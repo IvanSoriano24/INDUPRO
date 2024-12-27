@@ -1,0 +1,31 @@
+.dropdown_list:has( :checked){
+    --rows: 1fr;
+  }
+  
+  .dropdown_check{
+  position: absolute;
+  width: 30%;
+  height: 3%;
+  opacity: 0; 
+  cursor: pointer;
+  }
+  .dropdown_content{
+    display: grid;
+    grid-template-rows: var(--rows, 0fr)0fr;
+    transition: .3s grid-template-rows;
+  }
+  .dropdown_sub{
+  overflow: hidden;
+  background-color: #c4ccde ;
+  }
+  .dropdown_li{
+    width: 85%;
+    list-style: none;
+    margin-left: auto;
+  }
+  .dropdown_anchor{
+    padding: 1em 0;
+    display: block;
+    color: #B6BABE;
+    text-decoration: none;
+  }

@@ -1,0 +1,160 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap');
+
+.square-column {
+  height: 100%; /* Establece la altura al 100% del contenedor */
+  aspect-ratio: 1; /* Mantiene la relación de aspecto 1:1 para hacer un cuadrado */
+}
+
+*{
+  margin: 0;
+  padding: 0;
+
+}
+body{
+  font-family: 'Rubik', sans-serif;
+  height: 100%;
+  margin: 0;
+
+}
+.flex{
+  
+  display: flex;
+}
+.content {
+  flex: 1; /* Esta propiedad hace que el elemento ocupe todo el espacio disponible */
+  background-color: #f0f0f0; /* Puedes agregar estilos adicionales según tus necesidades */
+  padding: 20px;
+}
+.navbar{
+  background-color: #ffffff;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #c4ccde;
+}
+
+// Definir variable para las filas
+.dropdown_list:has(:checked) {
+  --rows: 1fr;
+}
+
+// Estilos para el checkbox
+.dropdown_check {
+  position: absolute;
+  width: 3%;
+  height: 3%;
+  opacity: 10;
+  cursor: pointer;
+}
+
+// Estilos para el contenido del dropdown
+.dropdown_content {
+  display: grid;
+  grid-template-rows: var(--rows, 0fr);
+  transition: 0.3s grid-template-rows;
+}
+
+// Estilos para los subelementos del dropdown
+.dropdown_sub {
+  overflow: hidden;
+  
+}
+
+// Estilos para los elementos de la lista
+.dropdown_li {
+  width: 85%;
+  list-style: none;
+  margin-left: auto;
+}
+
+// Estilos para los enlaces
+.dropdown_anchor {
+  padding: 1em 0;
+  display: block;
+  color: #b6babe;
+  text-decoration: none;
+}
+
+
+.sidebar{
+  width: 14rem;
+  height: calc(100vh - 52px);
+  border-right: 1px solid #c4ccde;
+  ul{
+    list-style: none;
+    padding: auto;
+    li{
+      margin-bottom: 2rem;
+      a{
+        text-decoration: none;
+        &.active{
+          background-color: #c4ccde;
+        }
+      }
+    }
+  }
+}
+
+.baseTap{
+  border-left: 1px solid #e9ecef !important;
+  cursor: pointer;
+}
+
+.baseTap:hover{
+  background-color: gray !important;
+  color: #ffffff;
+}
+
+.activeTab{
+  background-color: gray !important;
+  color: #ffffff;
+}
+
+.buttons-container {
+  display: flex;
+  gap: 10px; /* Ajusta el valor de gap según el espacio deseado entre los botones */
+}
+
+
+body.active-modal {
+  overflow-y: hidden;
+}
+
+.btn-modal {
+  padding: 10px 20px;
+  display: block;
+  margin: 100px auto 0;
+  font-size: 18px;
+}
+
+.modal, .overlay {
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: fixed;
+}
+
+.overlay {
+  background: rgba(49,49,49,0.8);
+}
+.modal-content {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  line-height: 1.4;
+  background: #f1f1f1;
+  padding: 14px 28px;
+  border-radius: 3px;
+  max-width: 600px;
+  min-width: 300px;
+}
+
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 7px;
+}
