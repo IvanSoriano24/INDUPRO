@@ -141,8 +141,8 @@ const LevantamientoDigital = () => {
                     <table className="table">
                         <thead>
                             <tr>
-                                <th style={{ padding: '10px' }}>FOLIO</th>
-                                <th style={{ padding: '10px' }}>CLEINTE</th>
+                                <th style={{ padding: '10px' }}>Folio</th>
+                                <th style={{ padding: '10px' }}>CLIENTE</th>
                                 <th style={{ padding: '10px' }}>ESTATUS</th>
                                 <th style={{ padding: '10px' }}>FECHA</th>
                                 <th style={{ padding: '7px' }}>SIG. DOCUMENTO<button><FaCircleQuestion /></button></th>

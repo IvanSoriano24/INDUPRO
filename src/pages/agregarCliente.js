@@ -8,7 +8,89 @@ import { Link } from "react-router-dom";
 import { ModalTitle,  Modal, Button  } from "react-bootstrap"
 import swal from "sweetalert";
 import { CiCirclePlus } from "react-icons/ci";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { query, where, getDocs } from "firebase/firestore";
+
+
+
 const AgregarCliente = () => {
+   // const foliosDoc = doc(db, "FOLIOS", "CLIENTES"); // Ruta al documento "FOLIOS"/"CLIENTES"
+   const foliosCollection = collection(db, "FOLIOS"); // Referencia a la colección
+    const [cve_clie, setCve_clie] = React.useState(""); // Inicializar el estado vacío
+    // Función para obtener el folio siguiente al cargar la página
+    const obtenerFolio = async () => {
+        try {
+            // Crear la consulta para buscar el documento que tenga el campo "documento" con el valor "CLIENTES"
+            const q = query(collection(db, "FOLIOS"), where("documento", "==", "CLIENTES"));
+    
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                // Si encontramos un documento que cumpla con la condición, accedemos a él
+                const folioDoc = querySnapshot.docs[0]; // El primer documento que cumpla la condición
+                const folioData = folioDoc.data();
+    
+                const folio = folioData.folio; // Ejemplo: "GS-Cli"
+                const folioSiguiente = folioData.folioSiguiente; // Ejemplo: "1"
+                const folioFinal = folioData.folioFinal; // Para verificar si es válido
+    
+                // Concatenar el folio con el folioSiguiente
+                const nuevoFolio = `${folio}-${folioSiguiente}`;
+                setCve_clie(nuevoFolio); // Establece el valor en el campo de texto
+            } else {
+                console.log("No se encontró un documento con el campo documento: CLIENTES.");
+            }
+        } catch (error) {
+            console.error("Error al obtener el folio:", error);
+        }
+    };
+
+    // Función para actualizar el folio siguiente en el documento de Firebase
+    const actualizarFolioSiguiente = async () => {
+        try {
+            // Crear la consulta para buscar el documento que tenga el campo "documento" con el valor "CLIENTES"
+            const q = query(collection(db, "FOLIOS"), where("documento", "==", "CLIENTES"));
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                // Si encontramos un documento que cumpla con la condición, accedemos a él
+                const folioDoc = querySnapshot.docs[0]; // El primer documento que cumpla la condición
+                const folioData = folioDoc.data();
+                const folioSiguiente = parseInt(folioData.folioSiguiente, 10);
+                const folioFinal = parseInt(folioData.folioFinal, 10);
+                // Incrementar el folio siguiente solo si no supera el folio final
+                if (folioSiguiente < folioFinal) {
+                    // Actualizar el documento con el nuevo valor de folioSiguiente
+                    await updateDoc(folioDoc.ref, {
+                        folioSiguiente: (folioSiguiente + 1).toString(),
+                    });
+                } else {
+                    console.log("El folio siguiente ha alcanzado el folio final.");
+                }
+            } else {
+                console.log("No se encontró un documento con el campo documento: CLIENTES.");
+            }
+        } catch (error) {
+            console.error("Error al actualizar el folio siguiente:", error);
+        }
+    };
+
+    // Llamar a obtenerFolio cuando se monte el componente
+    React.useEffect(() => {
+        obtenerFolio(); // Llamar a la función cuando el componente se monte
+    }, []);
+
+    // Manejar el envío del formulario
+    const saveClient  = async (e) => {
+        e.preventDefault();
+        try {
+            await addDoc(clienteCollecion, { cve_clie, /* otros campos */ });
+            await actualizarFolioSiguiente(); // Actualizar el folio siguiente después de guardar
+            navigate("/editarRevTecFinanciero/");
+        } catch (error) {
+            console.error("Error al guardar el cliente:", error);
+        }
+    };
+/*** */
+
     const [activeTab, setActiveTab] = useState("1");
 
     const cambiarTab = (numeroTab) =>{
@@ -16,7 +98,8 @@ const AgregarCliente = () => {
             setActiveTab(numeroTab);
         }
     }
-    const[cve_clie, setCve_clie] = useState('')
+    const[cve_int, setCve_int] = useState('')
+    /*const[cve_clie, setCve_clie] = useState('')*/
     const[razonSocial, setRazonSocial] = useState('')
     const[rfc, setRfc] = useState('')
     const[calle, setCalle] = useState('')
@@ -146,16 +229,31 @@ const AgregarCliente = () => {
                 <TabContent activeTab={activeTab}>
                     <TabPane tabId="1">
                         
-                            <div className="row">
+                            <div className="row"> 
                                 <div className="col-md-3">
-                                 <label className="form-label">CLAVE</label>
+                                    <label className="form-label">CLAVE</label>
                                     <div className="input-group mb-3">
-                                        
+                                    <input
+                                        value={cve_clie} // Mostrar el estado actual en el input
+                                        type="text"
+                                        className="form-control"
+                                        readOnly // Evitar edición manual
+                                    />
+                                        <div className="input-group-append">
+                                            <button className="btn btn-outline-secondary" type="button" onClick={infoCveCliente}>
+                                                <FaCircleQuestion />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-md-3">
+                                 <label className="form-label">CLIENTE INTERNO</label>
+                                    <div className="input-group mb-3">
                                         <input
-                                            value={cve_clie}
-                                            onChange={(e) => setCve_clie(e.target.value)}
+                                            value={cve_int}
+                                            onChange={(e) => setCve_int(e.target.value)}
                                             type="text"
-                                            className="form-control"
+                                            className="form-control" readOnly 
                                         />
                                         <div class="input-group-append">
                                             <button class="btn btn-outline-secondary" type="button" onClick={infoCveCliente}><FaCircleQuestion /></button>

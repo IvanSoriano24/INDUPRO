@@ -515,7 +515,7 @@ const asegurarCotizacion=() => {
                 </tr>
                 </tbody>
             </table>
-          <button className="btn btn-success" onClick={asegurarCotizacion}><FaCheckCircle /> Aprovar cotización</button>
+          <button className="btn btn-success" onClick={asegurarCotizacion}><FaCheckCircle /> Aprobar cotización</button>
           
         </div>
       </div>
