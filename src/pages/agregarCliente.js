@@ -15,7 +15,7 @@ import { query, where, getDocs } from "firebase/firestore";
 
 const AgregarCliente = () => {
    // const foliosDoc = doc(db, "FOLIOS", "CLIENTES"); // Ruta al documento "FOLIOS"/"CLIENTES"
-   const foliosCollection = collection(db, "FOLIOS"); // Referencia a la colección
+    const foliosCollection = collection(db, "FOLIOS"); // Referencia a la colección
     const [cve_clie, setCve_clie] = React.useState(""); // Inicializar el estado vacío
     // Función para obtener el folio siguiente al cargar la página
     const obtenerFolio = async () => {
@@ -49,19 +49,24 @@ const AgregarCliente = () => {
         try {
             // Crear la consulta para buscar el documento que tenga el campo "documento" con el valor "CLIENTES"
             const q = query(collection(db, "FOLIOS"), where("documento", "==", "CLIENTES"));
+    
             const querySnapshot = await getDocs(q);
+    
             if (!querySnapshot.empty) {
-                // Si encontramos un documento que cumpla con la condición, accedemos a él
+                // Si encontramos un documento que cumpla la condición, accedemos a él
                 const folioDoc = querySnapshot.docs[0]; // El primer documento que cumpla la condición
                 const folioData = folioDoc.data();
+    
                 const folioSiguiente = parseInt(folioData.folioSiguiente, 10);
                 const folioFinal = parseInt(folioData.folioFinal, 10);
-                // Incrementar el folio siguiente solo si no supera el folio final
+    
+                // Verificar que el folioSiguiente no haya alcanzado el folioFinal
                 if (folioSiguiente < folioFinal) {
-                    // Actualizar el documento con el nuevo valor de folioSiguiente
-                    await updateDoc(folioDoc.ref, {
+                    // Actualizar el documento en Firestore incrementando el folioSiguiente
+                    await updateDoc(folioDoc.ref, { // Usamos `folioDoc.ref` para apuntar al documento directamente
                         folioSiguiente: (folioSiguiente + 1).toString(),
                     });
+                    console.log("Folio actualizado exitosamente");
                 } else {
                     console.log("El folio siguiente ha alcanzado el folio final.");
                 }
@@ -71,24 +76,13 @@ const AgregarCliente = () => {
         } catch (error) {
             console.error("Error al actualizar el folio siguiente:", error);
         }
-    };
+    };     
 
     // Llamar a obtenerFolio cuando se monte el componente
     React.useEffect(() => {
         obtenerFolio(); // Llamar a la función cuando el componente se monte
     }, []);
 
-    // Manejar el envío del formulario
-    const saveClient  = async (e) => {
-        e.preventDefault();
-        try {
-            await addDoc(clienteCollecion, { cve_clie, /* otros campos */ });
-            await actualizarFolioSiguiente(); // Actualizar el folio siguiente después de guardar
-            navigate("/editarRevTecFinanciero/");
-        } catch (error) {
-            console.error("Error al guardar el cliente:", error);
-        }
-    };
 /*** */
 
     const [activeTab, setActiveTab] = useState("1");
@@ -124,8 +118,15 @@ const AgregarCliente = () => {
 
     const store = async(e) =>{
         e.preventDefault()
+        if (!razonSocial.trim()) {
+            swal("La razón social es obligatoria.", {
+                icon: "error",
+              });
+            return;
+        }
+        await actualizarFolioSiguiente();
         await addDoc( clienteCollecion, { cve_clie: cve_clie, razonSocial: razonSocial,  rfc: rfc, calle: calle, numExt: numExt, numInt: numInt, entreCalle: entreCalle,  colonia: colonia, referencia: referencia, poblacion: poblacion, codigoPostal: codigoPostal, estado: estado, pais: pais, municipio: municipio, nacionalidad: nacionalidad, nombreComercial: nombreComercial, condicionComercial: condicionComercial, diasCredito: diasCredito, estatus: estatus })
-        navigate("/editarRevTecFinanciero/")
+        navigate("/clientes/")
     }
 
     const [showModal, setShowModal] = useState(false);
