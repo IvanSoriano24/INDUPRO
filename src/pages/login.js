@@ -75,7 +75,7 @@ const Login = () => {
         <div className="text-center mb-4">
           <img src={GSSOLUCIONESLOGO} width="150" height="150" alt="GS Soluciones Logo" />
         </div>
-        <h2 className="text-center mb-4">Login</h2>
+        <h2 className="text-center mb-4">InduPro</h2>
         <form onSubmit={handleLogin}>
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>Username:</Form.Label>
@@ -99,7 +99,7 @@ const Login = () => {
             />
           </Form.Group>
           {error && <p style={{ color: 'red' }}>{error}</p>}
-          <Button variant="primary" type="submit" className="w-100">Login</Button>
+          <Button variant="primary" type="submit" className="w-100">Inisiar Sesion</Button>
         </form>
       </div>
     </Container>

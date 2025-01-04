@@ -142,11 +142,11 @@ const LevantamientoDigital = () => {
                         <thead>
                             <tr>
                                 <th style={{ padding: '10px' }}>Folio</th>
-                                <th style={{ padding: '10px' }}>CLIENTE</th>
-                                <th style={{ padding: '10px' }}>ESTATUS</th>
-                                <th style={{ padding: '10px' }}>FECHA</th>
-                                <th style={{ padding: '7px' }}>SIG. DOCUMENTO<button><FaCircleQuestion /></button></th>
-                                <th style={{ padding: '10px' }}>EDITAR</th>
+                                <th style={{ padding: '10px' }}>Cliente</th>
+                                <th style={{ padding: '10px' }}>Estatus</th>
+                                <th style={{ padding: '10px' }}>Fecha</th>
+                                <th style={{ padding: '7px' }}>Sig. Documento<button><FaCircleQuestion /></button></th>
+                                <th style={{ padding: '10px' }}>Editar</th>
                             </tr>
                         </thead>
                         <tbody>
