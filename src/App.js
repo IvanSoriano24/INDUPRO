@@ -72,16 +72,10 @@ function App() {
     !!localStorage.getItem('isAuthenticated') // Carga el estado inicial desde localStorage
   );
 
-  const handleLogin = () => {
-    localStorage.setItem('isAuthenticated', 'true');
-    setIsAuthenticated(true); // Actualiza el estado
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userRole'); // Si tienes más datos relacionados
-    setIsAuthenticated(false); // Actualiza el estado
-  };
+  useEffect(() => {
+    const authStatus = localStorage.getItem('isAuthenticated');
+    setIsAuthenticated(authStatus === 'true');
+  }, []);  
 
 //Este mensaje debe de desaparecer despues de desacer todos los cambios
   return (
@@ -94,13 +88,13 @@ function App() {
           <Route
               path="/"
               element={
-                <ProtectedRoute>
-                  <div className= "flex">
-                    <div className='content'>
-                    <Home />
+                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                  <div className="flex">
+                    <div className="content">
+                      <Home />
                     </div>
                   </div>
-                </ProtectedRoute>
+                </ProtectedRoute> 
               }
             />
           

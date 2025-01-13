@@ -50,7 +50,6 @@ const Login = () => {
       }
     } catch (error) {
       // Manejo de errores
-      console.error("Error al iniciar sesión: ", error);
       swal("Error en el inicio de sesión", {
         icon: "error",
       });
