@@ -18,38 +18,33 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      // Consulta la colección "USUARIOS" en Firestore
-      const q = query(collection(db, "USURIOS"), where("usuario", "==", username));  // Busca por el campo "usuario"
+      const q = query(collection(db, "USURIOS"), where("usuario", "==", username));
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        // Si el usuario existe, verifica la contraseña
-        const userDoc = querySnapshot.docs[0];  // Obtiene el primer documento que coincide
+        const userDoc = querySnapshot.docs[0];
         const userData = userDoc.data();
-        
+
         if (userData.Contraseña === password) {
-          // Si las credenciales son correctas, guarda el estado de autenticación
-          localStorage.setItem('isAuthenticated', 'true');
-          localStorage.setItem('userRole', userData.Nombre);  // Guarda el nombre o rol del usuario
-          swal("Inicio Correcto ", {
+          sessionStorage.setItem('isAuthenticated', 'true');
+          sessionStorage.setItem('userRole', userData.Nombre);
+          swal("Inicio Correcto", {
             icon: "success",
           });
+          console.log("Redirigiendo a home...");
           navigate('/');  // Redirige al home
           window.location.reload();
         } else {
-          // Si la contraseña es incorrecta
           swal("Contraseña incorrecta", {
             icon: "error",
           });
         }
       } else {
-        // Si el usuario no se encuentra
         swal("Usuario no encontrado", {
           icon: "error",
         });
       }
     } catch (error) {
-      // Manejo de errores
       swal("Error en el inicio de sesión", {
         icon: "error",
       });
@@ -57,7 +52,7 @@ const Login = () => {
   };
 
   return (
-    <Container 
+    <Container
       className="d-flex justify-content-center align-items-center"
       style={{ minHeight: "100vh", padding: "20px" }}
     >
@@ -98,7 +93,7 @@ const Login = () => {
             />
           </Form.Group>
           {error && <p style={{ color: 'red' }}>{error}</p>}
-          <Button variant="primary" type="submit" className="w-100">Inisiar Sesion</Button>
+          <Button variant="primary" type="submit" className="w-100">Iniciar Sesion</Button>
         </form>
       </div>
     </Container>

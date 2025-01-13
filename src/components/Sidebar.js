@@ -8,16 +8,22 @@ import { Gi3DGlasses } from "react-icons/gi";
 import { FaMoneyCheckAlt } from "react-icons/fa";
 import { LiaMoneyCheckAltSolid } from "react-icons/lia";
 import GSSOLUCIONESLOGO from "../imagenes/GS-SOLUCIONES-LOGO.png";
+import { useEffect, useState } from 'react';
 
-const SidebarComponent = () => {
+const SidebarComponent = ({ onLogout }) => {
   const clave = "NTtgoYURKvkxbuq2ospC";
   const navigate = useNavigate();
-
+const [isAuthenticated, setIsAuthenticated] = useState(
+    !!sessionStorage.getItem('isAuthenticated') // Carga el estado inicial desde localStorage
+  );
   const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("userRole");
+    sessionStorage.removeItem("isAuthenticated");
+    sessionStorage.removeItem("userRole");
+    sessionStorage.clear();
+    //setIsAuthenticated(false);
+    onLogout();
     navigate("/login");
-    window.location.reload();
+    //window.location.reload();
   };
 
   return (

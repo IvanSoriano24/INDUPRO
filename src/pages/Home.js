@@ -28,7 +28,6 @@ const Home = () => {
                     <p></p>
                     <h3 style={{textAlign:"center"}}>35</h3>
                     <p></p>
-                    
                     </Col>
                     <Col xs="1"></Col>
                 <Col xs="1"></Col>
@@ -37,5 +36,4 @@ const Home = () => {
         </>
     )
 }
-
 export default Home

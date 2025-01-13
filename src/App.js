@@ -13,7 +13,7 @@ function MaintenancePage() {
 
 export default MaintenancePage;
 */
-
+import { Navigate } from 'react-router-dom';
 import Navbar from '../src/components/Navbar'
 import './App.scss';
 import Login from './pages/login';
@@ -40,7 +40,7 @@ import EditarPersonalProyecto from './pages/editarPersonalProyecto';
 import VisualizarContacto from './pages/visualizarContacto';
 import EditarTipo from './pages/editarTipo';
 import VisualizarTipo from './pages/visualizarTipo';
-import { BrowserRouter as Router, Route, Routes, useHistory} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useHistory } from 'react-router-dom';
 import AgregarTipo from './pages/agregarTipo';
 import VisualizarPersonal from './pages/visualizarPersonal';
 import AgregarFactores from './pages/agregarFactores';
@@ -68,83 +68,100 @@ import VisualizarCotizacion from './pages/visualizarCotizacion';
 import { useEffect, useState } from 'react';
 
 function App() {
+  //const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(
-    !!localStorage.getItem('isAuthenticated') // Carga el estado inicial desde localStorage
+    !!sessionStorage.getItem('isAuthenticated') // Carga el estado inicial desde localStorage
   );
 
   useEffect(() => {
-    const authStatus = localStorage.getItem('isAuthenticated');
-    setIsAuthenticated(authStatus === 'true');
-  }, []);  
+    const authStatus = sessionStorage.getItem('isAuthenticated');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false); // Reset state if not authenticated
+    }
+  }, []);
 
-//Este mensaje debe de desaparecer despues de desacer todos los cambios
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+    sessionStorage.setItem('isAuthenticated', 'true');  // Asegúrate de guardar el estado en localStorage
+  };
+
+  const handleLogout = () => {
+    // Para cerrar sesión
+    setIsAuthenticated(false);
+    sessionStorage.setItem('isAuthenticated', 'false');
+  };
+
+  //Este mensaje debe de desaparecer despues de desacer todos los cambios
   return (
     <Router >
-      <div className= "flex">
-      {isAuthenticated && <Sidebar />}
-      <div className= "content">
-        <Routes>
-        <Route path="/login" element={<Login />} />
-          <Route
+      <div className="flex">
+        {isAuthenticated && <Sidebar onLogout={handleLogout} />}
+        <div className="content">
+          <Routes>
+            <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route
               path="/"
               element={
-                <ProtectedRoute isAuthenticated={isAuthenticated}>
+                isAuthenticated ? (
                   <div className="flex">
                     <div className="content">
                       <Home />
                     </div>
                   </div>
-                </ProtectedRoute> 
+                ) : (
+                  <Navigate to="/login" replace />
+                )
               }
             />
-          
-          <Route path="/levantamientoDigital" exact={true} element={<LevantamientoDigital />} />
-          <Route path="/precotizacion" exact={true} element={<Precotizacion />} />
-          <Route path="/revTecnicoFinanciero" exact={true} element={<RevTecnicoFinanciero />} />
-          <Route path="/cotizacion" exact={true} element={<Cotizacion />} />
-          <Route path="/clientes" exact={true} element={<Clientes />} />
-          <Route path="/contactos" exact={true} element={<Contactos />} />
-          <Route path="/tipo" exact={true} element={<Tipo />} />
-          <Route path="/usuarios" exact={true} element={<Usuarios />} />
-          <Route path="/factores/:id" exact={true} element={<Factores />} />
-          <Route path="/agregarCliente" exact={true} element={<AgregarCliente />} />
-          <Route path="/editarCliente/:id" element={<EditarCliente />} />
-          <Route path="/visualizarCliente/:id" element={<VisualizarCliente />} />
-          <Route path="/agregarContacto/:id" element={<AgregarContacto />} />
-          <Route path="/agregarTipo" element={<AgregarTipo />} />
-          <Route path="/editarContacto/:id" element={<EditarContacto />} />
-          <Route path="/personalProyectos" element={<PersonalProyectos />} />
-          <Route path="/agregarPersonal" element={<AgregarPersonal />} />
-          <Route path="/editarPersonalProyecto/:id" element={<EditarPersonalProyecto />} />
-          <Route path="/visualizarContacto/:id" element={<VisualizarContacto />} />
-          <Route path="/editarTipo/:id" element={<EditarTipo />} />
-          <Route path="/visualizarTipo/:id" element={<VisualizarTipo />} />
-          <Route path="/visualizarPersonal/:id" element={<VisualizarPersonal />} />
-          <Route path="/agregarFactores" element={<AgregarFactores />} />
-          <Route path="/editarFactores/:id" element={<EditarFactores />} />
-          <Route path="/visualizarFactor/:id" element={<VisualizarFactor />} />
-          <Route path="/agregarLevDigital" element={<AgregarLevDigital />} />
-          <Route path="/agregarPartidasLevDig" element={<AgregarPartidasLevDig />} />
-          <Route path="/editarLevDigital/:id" element={<EditarLevDigital />} />
-          <Route path="/editarParLevDig/:id" element={<EditarParLevDig />} />
-          <Route path="/agregarParLevDigAdicional/:id" element={<AgregarParLevDigAdicional />} />
-          <Route path="/agregarPreCotizacion/:id" element={<AgregarPreCotizacion />} />
-          <Route path="/editarPreCotizacion/:id" element={<EditarPreCotizacion />} />
-          <Route path="/cancelarPreCotizacion/:id" element={<CancelarPreCotizacion />} />
-          <Route path="/editarParPrecot/:id" element={<EditarParPrecot />} />
-          <Route path="/editarPartidasInsumoPC/:id" element={<EditarPartidasInsumosPC />} />
-          <Route path="/editarPartidasMO/:id" element={<EditarPartidasMO />} />
-          <Route path="/segDocLevDig/:id" element={<SegDocLevDig />} />
-          <Route path="/agregarRevTecFinanciero/:id" element={<AgregarRevTecFinanciero />} />
-          <Route path="/editarRevTecFinanciero/:id" element={<EditarRecTecFinanciero />} />
-          <Route path="/editarPartidasInsumosATF/:id" element={<EditarPartidasInsumosATF />} />
-          <Route path="/prueba2" element={<Prueba2 />} />
-          <Route path="/visualizarPDF/:id" element={<VisualizarPDF />} />
-          <Route path="/cancelarATF/:id" element={<CancelarATF />} />
-          <Route path="/visualizarCotizacion/:id" element={<VisualizarCotizacion />} />
-          
-        </Routes>
-      </div>
+            <Route path="/levantamientoDigital" exact={true} element={<LevantamientoDigital />} />
+            <Route path="/precotizacion" exact={true} element={<Precotizacion />} />
+            <Route path="/revTecnicoFinanciero" exact={true} element={<RevTecnicoFinanciero />} />
+            <Route path="/cotizacion" exact={true} element={<Cotizacion />} />
+            <Route path="/clientes" exact={true} element={<Clientes />} />
+            <Route path="/contactos" exact={true} element={<Contactos />} />
+            <Route path="/tipo" exact={true} element={<Tipo />} />
+            <Route path="/usuarios" exact={true} element={<Usuarios />} />
+            <Route path="/factores/:id" exact={true} element={<Factores />} />
+            <Route path="/agregarCliente" exact={true} element={<AgregarCliente />} />
+            <Route path="/editarCliente/:id" element={<EditarCliente />} />
+            <Route path="/visualizarCliente/:id" element={<VisualizarCliente />} />
+            <Route path="/agregarContacto/:id" element={<AgregarContacto />} />
+            <Route path="/agregarTipo" element={<AgregarTipo />} />
+            <Route path="/editarContacto/:id" element={<EditarContacto />} />
+            <Route path="/personalProyectos" element={<PersonalProyectos />} />
+            <Route path="/agregarPersonal" element={<AgregarPersonal />} />
+            <Route path="/editarPersonalProyecto/:id" element={<EditarPersonalProyecto />} />
+            <Route path="/visualizarContacto/:id" element={<VisualizarContacto />} />
+            <Route path="/editarTipo/:id" element={<EditarTipo />} />
+            <Route path="/visualizarTipo/:id" element={<VisualizarTipo />} />
+            <Route path="/visualizarPersonal/:id" element={<VisualizarPersonal />} />
+            <Route path="/agregarFactores" element={<AgregarFactores />} />
+            <Route path="/editarFactores/:id" element={<EditarFactores />} />
+            <Route path="/visualizarFactor/:id" element={<VisualizarFactor />} />
+            <Route path="/agregarLevDigital" element={<AgregarLevDigital />} />
+            <Route path="/agregarPartidasLevDig" element={<AgregarPartidasLevDig />} />
+            <Route path="/editarLevDigital/:id" element={<EditarLevDigital />} />
+            <Route path="/editarParLevDig/:id" element={<EditarParLevDig />} />
+            <Route path="/agregarParLevDigAdicional/:id" element={<AgregarParLevDigAdicional />} />
+            <Route path="/agregarPreCotizacion/:id" element={<AgregarPreCotizacion />} />
+            <Route path="/editarPreCotizacion/:id" element={<EditarPreCotizacion />} />
+            <Route path="/cancelarPreCotizacion/:id" element={<CancelarPreCotizacion />} />
+            <Route path="/editarParPrecot/:id" element={<EditarParPrecot />} />
+            <Route path="/editarPartidasInsumoPC/:id" element={<EditarPartidasInsumosPC />} />
+            <Route path="/editarPartidasMO/:id" element={<EditarPartidasMO />} />
+            <Route path="/segDocLevDig/:id" element={<SegDocLevDig />} />
+            <Route path="/agregarRevTecFinanciero/:id" element={<AgregarRevTecFinanciero />} />
+            <Route path="/editarRevTecFinanciero/:id" element={<EditarRecTecFinanciero />} />
+            <Route path="/editarPartidasInsumosATF/:id" element={<EditarPartidasInsumosATF />} />
+            <Route path="/prueba2" element={<Prueba2 />} />
+            <Route path="/visualizarPDF/:id" element={<VisualizarPDF />} />
+            <Route path="/cancelarATF/:id" element={<CancelarATF />} />
+            <Route path="/visualizarCotizacion/:id" element={<VisualizarCotizacion />} />
+
+          </Routes>
+        </div>
       </div>
     </Router>
   );
