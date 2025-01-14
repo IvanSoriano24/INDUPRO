@@ -15,6 +15,7 @@ import { MdDelete } from "react-icons/md";
 import { FaPencilAlt } from "react-icons/fa";
 import { red } from "@mui/material/colors"
 import * as XLSX from "xlsx";
+import { ModalTitle, Modal, Button } from "react-bootstrap";
 
 const AgregarLevDigital = () => {
 
@@ -32,20 +33,20 @@ const AgregarLevDigital = () => {
       alert("Por favor, selecciona un archivo válido.");
       return;
     }
-  
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, { type: "array" });
       const sheetName = workbook.SheetNames[0]; // Selecciona la primera hoja
       const sheet = workbook.Sheets[sheetName];
-  
+
       // Convertir la hoja de cálculo en JSON
       const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-  
+
       // Asegúrate de que las primeras filas son las que contienen los encabezados
       const headers = jsonData[0]; // Primera fila como encabezados
-  
+
       let isValid = true;  // Bandera para verificar la validez de los datos
       let prevPartida = 0; // Variable para almacenar el último número de partida
       const filteredData = jsonData.slice(1).map((row, index) => {
@@ -53,29 +54,29 @@ const AgregarLevDigital = () => {
         const cantidad = String(row[1] || '').trim();
         const descripcion = String(row[2] || '').trim();
         const observaciones = String(row[3] || '').trim();
-  
+
         // Validación de secuencialidad del número de partida
         if (parseInt(noPartida) !== prevPartida + 1) {
           isValid = false;
-          swal({ 
+          swal({
             text: `El número de partida no es secuencial en la fila ${index + 2}.`,
             icon: "error",
           });
           //alert(`El número de partida no es secuencial en la fila ${index + 2}.`);
         }
-  
+
         // Validación de cantidad (debe ser un número entero)
         if (!Number.isInteger(Number(cantidad)) || cantidad === '') {
           isValid = false;
-          swal({ 
+          swal({
             text: `La cantidad no es un número entero en la fila ${index + 2}.`,
             icon: "error",
-          });          
+          });
           //alert(`La cantidad no es un número entero en la fila ${index + 2}.`);
         }
-  
+
         prevPartida = parseInt(noPartida);
-  
+
         return {
           noPartida,
           cantidad,
@@ -91,13 +92,13 @@ const AgregarLevDigital = () => {
       });
       // Si todos los datos son correctos
       //alert("Los datos del archivo Excel son válidos y se han procesado correctamente.");
-      
+
       // Actualizar el estado con los datos validados
       setExcelData(filteredData);
     };
-  
+
     reader.readAsArrayBuffer(selectedFile); // Lee el archivo almacenado en el estado
-  };    
+  };
 
   const handleAddFromExcel = () => {
     if (excelData.length === 0) {
@@ -112,7 +113,31 @@ const AgregarLevDigital = () => {
   const [excelData, setExcelData] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   /*----------------------------------------------------------*/
+  /*----------------------------------------------------------*/
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = (item) => {
+    setNoPartida(item.noPartida);
+    setCantidad(item.cantidad);
+    setDescripcion(item.descripcion);
+    setObservacion(item.observaciones);
+    setShow(true);
+  };
 
+  const handleEdit = (index) => {
+    const item = list[index];
+    handleShow(item);
+  };
+
+
+  const guardarEdicion = () => {
+    const updatedList = list.map((item) =>
+      item.noPartida === noPartida ? { ...item, cantidad, descripcion, observaciones: observacion } : item
+    );
+    setList(updatedList);
+    handleClose();
+  };
+  /*----------------------------------------------------------*/
   /* ---------------------ENCABEZADO DE DOCUMENTO ------------------------------------- */
   const [cve_levDig, setCve_levDig] = useState("");
   const [folios, setFolios] = useState([]);
@@ -348,14 +373,14 @@ const AgregarLevDigital = () => {
       }
     }
   };
-  const handleEdit = (index) => {
+  /*const handleEdit = (index) => {
     const itemToEdit = list[index];
     setNoPartida(itemToEdit.noPartida);
     setCantidad(itemToEdit.cantidad);
     setDescripcion(itemToEdit.descripcion);
     setObservacion(itemToEdit.observacion);
     setEditIndex(index);
-  };
+  };*/
   const handleDelete = (index) => {
     const updatedList = [...list];
     updatedList.splice(index, 1);
@@ -608,8 +633,55 @@ const AgregarLevDigital = () => {
           <button className="btn btn-success" onClick={addEncabezado}><HiDocumentPlus /> GUARDAR DOCUMENTO</button>
         </div>
       </div>
+      <Modal show={show} onHide={handleClose} dialogClassName="lg" centered scrollable >
+        <Modal.Header closeButton>
+          <Modal.Title>Editar Partida</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="mb-3">
+            <label>No. Partida</label>
+            <input type="text" className="form-control" value={noPartida} readOnly />
+          </div>
+          <div className="mb-3">
+            <label>Cantidad</label>
+            <input
+              type="number"
+              className="form-control"
+              value={cantidad}
+              onChange={(e) => setCantidad(e.target.value)}
+            />
+          </div>
+          <div className="mb-3">
+            <label>Descripción</label>
+            <textarea
+              className="form-control"
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+            />
+          </div>
+          <div className="mb-3">
+            <label>Observaciones</label>
+            <textarea
+              className="form-control"
+              value={observacion}
+              onChange={(e) => setObservacion(e.target.value)}
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={guardarEdicion}>
+            Guardar Cambios
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
-
 export default AgregarLevDigital;
+
+/*
+
+ */
