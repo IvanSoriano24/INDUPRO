@@ -27,7 +27,8 @@ const Login = () => {
 
         if (userData.Contraseña === password) {
           sessionStorage.setItem('isAuthenticated', 'true');
-          sessionStorage.setItem('userRole', userData.Nombre);
+          sessionStorage.setItem('userRole', userData.rol); // Guarda el rol
+          sessionStorage.setItem('userName', userData.Nombre); 
           swal("Inicio Correcto", {
             icon: "success",
           });

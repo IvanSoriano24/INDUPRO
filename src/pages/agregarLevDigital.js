@@ -83,7 +83,6 @@ const AgregarLevDigital = () => {
           observaciones
         };
       });
-  
       if (!isValid) {
         return; // Detener el procesamiento si alguna validación falla
       }

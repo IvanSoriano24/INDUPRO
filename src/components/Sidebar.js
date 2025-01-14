@@ -9,7 +9,9 @@ import { FaMoneyCheckAlt } from "react-icons/fa";
 import { LiaMoneyCheckAltSolid } from "react-icons/lia";
 import GSSOLUCIONESLOGO from "../imagenes/GS-SOLUCIONES-LOGO.png";
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
+const userRole = sessionStorage.getItem('userRole'); 
 const SidebarComponent = ({ onLogout }) => {
   const clave = "NTtgoYURKvkxbuq2ospC";
   const navigate = useNavigate();
