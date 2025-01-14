@@ -114,16 +114,19 @@ const AgregarLevDigital = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   /*----------------------------------------------------------*/
   /*----------------------------------------------------------*/
+  const [modalNoPartida, setModalNoPartida] = useState(1);
+  const [modalDescripcion, setModalDescripcion] = useState("");
+  const [modalObservacion, setModalObservacion] = useState("");
+  const [modalCantidad, setModalCantidad] = useState("");
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = (item) => {
-    setNoPartida(item.noPartida);
-    setCantidad(item.cantidad);
-    setDescripcion(item.descripcion);
-    setObservacion(item.observaciones);
+    setModalNoPartida(item.noPartida);
+    setModalCantidad(item.cantidad);
+    setModalDescripcion(item.descripcion);
+    setModalObservacion(item.observaciones);
     setShow(true);
   };
-
   const handleEdit = (index) => {
     const item = list[index];
     handleShow(item);
@@ -373,14 +376,6 @@ const AgregarLevDigital = () => {
       }
     }
   };
-  /*const handleEdit = (index) => {
-    const itemToEdit = list[index];
-    setNoPartida(itemToEdit.noPartida);
-    setCantidad(itemToEdit.cantidad);
-    setDescripcion(itemToEdit.descripcion);
-    setObservacion(itemToEdit.observacion);
-    setEditIndex(index);
-  };*/
   const handleDelete = (index) => {
     const updatedList = [...list];
     updatedList.splice(index, 1);
@@ -640,31 +635,31 @@ const AgregarLevDigital = () => {
         <Modal.Body>
           <div className="mb-3">
             <label>No. Partida</label>
-            <input type="text" className="form-control" value={noPartida} readOnly />
+            <input type="text" className="form-control" value={modalNoPartida} readOnly />
           </div>
           <div className="mb-3">
             <label>Cantidad</label>
             <input
               type="number"
               className="form-control"
-              value={cantidad}
-              onChange={(e) => setCantidad(e.target.value)}
+              value={modalCantidad}
+              onChange={(e) => setModalCantidad(e.target.value)}
             />
           </div>
           <div className="mb-3">
             <label>Descripción</label>
             <textarea
               className="form-control"
-              value={descripcion}
-              onChange={(e) => setDescripcion(e.target.value)}
+              value={modalDescripcion}
+              onChange={(e) => setModalDescripcion (e.target.value)}
             />
           </div>
           <div className="mb-3">
             <label>Observaciones</label>
             <textarea
               className="form-control"
-              value={observacion}
-              onChange={(e) => setObservacion(e.target.value)}
+              value={modalObservacion}
+              onChange={(e) => setModalObservacion(e.target.value)}
             />
           </div>
         </Modal.Body>
