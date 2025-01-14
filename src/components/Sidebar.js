@@ -57,6 +57,7 @@ const [isAuthenticated, setIsAuthenticated] = useState(
             style={{ textDecoration: "none", border: "none", background: "transparent" }}
           >
             <ul className="list-unstyled ps-3">
+            {(userRole === "ADMINISTRADOR" || userRole === "LIDER") && (
               <li>
                 <NavLink
                   exact="true"
@@ -67,6 +68,8 @@ const [isAuthenticated, setIsAuthenticated] = useState(
                   Levantamiento Digital
                 </NavLink>
               </li>
+               )}
+               {(userRole === "ADMINISTRADOR" || userRole === "COMPRAS" || userRole === "VENTAS") && (
               <li>
                 <NavLink
                   exact="true"
@@ -77,6 +80,8 @@ const [isAuthenticated, setIsAuthenticated] = useState(
                   Pre-cotización
                 </NavLink>
               </li>
+              )}
+              {(userRole === "ADMINISTRADOR" || userRole === "JEFE") && (
               <li>
                 <NavLink
                   exact="true"
@@ -87,6 +92,8 @@ const [isAuthenticated, setIsAuthenticated] = useState(
                   Revisión Técnico Financiero
                 </NavLink>
               </li>
+              )}
+              {(userRole === "ADMINISTRADOR" || userRole === "VENTAS") && (
               <li>
                 <NavLink
                   exact="true"
@@ -97,8 +104,10 @@ const [isAuthenticated, setIsAuthenticated] = useState(
                   Cotización
                 </NavLink>
               </li>
+              )}
             </ul>
           </Sidebar.Collapse>
+          {(userRole === "ADMINISTRADOR" || userRole === "VENTAS") && (
           <li>
             <NavLink
               exact="true"
@@ -109,6 +118,8 @@ const [isAuthenticated, setIsAuthenticated] = useState(
               Clientes
             </NavLink>
           </li>
+          )}
+          {(userRole === "ADMINISTRADOR" || userRole === "VENTAS" || userRole === "COMPRAS") && (
           <li>
             <NavLink
               exact="true"
@@ -119,6 +130,8 @@ const [isAuthenticated, setIsAuthenticated] = useState(
               Contactos
             </NavLink>
           </li>
+          )}
+          {(userRole === "ADMINISTRADOR" || userRole === "COMPRAS") && (
           <li>
             <NavLink
               exact="true"
@@ -129,6 +142,8 @@ const [isAuthenticated, setIsAuthenticated] = useState(
               Tipos de Servicios
             </NavLink>
           </li>
+          )}
+          {(userRole === "ADMINISTRADOR" || userRole === "JEFE") && (
           <li>
             <NavLink
               exact="true"
@@ -139,6 +154,8 @@ const [isAuthenticated, setIsAuthenticated] = useState(
               Mano de Obra
             </NavLink>
           </li>
+          )}
+          {(userRole === "ADMINISTRADOR" || userRole === "JEFE") && (
           <li>
             <NavLink
               exact="true"
@@ -149,6 +166,7 @@ const [isAuthenticated, setIsAuthenticated] = useState(
               Insumo por Factores
             </NavLink>
           </li>
+        )}
           <li>
             <button
               onClick={handleLogout}
