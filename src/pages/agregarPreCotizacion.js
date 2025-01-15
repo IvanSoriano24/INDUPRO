@@ -34,6 +34,13 @@ const AgregarPreCotizacion = () => {
   const [par_levDigital, setPar_levDigital] = useState([])
   const [noPartida, setNoPartida] = useState("");
   const [listPreCot, setListPreCot] = useState([]);
+  const [listPartidas, setListPartidas] = useState([]);
+  const [selectedPartida, setSelectedPartida] = useState(null);
+  // Dentro de tu componente:
+  const [linea, setLinea] = useState(""); // Estado para la línea seleccionada
+  const [claveSae, setClaveSae] = useState(""); // Estado para la clave SAE
+  //const [proveedores, setProveedores] = useState([]); // Lista de proveedores
+  const [lineas, setLineas] = useState([]); // Lista de líneas disponibles
 
   const [idPartida, setIdPartida] = useState("");
 
@@ -55,13 +62,16 @@ const AgregarPreCotizacion = () => {
   const [cantidad, setCantidad] = useState();
   const total = costoCotizado * cantidad;
   const [listInsumos, setListInsumos] = useState([]);
+  const [insumos, setInsumos] = useState([]);  // Estado para los insumos
+  const [noPartidaMO, setNoParatidaMO] = useState('');
+  const [selectedTrabajador, setSelectedTrabajador] = useState('');
+  const [cantidadTrabajadores, setCantidadTrabajadores] = useState(0);
+  const [diasTrabajados, setDiasTrabajados] = useState(0);
+  const [showAddModalMO, setShowAddModalMO] = useState(false);
+
 
   /* --------------------------------PARTIDAS PARA MANO DE OBRA -----------------*/
   const [manoObra, setManoObra] = useState([]);
-  const [selectedTrabajador, setSelectedTrabajador] = useState("")
-  const [cantidadTrabajadores, setCantidadTrabajadores] = useState();
-  const [diasTrabajados, setDiasTrabajados] = useState("")
-  const [noPartidaMO, setNoParatidaMO] = useState()
   const [cve_precotMO, setCve_precotMO] = useState("")
   const [personal, setPersonal] = useState("")
   const [idCounter, setIdCounter] = useState(1); // Inicializamos el contador en 1
@@ -85,7 +95,9 @@ const AgregarPreCotizacion = () => {
     setShowAgregar(false);
   };
 
+  const proveedores = ["Proveedor 1", "Proveedor 2", "Proveedor 3", "Proveedor 4"];
   const [show, setShow] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   /* --------------------   Obtener los folios correspondiente  -------------------------- */
@@ -230,7 +242,7 @@ const AgregarPreCotizacion = () => {
   useEffect(() => {
     const cargarManoObra = async () => {
       const manoObraList = await obtenerTrabajadores();
-      console.log(manoObraList)
+      //console.log(manoObraList)
       setManoObra(manoObraList);
     };
 
@@ -397,6 +409,7 @@ const AgregarPreCotizacion = () => {
     setListInsumos(updatedList); // Actualiza la lista
   }
   /* ----------------------------------------------------AQUÍ ME QUEDE ---------------*/
+
   const addPartidasMO = (e) => {
     e.preventDefault();
     const newItem = {
@@ -454,8 +467,88 @@ const AgregarPreCotizacion = () => {
     // Actualiza el estado de la lista con la lista filtrada
     setListMO(updatedList);
   };
+  const handleOpenModal = (noPartida) => {
+    const partidaSeleccionada = par_levDigital.find(
+      (item) => item.noPartida === noPartida
+    );
+    setSelectedPartida(partidaSeleccionada);
+    setShowAddModal(true);
+  };
 
+  const handleOpenModalMO = (noPartida) => {
+    setNoParatidaMO(noPartida);  // Establece el noPartida seleccionado
+    setShowAddModalMO(true);     // Muestra el modal de Mano de Obra
+  };
 
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    setProveedor("");
+    setDescripcionInsumo("");
+    setComentariosAdi("");
+    setCostoCotizado("");
+    setCantidad("");
+    setUnidad("servicio");
+  };
+  const handleEditInsumo = (partida, insumo) => {
+    // Establece los valores actuales del insumo en el estado del modal
+    setInsumo(insumo.insumo);
+    setCantidad(insumo.cantidad);
+    setUnidad(insumo.unidad);
+    setClaveSae(insumo.claveSae);
+
+    // Establece la partida seleccionada y abre el modal para editar
+    setSelectedPartida(partida);
+    setShowAddModal(true); // Mostrar el modal de edición
+  };
+  const handleSaveManoObra = () => {
+    // Crea un nuevo objeto con los datos del modal
+    const nuevoRegistro = {
+      noPartida: noPartidaMO,
+      trabajador: selectedTrabajador,
+      cantidad: cantidadTrabajadores,
+      dias: diasTrabajados
+    };
+
+    // Añade el nuevo registro al estado o realiza cualquier operación que necesites (por ejemplo, actualizar un array de mano de obra)
+    setManoObra(prevState => [...prevState, nuevoRegistro]);
+
+    // Cierra el modal
+    setShowAddModalMO(false);
+  };
+  const guardarPartida = () => {
+    if (!selectedPartida || !insumo || !cantidad || !unidad || !claveSae) {
+      alert('Faltan datos para completar la operación.');
+      return;
+    }
+
+    const updatedList = listPartidas.map((item) =>
+      item.noPartida === selectedPartida.noPartida
+        ? {
+          ...item,
+          insumos: [
+            ...item.insumos, // Mantén los insumos existentes
+            { insumo, cantidad, unidad, claveSae } // Agrega el nuevo insumo
+          ]
+        }
+        : item
+    );
+
+    if (!updatedList.some(item => item.noPartida === selectedPartida.noPartida)) {
+      // Si no se encontró la partida, agregamos una nueva
+      updatedList.push({
+        noPartida: selectedPartida.noPartida,
+        insumos: [{ insumo, cantidad, unidad, claveSae }]
+      });
+    }
+
+    // Actualiza el estado
+    setListPartidas(updatedList);
+
+    // Cierra el modal
+    handleCloseModal();
+  };
+
+  /* Modales */
   const handleDelete = async (noPartida, cve_levDig) => {
     try {
       // Realiza una consulta para encontrar el documento que coincida con los identificadores proporcionados
@@ -520,6 +613,33 @@ const AgregarPreCotizacion = () => {
       setShow(false); // Cierra el modal
       getParLevDigital(); // Actualiza la tabla
     }
+  };
+  const handleAddInsumo = (noPartida, insumo, cantidad, unidad, claveSae) => {
+    // Buscar la partida seleccionada
+    const updatedInsumos = [...insumos];
+
+    const existingInsumo = updatedInsumos.find(item => item.noPartida === noPartida);
+
+    if (existingInsumo) {
+      existingInsumo.insumos.push({ insumo, cantidad, unidad, claveSae });
+    } else {
+      updatedInsumos.push({
+        noPartida,
+        insumos: [{ insumo, cantidad, unidad, claveSae }]
+      });
+    }
+
+    setInsumos(updatedInsumos);  // Actualiza el estado
+  };
+  const handleDeleteInsumo = (noPartida, insumoToDelete) => {
+    const updatedInsumos = insumos.map(item => {
+      if (item.noPartida === noPartida) {
+        item.insumos = item.insumos.filter(insumo => insumo !== insumoToDelete);
+      }
+      return item;
+    });
+
+    setInsumos(updatedInsumos);  // Actualiza el estado eliminando el insumo
   };
   /* --------------------------------------------------- - AGREGAR NUEVO DOCUMENTO --------------------------------------------------*/
   const addPreCotizacion = async (e) => {
@@ -832,6 +952,8 @@ const AgregarPreCotizacion = () => {
                     <th scope="col">observaciones</th>
                     <th scope="col">Editar</th>
                     <th scope="col">Eliminar</th>
+                    <th scope="col">Agregar Insumos</th>
+                    <th scope="col">Agregar Mano</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -842,7 +964,9 @@ const AgregarPreCotizacion = () => {
                       <td>{item.descripcion}</td>
                       <td>{item.observacion}</td>
                       <td><button className="btn btn-primary" onClick={() => recolectarDatos(item.id, item.cve_levDig, item.noPartida, item.cantidad, item.descripcion, item.observacion)}><FaPencilAlt /> </button></td>
-                      <td><button className="btn btn-danger" onClick={() => handleDelete(item.noPartida, item.cve_levDig)}><MdDelete /></button></td>
+                      <td><button className="btn btn-danger" onClick={() => handleDelete(item.noPartida, item.cve_levDig)}><MdDelete /></button> </td>
+                      <td><button className="btn btn-success" onClick={() => handleOpenModal(item.noPartida)}><CiCirclePlus /> </button></td>
+                      <td><button className="btn btn-success" onClick={() => handleOpenModalMO(item.noPartida)}><CiCirclePlus /> </button></td>
                     </tr>
                   ))}
                 </tbody>
@@ -853,256 +977,74 @@ const AgregarPreCotizacion = () => {
           <div className="row" style={{ border: '1px solid #000' }}>
             <label style={{ color: "red" }}>PARTIDAS POR INSUMO </label>
             <br></br>
-            <div className="col-md-2">
-              <div className="mb-3">
-                <label className="form-label">NO. PARTIDA</label>
-                <select
-                  id="selectFolio"
-                  className="form-control"
-                  value={noPartidaPC}
-                  onChange={(e) => setNoPartidaPC(e.target.value)}
-                >
-                  <option value="0">Seleccionar...</option>
-                  {par_levDigital.map((item, index) => (
-                    <option key={item.noPartida} value={item.noPartida} >
-                      {item.noPartida}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="col-md-2">
-              <div className="mb-3">
-                <label className="form-label">INSUMO</label>
-                <select
-                  value={insumo}
-                  onChange={(e) => setInsumo(e.target.value)}
-                  className="form-control"
-                >
-                  <option value="">Seleccionar...</option>
-                  {factores.map((factor, index) => (
-                    <option key={index} value={factor}>
-                      {factor}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="col-md-8 ">
-              <label className="form-label">PROVEEDOR</label>
-              <div class="input-group mb-3">
-                <input
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
-                  type="text"
-                  value={proveedor}
-                  onChange={(e) => setProveedor(e.target.value)}
-                  className="form-control"
-                />
-              </div>
-            </div>
-            <div className="col-md-5 ">
-              <label className="form-label">DESCRIPCIÓN</label>
-              <div class="input-group mb-3">
-                <textarea
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
-                  type="text"
-                  value={descripcionInsumo}
-                  onChange={(e) => setDescripcionInsumo(e.target.value)}
-                  className="form-control"
-                />
-              </div>
-            </div>
-            <div className="col-md-5 ">
-              <label className="form-label">COMENTARIOS ADICIONALES</label>
-              <div class="input-group mb-3">
-                <textarea
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
-                  type="text"
-                  value={comentariosAdi}
-                  onChange={(e) => setComentariosAdi(e.target.value)}
-                  className="form-control"
-                />
-              </div>
-            </div>
-            <div className="col-md-3 ">
-              <label className="form-label">COSTO COTIZADO</label>
-              <div class="input-group mb-3">
-                <input
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
-                  type="number"
-                  value={costoCotizado}
-                  onChange={(e) => setCostoCotizado(e.target.value)}
-                  className="form-control"
-                />
-              </div>
-            </div>
-            <div className="col-md-3 ">
-              <label className="form-label">CANTIDAD</label>
-              <div class="input-group mb-3">
-                <input
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
-                  type="number"
-                  value={cantidad}
-                  onChange={(e) => setCantidad(e.target.value)}
-                  className="form-control"
-                />
-              </div>
-            </div>
-            <div className="col-md-3 ">
-              <label className="form-label">UNIDAD</label>
-              <div class="input-group mb-3">
-                <select
-                  value={unidad}
-                  onChange={(e) => setUnidad(e.target.value)}
-                  className="form-select"
-                >
-                  <option value="servicio">Servicio</option>
-                  <option value="pieza">Pieza</option>
-                  <option value="kg">Kg</option>
-                  <option value="toneladas">Toneladas</option>
-                </select>
-              </div>
-            </div>
-            <div className="col-md-3 ">
-              <br />
-              <div class="input-group mb-3">
-                <button className="btn btn-success" onClick={agregarPartidasInsumos}><CiCirclePlus /> Agregar insumo</button>
-              </div>
-            </div>
-            <div>
-              <br></br>
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th scope="col">PARTIDA</th>
-                    <th scope="col">TIPO DE INSUMO</th>
-                    <th scope="col">PROVEEDOR</th>
-                    <th scope="col">DESCRIPCIÓN</th>
-                    <th scope="col">COMENTARIOS ADICIONALES</th>
-                    <th scope="col">Unidad</th>
-                    <th scope="col">CANTIDAD</th>
-                    <th scope="col">COSTO</th>
-                    <th scope="col">TOTAL</th>
-                    <th scope="col">EDITAR</th>
-                    <th scope="col">ELIMINAR</th>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">No. Partida</th>
+                  <th scope="col">Insumo</th>
+                  <th scope="col">Cantidad</th>
+                  <th scope="col">Unidad</th>
+                  <th scope="col">Clave SAE</th>
+                  <th scope="col">Editar</th>
+                  <th scope="col">Eliminar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {listPartidas.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.noPartida}</td> 
+                    <td>{item.insumo}</td> 
+                    <td>{item.cantidad}</td> 
+                    <td>{item.unidad}</td>
+                    <td>{item.claveSae}</td>
+                    <td>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => handleOpenModal(item.noPartida)}
+                      >
+                        Editar
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleDeleteInsumo(item.noPartida)}
+                      >
+                        Eliminar
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {listInsumos.map((itemPC, indexPC) => (
-                    <tr key={indexPC}>
-                      <td>{itemPC.noPartidaPC}</td>
-                      <td>{itemPC.insumo}</td>
-                      <td>{itemPC.proveedor}</td>
-                      <td>{itemPC.descripcionInsumo}</td>
-                      <td>{itemPC.comentariosAdi}</td>
-                      <td>{itemPC.unidad}</td>
-                      <td>{itemPC.cantidad}</td>
-                      <td>{itemPC.costoCotizado}</td>
-                      <td>{itemPC.cantidad * itemPC.costoCotizado}</td>
-                      <td><button className="btn btn-primary" onClick={() => editarPartida(indexPC)}><FaPencilAlt /></button></td>
-                      <td><button className="btn btn-danger" onClick={() => eliminarPartidaInsu(indexPC)}><MdDelete /></button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
+          <br></br>
           <div className="row" style={{ border: '1px solid #000' }}>
             <label style={{ color: "red" }}>PARTIDAS POR MANO DE OBRA </label>
-            <div className="col-md-2">
-              <div className="mb-3">
-                <label className="form-label">NO. PARTIDA</label>
-                <select
-                  id="selectFolio"
-                  className="form-control"
-                  value={noPartidaMO}
-                  onChange={(e) => setNoParatidaMO(e.target.value)}
-                >
-                  <option value="0">Seleccionar...</option>
-                  {par_levDigital.map((item, index) => (
-                    <option key={item.noPartida} value={item.noPartida} >
-                      {item.noPartida}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="col-md-5">
-              <div className="mb-3">
-                <label className="form-label">TRABAJADOR</label>
-                <select
-                  id="selectTrabajador"
-                  className="form-control"
-                  value={selectedTrabajador}
-                  onChange={(e) => setSelectedTrabajador(e.target.value)}
-                >
-                  <option value="" disabled>SELECCIONA UN TRABAJADOR</option>
-                  {manoObra.map((trabajador, index) => (
-                    <option key={index} value={trabajador}>
-                      {trabajador}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="col-md-3 ">
-              <label className="form-label">CANTIDAD DE PERSONAL</label>
-              <div class="input-group mb-3">
-                <input
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
-                  type="number"
-                  value={cantidadTrabajadores}
-                  onChange={(e) => setCantidadTrabajadores(e.target.value)}
-                  className="form-control"
-                />
-              </div>
-            </div>
-            <div className="col-md-3 ">
-              <label className="form-label">DÍAS TRABAJADOS</label>
-              <div class="input-group mb-3">
-                <input
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
-                  type="number"
-                  value={diasTrabajados}
-                  onChange={(e) => setDiasTrabajados(e.target.value)}
-                  className="form-control"
-                />
-              </div>
-            </div>
-            <p />
-            <div className="col-md-3 ">
-              <div class="input-group mb-3">
-                <button className="btn btn-success" onClick={addPartidasMO} ><HiDocumentPlus />Agregar mano de obra</button>
-              </div>
-            </div>
-            <div>
-              <br></br>
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th scope="col">No Partida</th>
-                    <th scope="col">No. de trabajadores</th>
-                    <th scope="col">Trabajador</th>
-                    <th scope="col">Días trabajados</th>
-                    <th scope="col">EDITAR</th>
-                    <th scope="col">ELIMINAR</th>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">No Partida</th>
+                  <th scope="col">No. de trabajadores</th>
+                  <th scope="col">Trabajador</th>
+                  <th scope="col">Días trabajados</th>
+                  <th scope="col">Editar</th>
+                  <th scope="col">Eliminar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {listMO.map((itemMO, indexMO) => (
+                  <tr key={indexMO}>
+                    <td>{itemMO.noPartidaMO}</td>
+                    <td>{itemMO.cantidadTrabajadores}</td>
+                    <td>{itemMO.personal}</td>
+                    <td>{itemMO.diasTrabajados}</td>
+                    <td><button className="btn btn-primary" onClick={() => EditPartidaMO(indexMO)}><FaPencilAlt /></button></td>
+                    <td><button className="btn btn-danger" onClick={() => DeletePartidaMO(indexMO)}><MdDelete /></button></td>
                   </tr>
-                </thead>
-                <tbody>
-                  {listMO.map((itemMO, indexMO) => (
-                    <tr key={indexMO}>
-                      <td>{itemMO.noPartidaMO}</td>
-                      <td>{itemMO.cantidadTrabajadores}</td>
-                      <td>{itemMO.personal}</td>
-                      <td>{itemMO.diasTrabajados}</td>
-                      <td><button className="btn btn-primary" onClick={() => EditPartidaMO(indexMO)}><FaPencilAlt /></button></td>
-                      <td><button className="btn btn-danger" onClick={() => DeletePartidaMO(indexMO)}><MdDelete /></button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           <br></br>
@@ -1150,6 +1092,252 @@ const AgregarPreCotizacion = () => {
           </Button>
           <Button variant="primary" onClick={guardarEdicion}>
             Guardar Cambios
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      {/*---------------------------------------------------------------------------------------------------*/}
+      <Modal
+        show={showAddModal}
+        onHide={handleCloseModal}
+        dialogClassName="lg"
+        centered
+        scrollable
+        size="lg"  // O usa "xl" si necesitas más espacio
+        className="d-flex align-items-center justify-content-center"  // Asegura el centrado
+        style={{ maxWidth: '100%', width: '100%' }}  // Ajusta el ancho máximo y asegura que no ocupe todo el ancho
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>{selectedPartida ? 'Editar Insumo' : 'Añadir Insumo'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {/* Fila 1: No.Partida, Insumo, Unidad, Línea, Clave SAE */}
+          <div className="row mb-4">
+            <div className="col-md-2">
+              <div className="mb-3">
+                <label>No. Partida</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={selectedPartida?.noPartida || ""}
+                  readOnly
+                />
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="mb-3">
+                <label>Insumo</label>
+                <select
+                  value={insumo}
+                  onChange={(e) => setInsumo(e.target.value)}
+                  className="form-control"
+                >
+                  <option value="">Seleccionar...</option>
+                  {factores.map((factor, index) => (
+                    <option key={index} value={factor}>
+                      {factor}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="mb-3">
+                <label>Unidad</label>
+                <select
+                  className="form-control"
+                  value={unidad}
+                  onChange={(e) => setUnidad(e.target.value)}
+                >
+                  <option value="servicio">Servicio</option>
+                  <option value="pieza">Pieza</option>
+                  <option value="kg">Kg</option>
+                  <option value="toneladas">Toneladas</option>
+                </select>
+              </div>
+            </div>
+            {/* Columna para Línea en la misma fila */}
+            <div className="col-md-2">
+              <div className="mb-3">
+                <label>Línea</label>
+                <select
+                  className="form-control"
+                  value={linea}
+                  onChange={(e) => setLinea(e.target.value)}
+                >
+                  <option value="">Seleccionar...</option>
+                  {lineas.map((linea, index) => (
+                    <option key={index} value={linea}>
+                      {linea}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+          {/* Columna para Línea en la misma fila */}
+          <div className="row mb-4">
+            <div className="col-md-2">
+              <div className="mb-3">
+                <label>Clave SAE</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={claveSae}
+                  onChange={(e) => setClaveSae(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="col-md-9">
+              <div className="mb-3">
+                <label>Descripción</label>
+                <textarea
+                  className="form-control"
+                  value={descripcionInsumo}
+                  onChange={(e) => setDescripcionInsumo(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="col-md-9">
+              <div className="mb-3">
+                <label>Comentarios Adicionales</label>
+                <textarea
+                  className="form-control"
+                  value={comentariosAdi}
+                  onChange={(e) => setComentariosAdi(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          {/* Fila 2: Proveedor, Cantidad, Costo Cotizado */}
+          <div className="row mb-4">
+            <div className="col-md-4">
+              <div className="mb-3">
+                <label>Proveedor</label>
+                <select
+                  value={proveedor}
+                  onChange={(e) => setProveedor(e.target.value)}
+                  className="form-control"
+                >
+                  <option value="">Seleccionar...</option>
+                  {proveedores.map((prov, index) => (
+                    <option key={index} value={prov}>
+                      {prov}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="mb-3">
+                <label>Cantidad</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={cantidad}
+                  onChange={(e) => setCantidad(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="mb-3">
+                <label>Costo Cotizado</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={costoCotizado}
+                  onChange={(e) => setCostoCotizado(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={guardarPartida}>
+            Guardar Insumo
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      {/*---------------------------------------------------------*/}
+      <Modal
+        show={showAddModalMO}
+        onHide={() => setShowAddModalMO(false)}
+        centered
+
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Añadir Mano de Obra</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            <div className="row">
+              <div className="col-md-2">
+                <div className="mb-3">
+                  <label>No. Partida</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={noPartidaMO || ""}  // Aquí el valor se establece automáticamente
+                    readOnly
+                  />
+                </div>
+              </div>
+              <div className="col-md-5">
+                <div className="mb-3">
+                  <label className="form-label">TRABAJADOR</label>
+                  <select
+                    id="selectTrabajador"
+                    className="form-control"
+                    value={selectedTrabajador}
+                    onChange={(e) => setSelectedTrabajador(e.target.value)}
+                  >
+                    <option value="" disabled>SELECCIONA UN TRABAJADOR</option>
+                    {manoObra.map((trabajador, index) => (
+                      <option key={index} value={trabajador}>
+                        {trabajador}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-md-3">
+                <label className="form-label">CANTIDAD DE PERSONAL</label>
+                <div className="input-group mb-3">
+                  <input
+                    type="number"
+                    value={cantidadTrabajadores}
+                    onChange={(e) => setCantidadTrabajadores(e.target.value)}
+                    className="form-control"
+                    placeholder="Cantidad"
+                  />
+                </div>
+              </div>
+              <div className="col-md-3">
+                <label className="form-label">DÍAS TRABAJADOS</label>
+                <div className="input-group mb-3">
+                  <input
+                    type="number"
+                    value={diasTrabajados}
+                    onChange={(e) => setDiasTrabajados(e.target.value)}
+                    className="form-control"
+                    placeholder="Días"
+                  />
+                </div>
+              </div>
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAddModalMO(false)}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={handleSaveManoObra}>
+            Guardar
           </Button>
         </Modal.Footer>
       </Modal>
