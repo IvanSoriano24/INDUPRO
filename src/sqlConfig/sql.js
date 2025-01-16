@@ -80,21 +80,20 @@ app.get('/api/categorias/:unidad', async (req, res) => {
     }
 });
 app.get('/api/lineas/:categoria', async (req, res) => {
+    const { categoria } = req.params;
+    console.log("Categoría recibida:", categoria); // Log para verificar el parámetro recibido
     try {
-        const { categoria } = req.params; // Obtener la clave de la categoría (por ejemplo, 01.01)
         const pool = await sql.connect(config);
-
-        // Filtrar líneas por categoría
         const result = await pool.request()
-            .input('categoria', sql.VarChar, `${categoria}%`) // Filtra usando la categoría como prefijo
+            .input('categoria', sql.VarChar, `${categoria}%`)
             .query(`SELECT CVE_LIN, DESC_LIN 
                     FROM CLIN01 
                     WHERE CVE_LIN LIKE @categoria 
                     AND CHARINDEX('.', CVE_LIN) > 0`);
-
-        res.json(result.recordset); // Enviar las líneas filtradas al cliente
+        console.log("Líneas obtenidas:", result.recordset); // Verifica el resultado de la consulta
+        res.json(result.recordset);
     } catch (err) {
-        console.error('Error al obtener las líneas:', err);
+        console.error("Error al obtener las líneas:", err);
         res.status(500).json({ error: 'Error al obtener las líneas', details: err });
     }
 });

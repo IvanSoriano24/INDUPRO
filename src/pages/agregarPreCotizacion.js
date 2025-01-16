@@ -525,6 +525,8 @@ const AgregarPreCotizacion = () => {
     setInsumo(insumo.insumo); // Asigna el valor del insumo al estado
     setCantidad(insumo.cantidad); // Asigna la cantidad
     setUnidad(insumo.unidad); // Asigna la unidad
+    setCategoria(insumo.categoria);
+    setLinea(insumo.linea)
     setClaveSae(insumo.claveSae); // Asigna la clave SAE
     setCostoCotizado(insumo.costoCotizado);
     setComentariosAdi(insumo.comentariosAdi);
@@ -568,7 +570,7 @@ const AgregarPreCotizacion = () => {
           ...item,
           insumos: [
             ...item.insumos, // Mantén los insumos existentes
-            { insumo, cantidad, unidad, claveSae, descripcionInsumo, comentariosAdi, costoCotizado } // Agrega el nuevo insumo
+            { insumo, cantidad, unidad, claveSae, descripcionInsumo, comentariosAdi, costoCotizado, categoria } // Agrega el nuevo insumo
           ]
         }
         : item
@@ -644,6 +646,25 @@ const AgregarPreCotizacion = () => {
       obtenerCategorias(unidadSeleccionada); // Cargar categorías
     } else {
       setCategorias([]); // Limpiar categorías si no hay unidad seleccionada
+    }
+  };
+  const obtenerLineas = async (categoriaSeleccionada) => {
+    console.log("Obteniendo líneas para la categoría:", categoriaSeleccionada); // Verifica la entrada
+    try {
+      const response = await axios.get(`http://localhost:5000/api/lineas/${categoriaSeleccionada}`);
+      setLineas(response.data); // Guardar las líneas en el estado
+      console.log("Líneas filtradas obtenidas:", response.data); // Verifica la respuesta
+    } catch (error) {
+      console.error("Error al obtener las líneas:", error);
+    }
+  };
+  const handleCategoriaChange = (e) => {
+    const categoriaSeleccionada = e.target.value;
+    setCategoria(categoriaSeleccionada); // Actualiza la categoría seleccionada
+    if (categoriaSeleccionada) {
+      obtenerLineas(categoriaSeleccionada); // Obtén las líneas asociadas
+    } else {
+      setLineas([]); // Limpia las líneas si no hay categoría seleccionada
     }
   };
   /* Modales */
@@ -1330,12 +1351,13 @@ const AgregarPreCotizacion = () => {
                 <select
                   className="form-control"
                   value={linea}
-                  onChange={(e) => setLinea(e.target.value)}
+                  onChange={(e) => setLinea(e.target.value)} // Manejar la línea seleccionada
+                  disabled={!categoria} // Deshabilitar si no hay categoría seleccionada
                 >
                   <option value="">Seleccionar...</option>
                   {lineas.map((linea, index) => (
                     <option key={index} value={linea.CVE_LIN}>
-                      {linea.DESC_LIN}
+                      {linea.CVE_LIN} - {linea.DESC_LIN}
                     </option>
                   ))}
                 </select>
