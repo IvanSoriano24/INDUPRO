@@ -9,10 +9,16 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.7.9",
+    "body-parser": "^1.20.3",
     "bootstrap": "^5.3.2",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
     "firebase": "^10.7.1",
     "flowbite-react": "^0.7.2",
     "image-to-base64": "^2.2.0",
+    "mssql": "^11.0.1",
+    "mysql2": "^3.12.0",
     "pdfmake": "^0.2.9",
     "react": "^18.2.0",
     "react-bootstrap": "^2.9.2",
@@ -51,5 +57,10 @@
   },
   "devDependencies": {
     "sass": "^1.69.7"
-  }
+  },
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

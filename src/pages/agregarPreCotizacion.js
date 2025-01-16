@@ -11,6 +11,7 @@ import { CiCirclePlus } from "react-icons/ci";
 import { MdDelete } from "react-icons/md";
 import { FaPencilAlt } from "react-icons/fa";
 import { ModalTitle, Modal, Button } from "react-bootstrap"
+import axios from 'axios';
 
 const AgregarPreCotizacion = () => {
   const [showAgregar, setShowAgregar] = useState(false);
@@ -35,12 +36,17 @@ const AgregarPreCotizacion = () => {
   const [noPartida, setNoPartida] = useState("");
   const [listPreCot, setListPreCot] = useState([]);
   const [listPartidas, setListPartidas] = useState([]);
+  const [listMano, setListMano] = useState([]);
   const [selectedPartida, setSelectedPartida] = useState(null);
   // Dentro de tu componente:
   const [linea, setLinea] = useState(""); // Estado para la línea seleccionada
   const [claveSae, setClaveSae] = useState(""); // Estado para la clave SAE
+  const [clavesSAE, setClavesSAE] = useState([]);
   //const [proveedores, setProveedores] = useState([]); // Lista de proveedores
   const [lineas, setLineas] = useState([]); // Lista de líneas disponibles
+  const [categorias, setCategorias] = useState([]);
+  const [categoria, setCategoria] = useState("");
+
 
   const [idPartida, setIdPartida] = useState("");
 
@@ -54,7 +60,8 @@ const AgregarPreCotizacion = () => {
   const [no_subPartida, setNoSubPartida] = useState("");
   const [noPartidaPC, setNoPartidaPC] = useState();
   const [proveedor, setProveedor] = useState("");
-  const [unidad, setUnidad] = useState("");
+  const [unidad, setUnidad] = useState(""); // Unidad seleccionada
+  const [unidades, setUnidades] = useState([]); // Lista de unidades únicas
   const [docAnteriorPPC, setDocAnteriorPPC] = useState("");
   const [descripcionInsumo, setDescripcionInsumo] = useState("");
   const [comentariosAdi, setComentariosAdi] = useState("");
@@ -410,7 +417,7 @@ const AgregarPreCotizacion = () => {
   }
   /* ----------------------------------------------------AQUÍ ME QUEDE ---------------*/
 
-  const addPartidasMO = (e) => {
+  /*const addPartidasMO = (e) => {
     e.preventDefault();
     const newItem = {
       cve_precotMO: selectedFolio + folioSiguiente.toString(),
@@ -440,7 +447,7 @@ const AgregarPreCotizacion = () => {
     } else {
       alert("Debes ingresar los días trabajados")
     }
-  };
+  };*/
   const EditPartidaMO = (indexMO) => {
     // Obtiene la partida de mano de obra a editar según el índice proporcionado
     const partidaEditada = listMO[indexMO];
@@ -467,12 +474,36 @@ const AgregarPreCotizacion = () => {
     // Actualiza el estado de la lista con la lista filtrada
     setListMO(updatedList);
   };
-  const handleOpenModal = (noPartida) => {
-    const partidaSeleccionada = par_levDigital.find(
-      (item) => item.noPartida === noPartida
-    );
-    setSelectedPartida(partidaSeleccionada);
+  const handleOpenModal = async (noPartida) => {
     setShowAddModal(true);
+    try {
+      const partidaSeleccionada = par_levDigital.find(
+        (item) => item.noPartida === noPartida
+      );
+      setSelectedPartida(partidaSeleccionada);
+
+      // Llamar a la API para obtener las líneas
+      /*const responseLineas = await axios.get("http://localhost:5000/api/lineas");
+      setLineas(responseLineas.data); // Guardar las líneas obtenidas en el estado
+      console.log("Líneas obtenidas:", responseLineas.data);*/
+
+      // Llamar a la API para obtener las unidades
+      const responseUnidades = await axios.get(
+        "http://localhost:5000/api/lineasMaster");
+      setUnidades(responseUnidades.data); // Guardar las unidades con descripciones
+      console.log("Unidades obtenidas:", responseUnidades.data);
+
+      // Mostrar el modal después de obtener los datos
+    } catch (error) {
+      console.error("Error al obtener los datos necesarios:", error);
+      if (error.response) {
+        console.error('Error del servidor:', error.response.data);
+      } else if (error.request) {
+        console.error('No se recibió respuesta:', error.request);
+      } else {
+        console.error('Error al configurar la petición:', error.message);
+      }
+    }
   };
 
   const handleOpenModalMO = (noPartida) => {
@@ -491,48 +522,57 @@ const AgregarPreCotizacion = () => {
   };
   const handleEditInsumo = (partida, insumo) => {
     // Establece los valores actuales del insumo en el estado del modal
-    setInsumo(insumo.insumo);
-    setCantidad(insumo.cantidad);
-    setUnidad(insumo.unidad);
-    setClaveSae(insumo.claveSae);
+    setInsumo(insumo.insumo); // Asigna el valor del insumo al estado
+    setCantidad(insumo.cantidad); // Asigna la cantidad
+    setUnidad(insumo.unidad); // Asigna la unidad
+    setClaveSae(insumo.claveSae); // Asigna la clave SAE
+    setCostoCotizado(insumo.costoCotizado);
+    setComentariosAdi(insumo.comentariosAdi);
+    setDescripcionInsumo(insumo.descripcionInsumo);
 
     // Establece la partida seleccionada y abre el modal para editar
-    setSelectedPartida(partida);
+    setSelectedPartida(partida); // Establece la partida seleccionada en el estado
     setShowAddModal(true); // Mostrar el modal de edición
   };
   const handleSaveManoObra = () => {
-    // Crea un nuevo objeto con los datos del modal
     const nuevoRegistro = {
-      noPartida: noPartidaMO,
-      trabajador: selectedTrabajador,
-      cantidad: cantidadTrabajadores,
-      dias: diasTrabajados
+      noPartidaMO: noPartidaMO,
+      personal: typeof selectedTrabajador === "object" ? selectedTrabajador.nombre : selectedTrabajador,
+      cantidadTrabajadores: parseInt(cantidadTrabajadores, 10),
+      diasTrabajados: parseInt(diasTrabajados, 10),
     };
 
-    // Añade el nuevo registro al estado o realiza cualquier operación que necesites (por ejemplo, actualizar un array de mano de obra)
-    setManoObra(prevState => [...prevState, nuevoRegistro]);
-
-    // Cierra el modal
-    setShowAddModalMO(false);
+    // Si el número de partida ya existe, actualiza su lista de mano de obra
+    const updatedListMano = listMano.map((item) =>
+      item.noPartidaMO === noPartidaMO
+        ? { ...item, personal: nuevoRegistro.personal, cantidadTrabajadores: nuevoRegistro.cantidadTrabajadores, diasTrabajados: nuevoRegistro.diasTrabajados }
+        : item
+    );
+    // Si no se encuentra la partida, agrega una nueva
+    if (!updatedListMano.some(item => item.noPartidaMO === noPartidaMO)) {
+      updatedListMano.push(nuevoRegistro);
+    }
+    // Actualiza el estado
+    setListMano(updatedListMano);
+    //setManoObra(prevState => [...prevState, nuevoRegistro]); // Mantiene el estado original
+    setShowAddModalMO(false); // Cierra el modal
   };
   const guardarPartida = () => {
     if (!selectedPartida || !insumo || !cantidad || !unidad || !claveSae) {
       alert('Faltan datos para completar la operación.');
       return;
     }
-
     const updatedList = listPartidas.map((item) =>
       item.noPartida === selectedPartida.noPartida
         ? {
           ...item,
           insumos: [
             ...item.insumos, // Mantén los insumos existentes
-            { insumo, cantidad, unidad, claveSae } // Agrega el nuevo insumo
+            { insumo, cantidad, unidad, claveSae, descripcionInsumo, comentariosAdi, costoCotizado } // Agrega el nuevo insumo
           ]
         }
         : item
     );
-
     if (!updatedList.some(item => item.noPartida === selectedPartida.noPartida)) {
       // Si no se encontró la partida, agregamos una nueva
       updatedList.push({
@@ -540,14 +580,72 @@ const AgregarPreCotizacion = () => {
         insumos: [{ insumo, cantidad, unidad, claveSae }]
       });
     }
-
     // Actualiza el estado
     setListPartidas(updatedList);
-
     // Cierra el modal
     handleCloseModal();
   };
 
+  useEffect(() => {
+    // Filtrar las claves cuando la línea cambie
+    filtrarClavesPorLinea(linea);
+  }, [linea]);
+
+  useEffect(() => {
+    // Filtrar proveedores cuando la línea cambie
+    const proveedoresFiltrados = filtrarProveedoresPorLinea(linea);
+    // Asignar el primer proveedor al seleccionar la clave
+    if (proveedoresFiltrados.length > 0 && !proveedor) {
+      setProveedor(proveedoresFiltrados[0]);
+    }
+  }, [linea]);
+  useEffect(() => {
+    // Verifica si los campos esenciales están llenos
+    if (insumo && unidad && linea) {
+      // Solo hacer la consulta cuando los campos están completos
+      axios.get('http://localhost:5000/api/claves')
+        .then((response) => {
+          setClavesSAE(response.data); // Guardar las claves obtenidas en el estado
+        })
+        .catch((error) => {
+          console.error('Error al obtener las claves:', error);
+        });
+    }
+  }, [insumo, unidad, linea]); // Dependencias: se ejecuta cuando estos campos cambian  
+
+  const filtrarClavesPorLinea = (linea) => {
+    return clavesSAE.filter((clave) => clave.LINEA === linea);  // Ajusta a tu estructura
+  };
+
+  const filtrarProveedoresPorLinea = (linea) => {
+    // Filtra los proveedores según la línea
+    return proveedores.filter((proveedor) => proveedor.LINEA === linea);
+  };
+
+  // Filtrar las líneas según el tipo (si tipoLinea es "Producto", muestra solo esas)
+  //const tiposPermitidos = ["Producto", "Servicio", "Pieza"]; 
+
+  /*const lineasFiltradas = lineas.filter(linea =>
+    linea.tipoLinea === unidad // Compara el tipoLinea con el tipoUnidad seleccionado
+  );*/
+  const obtenerCategorias = async (unidadSeleccionada) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/categorias/${unidadSeleccionada}`);
+      setCategorias(response.data); // Guardar las categorías filtradas en el estado
+      console.log("Categorías filtradas obtenidas:", response.data);
+    } catch (error) {
+      console.error("Error al obtener las categorías:", error);
+    }
+  };
+  const handleUnidadChange = (e) => {
+    const unidadSeleccionada = e.target.value;
+    setUnidad(unidadSeleccionada); // Actualiza la unidad seleccionada
+    if (unidadSeleccionada) {
+      obtenerCategorias(unidadSeleccionada); // Cargar categorías
+    } else {
+      setCategorias([]); // Limpiar categorías si no hay unidad seleccionada
+    }
+  };
   /* Modales */
   const handleDelete = async (noPartida, cve_levDig) => {
     try {
@@ -753,7 +851,7 @@ const AgregarPreCotizacion = () => {
 
       });
       /* ******************************************* AGREGAR PARTIDAS DE MANO DE OBRA ******************************************* */
-      listMO.forEach(async (item) => {
+      /*manoObra.forEach(async (item) => {
         const personalSeleccionado = await obtenerMOPorNombre(item.personal)
         const { valorHombre, salarioDiario } = personalSeleccionado;
 
@@ -777,7 +875,7 @@ const AgregarPreCotizacion = () => {
           fechaModificacion: formattedDate,
           estatus: "Activo"
         });
-      });
+      });*/
       navigate("/levantamientoDigital")
     } else {
       alert("Selecciona un folio valido");
@@ -991,29 +1089,36 @@ const AgregarPreCotizacion = () => {
               </thead>
               <tbody>
                 {listPartidas.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.noPartida}</td> 
-                    <td>{item.insumo}</td> 
-                    <td>{item.cantidad}</td> 
-                    <td>{item.unidad}</td>
-                    <td>{item.claveSae}</td>
-                    <td>
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => handleOpenModal(item.noPartida)}
-                      >
-                        Editar
-                      </button>
-                    </td>
-                    <td>
-                      <button
-                        className="btn btn-danger"
-                        onClick={() => handleDeleteInsumo(item.noPartida)}
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
+                  <React.Fragment key={index}>
+                    {item.insumos.map((insumo, subIndex) => (
+                      <tr key={`${index}-${subIndex}`}>
+                        {/* Muestra el No. Partida solo en la primera fila de insumos */}
+                        {subIndex === 0 && (
+                          <td rowSpan={item.insumos.length}>{item.noPartida}</td>
+                        )}
+                        <td>{insumo.insumo}</td>
+                        <td>{insumo.cantidad}</td>
+                        <td>{insumo.unidad}</td>
+                        <td>{insumo.claveSae}</td>
+                        <td>
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => handleEditInsumo(item.noPartida, insumo)}
+                          >
+                            Editar
+                          </button>
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-danger"
+                            onClick={() => handleDeleteInsumo(item.noPartida, insumo)}
+                          >
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
@@ -1021,7 +1126,7 @@ const AgregarPreCotizacion = () => {
           <br></br>
           <div className="row" style={{ border: '1px solid #000' }}>
             <label style={{ color: "red" }}>PARTIDAS POR MANO DE OBRA </label>
-            <table class="table">
+            <table className="table">
               <thead>
                 <tr>
                   <th scope="col">No Partida</th>
@@ -1033,20 +1138,39 @@ const AgregarPreCotizacion = () => {
                 </tr>
               </thead>
               <tbody>
-                {listMO.map((itemMO, indexMO) => (
-                  <tr key={indexMO}>
-                    <td>{itemMO.noPartidaMO}</td>
-                    <td>{itemMO.cantidadTrabajadores}</td>
-                    <td>{itemMO.personal}</td>
-                    <td>{itemMO.diasTrabajados}</td>
-                    <td><button className="btn btn-primary" onClick={() => EditPartidaMO(indexMO)}><FaPencilAlt /></button></td>
-                    <td><button className="btn btn-danger" onClick={() => DeletePartidaMO(indexMO)}><MdDelete /></button></td>
+                {listMano.length > 0 ? (
+                  listMano.map((itemMO, indexMO) => (
+                    <tr key={indexMO}>
+                      <td>{itemMO.noPartidaMO || "-"}</td>
+                      <td>{itemMO.cantidadTrabajadores || "-"}</td>
+                      <td>{itemMO.personal || "-"}</td>
+                      <td>{itemMO.diasTrabajados || "-"}</td>
+                      <td>
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => EditPartidaMO(indexMO)}
+                        >
+                          <FaPencilAlt />
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => DeletePartidaMO(indexMO)}
+                        >
+                          <MdDelete />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6">No hay datos disponibles</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
-
           <br></br>
           <button className="btn btn-success" onClick={addPreCotizacion} ><HiDocumentPlus /> GUARDAR DOCUMENTO</button>
         </div>
@@ -1102,16 +1226,16 @@ const AgregarPreCotizacion = () => {
         dialogClassName="lg"
         centered
         scrollable
-        size="lg"  // O usa "xl" si necesitas más espacio
+        size="xl"  // O usa "xl" si necesitas más espacio
         className="d-flex align-items-center justify-content-center"  // Asegura el centrado
-        style={{ maxWidth: '100%', width: '100%' }}  // Ajusta el ancho máximo y asegura que no ocupe todo el ancho
+        style={{ maxWidth: '100%', width: '200%' }}  // Ajusta el ancho máximo y asegura que no ocupe todo el ancho
       >
         <Modal.Header closeButton>
           <Modal.Title>{selectedPartida ? 'Editar Insumo' : 'Añadir Insumo'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {/* Fila 1: No.Partida, Insumo, Unidad, Línea, Clave SAE */}
-          <div className="row mb-4">
+          <div className="row mb-6">
             <div className="col-md-2">
               <div className="mb-3">
                 <label>No. Partida</label>
@@ -1143,15 +1267,47 @@ const AgregarPreCotizacion = () => {
             <div className="col-md-4">
               <div className="mb-3">
                 <label>Unidad</label>
-                <select
+                {/*<select
                   className="form-control"
                   value={unidad}
                   onChange={(e) => setUnidad(e.target.value)}
                 >
-                  <option value="servicio">Servicio</option>
-                  <option value="pieza">Pieza</option>
-                  <option value="kg">Kg</option>
-                  <option value="toneladas">Toneladas</option>
+                  <option value="">Seleccionar...</option>
+                  {unidades.map((unidad, index) => (
+                    <option key={index} value={unidad.unidad}>
+                      {unidad.unidad} - {unidad.descripcion}
+                    </option>
+                  ))}
+                </select>*/}
+                <select
+                  className="form-control"
+                  value={unidad} // Estado de la unidad seleccionada
+                  onChange={handleUnidadChange} // Llama a la función al cambiar la unidad
+                >
+                  <option value="">Seleccionar...</option>
+                  {unidades.map((unidad, index) => (
+                    <option key={index} value={unidad.unidad}>
+                      {unidad.unidad} - {unidad.descripcion}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="mb-3">
+                <label>Categoría</label>
+                <select
+                  className="form-control"
+                  value={categoria}
+                  onChange={(e) => setCategoria(e.target.value)}
+                  disabled={!unidad} // Deshabilitar si no hay unidad seleccionada
+                >
+                  <option value="">Seleccionar...</option>
+                  {categorias.map((categoria, index) => (
+                    <option key={index} value={categoria.CVE_LIN}>
+                      {categoria.CVE_LIN} - {categoria.DESC_LIN}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -1159,6 +1315,18 @@ const AgregarPreCotizacion = () => {
             <div className="col-md-2">
               <div className="mb-3">
                 <label>Línea</label>
+                {/*<select
+                  className="form-control"
+                  value={linea}
+                  onChange={(e) => setLinea(e.target.value)}
+                >
+                  <option value="">Seleccionar...</option>
+                  {lineasFiltradas.map((linea, index) => (
+                    <option key={index} value={linea.clave}>
+                      {linea.descripcion}
+                    </option>
+                  ))}
+                </select>*/}
                 <select
                   className="form-control"
                   value={linea}
@@ -1166,8 +1334,8 @@ const AgregarPreCotizacion = () => {
                 >
                   <option value="">Seleccionar...</option>
                   {lineas.map((linea, index) => (
-                    <option key={index} value={linea}>
-                      {linea}
+                    <option key={index} value={linea.CVE_LIN}>
+                      {linea.DESC_LIN}
                     </option>
                   ))}
                 </select>
@@ -1175,16 +1343,24 @@ const AgregarPreCotizacion = () => {
             </div>
           </div>
           {/* Columna para Línea en la misma fila */}
-          <div className="row mb-4">
+          <div className="row mb-6">
             <div className="col-md-2">
               <div className="mb-3">
                 <label>Clave SAE</label>
-                <input
-                  type="text"
+                <select
                   className="form-control"
                   value={claveSae}
                   onChange={(e) => setClaveSae(e.target.value)}
-                />
+                >
+                  <option value={0}>0</option>
+                  <option value={1}>1</option>
+                  {/*<option value="">Seleccionar...</option>
+                  {clavesSAE.map((clave, index) => (
+                    <option key={index} value={clave.CVE_ART}>
+                      {clave.CVE_ART} - {clave.DESCR}
+                    </option>
+                  ))}*/}
+                </select>
               </div>
             </div>
             <div className="col-md-9">
@@ -1209,7 +1385,7 @@ const AgregarPreCotizacion = () => {
             </div>
           </div>
           {/* Fila 2: Proveedor, Cantidad, Costo Cotizado */}
-          <div className="row mb-4">
+          <div className="row mb-6">
             <div className="col-md-4">
               <div className="mb-3">
                 <label>Proveedor</label>
