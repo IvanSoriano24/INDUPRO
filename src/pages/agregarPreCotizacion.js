@@ -449,31 +449,28 @@ const AgregarPreCotizacion = () => {
     }
   };*/
   const EditPartidaMO = (indexMO) => {
-    // Obtiene la partida de mano de obra a editar según el índice proporcionado
-    const partidaEditada = listMO[indexMO];
+    const partidaEditada = listMano[indexMO];
 
-    // Establece los valores de los campos de entrada con los valores de la partida a editar
-    setNoParatidaMO(partidaEditada.noPartidaMO)
-    setPersonal(partidaEditada.personal);
-    setDiasTrabajados(partidaEditada.diasTrabajados);
+    setNoParatidaMO(partidaEditada.noPartidaMO);
+    setSelectedTrabajador(partidaEditada.personal);
     setCantidadTrabajadores(partidaEditada.cantidadTrabajadores);
+    setDiasTrabajados(partidaEditada.diasTrabajados);
     setEditIndex(indexMO); // Establece el índice de edición
+    setShowAddModalMO(true); // Abre el modal de edición
   };
   const DeletePartidaMO = (indexMO) => {
-    // Verifica si el elemento a eliminar es el último de la lista
-    const isLastItem = indexMO === listMO.length - 1;
+    // Verifica si el índice es correcto
+    console.log("Índice a eliminar:", indexMO);
 
-    // Si es el último elemento, disminuye el contador en 1
-    if (isLastItem) {
-      setIdCounter(idCounter - 1);
-    }
+    // Filtra la lista para excluir el índice especificado
+    const updatedList = listMano.filter((_, index) => index !== indexMO);
 
-    // Filtra la lista actual para excluir el elemento en el índice especificado
-    const updatedList = listMO.filter((item, index) => index !== indexMO);
+    // Depuración: Verifica el contenido de la lista después de filtrar
+    console.log("Lista después de eliminar:", updatedList);
 
-    // Actualiza el estado de la lista con la lista filtrada
-    setListMO(updatedList);
-  };
+    // Actualiza el estado con la lista filtrada
+    setListMano(updatedList);
+};
   const handleOpenModal = async (noPartida) => {
     setShowAddModal(true);
     try {
@@ -521,20 +518,24 @@ const AgregarPreCotizacion = () => {
     setUnidad("servicio");
   };
   const handleEditInsumo = (partida, insumo) => {
-    // Establece los valores actuales del insumo en el estado del modal
-    setInsumo(insumo.insumo); // Asigna el valor del insumo al estado
-    setCantidad(insumo.cantidad); // Asigna la cantidad
-    setUnidad(insumo.unidad); // Asigna la unidad
+    console.log("Partida seleccionada:", partida); // Verificar partida
+    console.log("Insumo seleccionado:", insumo); // Verificar insumo
+
+    setInsumo(insumo.insumo);
+    setCantidad(insumo.cantidad);
+    setUnidad(insumo.unidad);
     setCategoria(insumo.categoria);
-    setLinea(insumo.linea)
-    setClaveSae(insumo.claveSae); // Asigna la clave SAE
+    setLinea(insumo.linea);
+    setClaveSae(insumo.claveSae);
+    setProveedor(insumo.proveedor);
     setCostoCotizado(insumo.costoCotizado);
     setComentariosAdi(insumo.comentariosAdi);
     setDescripcionInsumo(insumo.descripcionInsumo);
 
-    // Establece la partida seleccionada y abre el modal para editar
-    setSelectedPartida(partida); // Establece la partida seleccionada en el estado
-    setShowAddModal(true); // Mostrar el modal de edición
+    // Asigna correctamente la partida seleccionada
+    setSelectedPartida({ noPartida: partida });
+
+    setShowAddModal(true);
   };
   const handleSaveManoObra = () => {
     const nuevoRegistro = {
@@ -544,48 +545,105 @@ const AgregarPreCotizacion = () => {
       diasTrabajados: parseInt(diasTrabajados, 10),
     };
 
-    // Si el número de partida ya existe, actualiza su lista de mano de obra
-    const updatedListMano = listMano.map((item) =>
-      item.noPartidaMO === noPartidaMO
-        ? { ...item, personal: nuevoRegistro.personal, cantidadTrabajadores: nuevoRegistro.cantidadTrabajadores, diasTrabajados: nuevoRegistro.diasTrabajados }
-        : item
-    );
-    // Si no se encuentra la partida, agrega una nueva
-    if (!updatedListMano.some(item => item.noPartidaMO === noPartidaMO)) {
-      updatedListMano.push(nuevoRegistro);
+    let updatedListMano;
+
+    if (editIndex !== null) {
+      // Modo edición: Actualiza el registro existente
+      updatedListMano = listMano.map((item, index) =>
+        index === editIndex ? { ...item, ...nuevoRegistro } : item
+      );
+    } else {
+      // Modo creación: Agrega un nuevo registro
+      updatedListMano = [...listMano, nuevoRegistro];
     }
+
     // Actualiza el estado
     setListMano(updatedListMano);
-    //setManoObra(prevState => [...prevState, nuevoRegistro]); // Mantiene el estado original
+    setEditIndex(null); // Resetea el índice de edición
     setShowAddModalMO(false); // Cierra el modal
   };
   const guardarPartida = () => {
     if (!selectedPartida || !insumo || !cantidad || !unidad || !claveSae) {
-      alert('Faltan datos para completar la operación.');
+      alert("Faltan datos para completar la operación.");
       return;
     }
-    const updatedList = listPartidas.map((item) =>
-      item.noPartida === selectedPartida.noPartida
-        ? {
+
+    // Actualizar lista de partidas
+    const updatedList = listPartidas.map((item) => {
+      if (item.noPartida === selectedPartida.noPartida) {
+        // Si es la partida seleccionada
+        const insumosActualizados = item.insumos.map((existingInsumo) => {
+          if (existingInsumo.insumo === insumo) {
+            // Actualiza el insumo existente
+            return {
+              ...existingInsumo,
+              cantidad,
+              unidad,
+              claveSae,
+              descripcionInsumo,
+              comentariosAdi,
+              costoCotizado,
+              proveedor,
+              categoria,
+              linea,
+            };
+          }
+          return existingInsumo; // Mantén los insumos no editados
+        });
+
+        // Verifica si el insumo es nuevo
+        const insumoYaExiste = item.insumos.some((existingInsumo) => existingInsumo.insumo === insumo);
+
+        return {
           ...item,
-          insumos: [
-            ...item.insumos, // Mantén los insumos existentes
-            { insumo, cantidad, unidad, claveSae, descripcionInsumo, comentariosAdi, costoCotizado, categoria } // Agrega el nuevo insumo
-          ]
-        }
-        : item
-    );
-    if (!updatedList.some(item => item.noPartida === selectedPartida.noPartida)) {
-      // Si no se encontró la partida, agregamos una nueva
+          insumos: insumoYaExiste
+            ? insumosActualizados // Actualiza si ya existe
+            : [
+              ...item.insumos,
+              {
+                insumo,
+                cantidad,
+                unidad,
+                claveSae,
+                descripcionInsumo,
+                comentariosAdi,
+                costoCotizado,
+                proveedor,
+                categoria,
+                linea,
+              },
+            ], // Agrega un nuevo insumo
+        };
+      }
+      return item; // Mantén las partidas que no se están editando
+    });
+
+    // Si no se encontró la partida, agrega una nueva
+    if (!updatedList.some((item) => item.noPartida === selectedPartida.noPartida)) {
       updatedList.push({
         noPartida: selectedPartida.noPartida,
-        insumos: [{ insumo, cantidad, unidad, claveSae }]
+        insumos: [
+          {
+            insumo,
+            cantidad,
+            unidad,
+            claveSae,
+            descripcionInsumo,
+            comentariosAdi,
+            costoCotizado,
+            proveedor,
+            categoria,
+            linea,
+          },
+        ],
       });
     }
-    // Actualiza el estado
-    setListPartidas(updatedList);
-    // Cierra el modal
-    handleCloseModal();
+
+    // Verifica el estado actualizado antes de asignarlo
+    console.log("Lista de partidas actualizada:", updatedList);
+
+    setListPartidas(updatedList); // Actualiza el estado con la lista modificada
+    handleCloseModal(); // Cierra el modal
   };
 
   useEffect(() => {
@@ -751,14 +809,23 @@ const AgregarPreCotizacion = () => {
     setInsumos(updatedInsumos);  // Actualiza el estado
   };
   const handleDeleteInsumo = (noPartida, insumoToDelete) => {
-    const updatedInsumos = insumos.map(item => {
+    // Filtra el insumo dentro de la partida seleccionada
+    const updatedList = listPartidas.map((item) => {
       if (item.noPartida === noPartida) {
-        item.insumos = item.insumos.filter(insumo => insumo !== insumoToDelete);
+        return {
+          ...item,
+          insumos: item.insumos.filter(
+            (insumo) => insumo.insumo !== insumoToDelete.insumo
+          ), // Filtra el insumo a eliminar
+        };
       }
-      return item;
+      return item; // Mantén las demás partidas sin cambios
     });
 
-    setInsumos(updatedInsumos);  // Actualiza el estado eliminando el insumo
+    // Filtrar las partidas sin insumos
+    const finalList = updatedList.filter((item) => item.insumos.length > 0);
+
+    setListPartidas(finalList); // Actualiza el estado eliminando el insumo
   };
   /* --------------------------------------------------- - AGREGAR NUEVO DOCUMENTO --------------------------------------------------*/
   const addPreCotizacion = async (e) => {
@@ -1177,7 +1244,9 @@ const AgregarPreCotizacion = () => {
                       <td>
                         <button
                           className="btn btn-danger"
-                          onClick={() => DeletePartidaMO(indexMO)}
+                          onClick={() => {
+                            DeletePartidaMO(indexMO);
+                          }}
                         >
                           <MdDelete />
                         </button>
@@ -1463,7 +1532,7 @@ const AgregarPreCotizacion = () => {
         show={showAddModalMO}
         onHide={() => setShowAddModalMO(false)}
         centered
-
+        scrollable
         size="lg"
       >
         <Modal.Header closeButton>
