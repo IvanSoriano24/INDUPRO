@@ -1012,8 +1012,8 @@ const AgregarPreCotizacion = () => {
         });
       });
       /* ******************************************* AGREGAR PARTIDAS DE MANO DE OBRA ******************************************* */
-      /*manoObra.forEach(async (item) => {
-        const personalSeleccionado = await obtenerMOPorNombre(item.personal)
+      manoObra.forEach(async (item) => {
+        const personalSeleccionado = await obtenerMOPorNombre(item.personal);
         const { valorHombre, salarioDiario } = personalSeleccionado;
 
         await addDoc(bitacora, {
@@ -1029,14 +1029,20 @@ const AgregarPreCotizacion = () => {
           personal: item.personal,
           cantidadTrabajadores: parseInt(item.cantidadTrabajadores), // Convertir a número entero
           diasTrabajados: item.diasTrabajados,
-          valorLider: parseInt(item.cantidadTrabajadores) * valorHombre * parseInt(item.diasTrabajados), // Convertir a número entero
-          costoLider: parseInt(item.cantidadTrabajadores) * salarioDiario * parseInt(item.diasTrabajados), // Convertir a número entero
+          valorLider:
+            parseInt(item.cantidadTrabajadores) *
+            valorHombre *
+            parseInt(item.diasTrabajados), // Convertir a número entero
+          costoLider:
+            parseInt(item.cantidadTrabajadores) *
+            salarioDiario *
+            parseInt(item.diasTrabajados), // Convertir a número entero
           salarioDiario: parseFloat(salarioDiario), // Convertir a número de punto flotante
           fechaRegistro: formattedDate,
           fechaModificacion: formattedDate,
-          estatus: "Activo"
+          estatus: "Activo",
         });
-      });*/
+      });
       navigate("/levantamientoDigital");
     } else {
       alert("Selecciona un folio valido");
@@ -1340,40 +1346,51 @@ const AgregarPreCotizacion = () => {
               <tbody>
                 {listPartidas.map((item, index) => (
                   <React.Fragment key={index}>
-                    {item.insumos.map((insumo, subIndex) => (
-                      <tr key={`${index}-${subIndex}`}>
-                        {/* Muestra el No. Partida solo en la primera fila de insumos */}
-                        {subIndex === 0 && (
-                          <td rowSpan={item.insumos.length}>
-                            {item.noPartida}
+                    {item.insumos.map((insumo, subIndex) => {
+                      // Buscar la unidad en la lista de unidades
+                      const unidadEncontrada = unidades.find(
+                        (u) => u.unidad === insumo.unidad
+                      );
+
+                      return (
+                        <tr key={`${index}-${subIndex}`}>
+                          {subIndex === 0 && (
+                            <td rowSpan={item.insumos.length}>
+                              {item.noPartida}
+                            </td>
+                          )}
+                          <td>{insumo.insumo}</td>
+                          <td>{insumo.cantidad}</td>
+                          {/* Mostrar el nombre de la unidad en lugar del número */}
+                          <td>
+                            {unidadEncontrada
+                              ? unidadEncontrada.descripcion
+                              : "Desconocida"}
                           </td>
-                        )}
-                        <td>{insumo.insumo}</td>
-                        <td>{insumo.cantidad}</td>
-                        <td>{insumo.unidad}</td>
-                        <td>{insumo.claveSae}</td>
-                        <td>
-                          <button
-                            className="btn btn-primary"
-                            onClick={() =>
-                              handleEditInsumo(item.noPartida, insumo)
-                            }
-                          >
-                            Editar
-                          </button>
-                        </td>
-                        <td>
-                          <button
-                            className="btn btn-danger"
-                            onClick={() =>
-                              handleDeleteInsumo(item.noPartida, insumo)
-                            }
-                          >
-                            Eliminar
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                          <td>{insumo.claveSae}</td>
+                          <td>
+                            <button
+                              className="btn btn-primary"
+                              onClick={() =>
+                                handleEditInsumo(item.noPartida, insumo)
+                              }
+                            >
+                              <FaPencilAlt />
+                            </button>
+                          </td>
+                          <td>
+                            <button
+                              className="btn btn-danger"
+                              onClick={() =>
+                                handleDeleteInsumo(item.noPartida, insumo)
+                              }
+                            >
+                              <MdDelete />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </React.Fragment>
                 ))}
               </tbody>
