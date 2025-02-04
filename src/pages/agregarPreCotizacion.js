@@ -1578,7 +1578,7 @@ const AgregarPreCotizacion = () => {
             </div>
             <div className="col-md-4">
               <div className="mb-3">
-                <label>Categoría</label>
+                <label>Sub Linea</label>
                 <select
                   className="form-control"
                   value={categoria}
@@ -1639,6 +1639,7 @@ const AgregarPreCotizacion = () => {
                     className="form-control"
                     value={descripcionInsumo}
                     onChange={(e) => setDescripcionInsumo(e.target.value)}
+                    style={{ resize: "none" }}
                   />
                 </div>
               </div>
@@ -1652,6 +1653,7 @@ const AgregarPreCotizacion = () => {
                     className="form-control"
                     value={comentariosAdi}
                     onChange={(e) => setComentariosAdi(e.target.value)}
+                    style={{ resize: "none" }}
                   />
                 </div>
               </div>
