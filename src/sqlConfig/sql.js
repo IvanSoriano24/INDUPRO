@@ -37,6 +37,30 @@ app.get('/api/claves', async (req, res) => {
         res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: err });
     }
 });
+app.get('/api/proveedores', async (req, res) => {
+    try {
+        // Conectar a la base de datos
+        const pool = await sql.connect(config);
+
+        // Ejecutar la consulta
+        const result = await pool.request()
+            .query("SELECT CLAVE, NOMBRE FROM PROV01 WHERE STATUS = 'A'");
+
+        // Verifica si hay resultados
+        if (result.recordset.length === 0) {
+            return res.status(404).json({ message: "No hay proveedores activos." });
+        }
+
+        // Log para depuración
+        console.log("Proveedores obtenidos:", result.recordset);
+
+        // Enviar la respuesta
+        res.json(result.recordset);
+    } catch (err) {
+        console.error('Error al ejecutar la consulta:', err);
+        res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: err.message });
+    }
+});
 
 // Ruta para obtener las líneas
 app.get('/api/lineasMaster', async (req, res) => {
@@ -60,6 +84,27 @@ app.get('/api/lineasMaster', async (req, res) => {
         res.status(500).json({ error: 'Error al obtener las líneas de la base de datos', details: err });
     }
 });
+/*app.get('/api/lineasMaster', async (req, res) => {
+    try {
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .query('SELECT CUENTA_COI, DESC_LIN FROM CLIN01');
+        
+        // Crear un objeto único basado en los primeros dos dígitos y asociar la descripción
+        const unidades = result.recordset.reduce((acc, linea) => {
+            const cuentaCoi = linea.CUENTA_COI ;
+            //if (!acc.some(item => item.unidad === unidad)) {
+                acc.push({ cuentaCoi, descripcion: linea.DESC_LIN });
+            //}
+            return acc;
+        }, []);
+
+        res.json(unidades); // Enviar unidades con descripciones
+    } catch (err) {
+        console.error('Error al ejecutar la consulta de líneas:', err);
+        res.status(500).json({ error: 'Error al obtener las líneas de la base de datos', details: err });
+    }
+});*/
 app.get('/api/categorias/:unidad', async (req, res) => {
     try {
         const { unidad } = req.params; // Obtener el primer par (unidad) de los parámetros
