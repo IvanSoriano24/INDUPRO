@@ -514,6 +514,8 @@ const AgregarPreCotizacion = () => {
       );
       setSelectedPartida(partidaSeleccionada);
 
+      setCantidad(0);
+      setCostoCotizado(0);
       // Llamar a la API para obtener las líneas
       /*const responseLineas = await axios.get("http://localhost:5000/api/lineas");
       setLineas(responseLineas.data); // Guardar las líneas obtenidas en el estado
@@ -1688,7 +1690,7 @@ const AgregarPreCotizacion = () => {
               <div className="col-md-4">
                 <div className="mb-3">
                   <label>Costo Cotizado</label>
-                  <input
+                  <input 
                     type="number"
                     className="form-control"
                     value={costoCotizado}
