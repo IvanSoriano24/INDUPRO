@@ -536,7 +536,7 @@ const AgregarPreCotizacion = () => {
         "http://localhost:5000/api/lineasMaster"
       );
       setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
-      console.log("Unidades obtenidas:", responseUnidades.data);
+      //console.log("Unidades obtenidas:", responseUnidades.data);
 
       const responseProvedores = await axios.get(
         "http://localhost:5000/api/proveedores"

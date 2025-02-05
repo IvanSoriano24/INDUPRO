@@ -272,142 +272,123 @@ const EditarPreCotizacion = () => {
       console.error("Error al obtener las líneas:", error);
     }
   };
-  const guardarPartida = () => {
+  const guardarPartida = async () => {
     if (!selectedPartida || !insumo || !cantidad || !unidad || !claveSae) {
-      alert("Faltan datos para completar la operación.");
-      return;
+        alert("Faltan datos para completar la operación.");
+        return;
     }
 
-    // 🟢 Normaliza el proveedor eliminando espacios en blanco
-    const proveedorNormalizado = proveedor ? proveedor.trim() : "";
-    const proveedorClave =
-      proveedores.find((prov) => prov.CLAVE.trim() === proveedorNormalizado)
-        ?.CLAVE || "";
+    try {
+        // 🟢 Se mantiene la estructura original de la clave del proveedor (varchar(10))
+        const proveedorConEspacios = proveedor || ""; // Si proveedor es null, lo dejamos como cadena vacía
 
-    console.log("🔍 Guardando partida con proveedor:", proveedorClave);
+        console.log("🔍 Guardando partida con proveedor:", `"${proveedorConEspacios}"`);
 
-    let updatedList = [...listPartidas]; // Copia la lista actual para modificarla
-
-    // 🔍 Buscar la partida en la lista
-    let partidaIndex = updatedList.findIndex(
-      (item) => item.noPartida === selectedPartida.noPartida
-    );
-
-    if (partidaIndex !== -1) {
-      // 🟢 Si la partida existe, buscar el insumo dentro de la partida
-      let insumoIndex = updatedList[partidaIndex].insumos.findIndex(
-        (existingInsumo) => existingInsumo.insumo === insumo
-      );
-
-      if (insumoIndex !== -1) {
-        // 🟢 Si el insumo ya existe, actualizarlo completamente
-        updatedList[partidaIndex].insumos[insumoIndex] = {
-          insumo,
-          cantidad,
-          unidad,
-          claveSae,
-          descripcionInsumo,
-          comentariosAdi,
-          costoCotizado,
-          proveedor: proveedorClave, // 🟢 Guarda sin espacios
-          categoria,
-          familia,
-          linea,
-        };
-      } else {
-        // 🟢 Si el insumo no existe en la partida, agregarlo
-        updatedList[partidaIndex].insumos.push({
-          insumo,
-          cantidad,
-          unidad,
-          claveSae,
-          descripcionInsumo,
-          comentariosAdi,
-          costoCotizado,
-          proveedor: proveedorClave, // 🟢 Guarda sin espacios
-          categoria,
-          familia,
-          linea,
-        });
-      }
-    } else {
-      // 🟢 Si la partida no existe, agregarla como nueva
-      updatedList.push({
-        noPartida: selectedPartida.noPartida,
-        insumos: [
-          {
+        // 🟢 Construye el objeto con los datos a guardar
+        const insumoData = {
+            cve_precot: cve_precot, // Asegurar que el folio de la precotización se guarde
+            noPartidaPC: parseInt(selectedPartida.noPartida, 10), // Convertir a número
             insumo,
-            cantidad,
-            unidad,
-            claveSae,
+            proveedor: proveedorConEspacios, // Guardar con espacios
             descripcionInsumo,
             comentariosAdi,
+            unidad,
             costoCotizado,
-            proveedor: proveedorClave, // 🟢 Guarda sin espacios
+            cantidad,
+            total: costoCotizado * cantidad,
             categoria,
             familia,
             linea,
-          },
-        ],
-      });
+            claveSae,
+            estatus: "Activo",
+            fechaRegistro: new Date().toLocaleDateString(),
+            fechaModificacion: new Date().toLocaleDateString(),
+        };
+
+        if (editIndex) {
+            // 🟢 Si editIndex tiene un valor, actualizamos el insumo existente en Firestore
+            const insumoRef = doc(db, "PAR_PRECOTIZACION_INSU", editIndex);
+            await updateDoc(insumoRef, insumoData);
+            console.log("✅ Insumo actualizado correctamente en Firestore");
+        } else {
+            // 🟢 Si no hay editIndex, significa que estamos creando un nuevo insumo
+            await addDoc(parPrecotizacionInsumos, insumoData);
+            console.log("✅ Insumo agregado correctamente en Firestore");
+        }
+
+        // 🔄 Resetear los valores después de guardar
+        setEditIndex(null);
+        setShowAddModal(false);
+        window.location.reload(); // Recargar para reflejar cambios
+    } catch (error) {
+        console.error("⚠️ Error al guardar la partida:", error);
+    }
+};
+const handleEditInsumo = async (partida, insumoId) => {
+  try {
+    console.log("🟢 Editando partida:", partida);
+    console.log("🟢 ID del insumo a editar:", insumoId);
+
+    // 🟢 Obtener el insumo desde Firestore
+    const insumoDoc = await getDoc(doc(db, "PAR_PRECOTIZACION_INSU", insumoId));
+
+    if (!insumoDoc.exists()) {
+      console.error("⚠️ Error: No se encontró el insumo en Firestore.");
+      return;
     }
 
-    console.log("📌 Lista de partidas actualizada:", updatedList);
+    const insumo = insumoDoc.data();
 
-    setListPartidas(updatedList); // Actualiza el estado con la lista modificada
-    handleCloseModal(); // Cierra el modal
-  };
-  const handleEditInsumo = (partida, insumo) => {
-    console.log("🟢 Editando partida:", partida);
-    console.log("🟢 Editando insumo:", insumo);
-    console.log("🟢 Proveedor recibido:", `"${insumo.proveedor}"`); // ✅ Verifica los espacios
-  
+    // 🟢 Si la lista de proveedores está vacía, cargarla antes de continuar
+    let listaProveedores = [...proveedores];
+    if (proveedores.length === 0) {
+      console.log("🔄 Cargando proveedores antes de editar...");
+      const responseProvedores = await axios.get("http://localhost:5000/api/proveedores");
+      listaProveedores = responseProvedores.data;
+      setProveedores(listaProveedores);
+    }
+
+    // 🟢 Buscar el proveedor en la lista de proveedores
+    const proveedorEncontrado = listaProveedores.find((prov) => prov.CLAVE === insumo.proveedor);
+
+    // 🔄 Asignar valores al estado para mostrar en el modal
+    setSelectedPartida({ noPartida: insumo.noPartidaPC });
     setInsumo(insumo.insumo);
     setCantidad(insumo.cantidad);
     setUnidad(insumo.unidad);
-    setCategoria(insumo.categoria);
-    setFamilia(insumo.familia);
-    setLinea(insumo.linea);
+    setCategoria(insumo.categoria || "");
+    setFamilia(insumo.familia || "");
+    setLinea(insumo.linea || "");
     setClaveSae(insumo.claveSae);
     setCostoCotizado(insumo.costoCotizado);
     setComentariosAdi(insumo.comentariosAdi);
     setDescripcionInsumo(insumo.descripcionInsumo);
 
-    // ✅ Asegurar que insumo.proveedor no sea null o undefined antes de hacer trim()
-    const proveedorNormalizado = insumo.proveedor ? insumo.proveedor.trim() : "";
-
-    // 🟢 Buscar proveedor eliminando espacios en blanco en ambos valores
-    const proveedorEncontrado = proveedores.find(
-        (prov) => prov.CLAVE.trim() === proveedorNormalizado
-    );
-
-    console.log("🟢 Proveedor normalizado:", `"${proveedorNormalizado}"`);
-    console.log("🟢 Proveedor encontrado:", proveedorEncontrado);
-
-    // ✅ Si no se encuentra, intenta comparar sin usar trim() para revisar el problema
-    if (!proveedorEncontrado) {
-        console.log(
-            "⚠️ No se encontró el proveedor, aquí están las claves en proveedores:"
-        );
-        proveedores.forEach((prov) =>
-            console.log(`CLAVE: "${prov.CLAVE}", NOMBRE: "${prov.NOMBRE}"`)
-        );
-    }
-
-    setProveedor(proveedorEncontrado ? proveedorEncontrado.CLAVE : "");
-
     // 🟢 Cargar familia si hay categoría
     if (insumo.categoria) {
-        obtenerFamilia(insumo.categoria);
+      console.log("🔄 Cargando familias para la categoría:", insumo.categoria);
+      await obtenerFamilia(insumo.categoria);
     }
 
-    // 🟢 Cargar línea si hay familia
+    // 🟢 Cargar líneas si hay familia
     if (insumo.familia) {
-        obtenerLineas(insumo.familia);
+      console.log("🔄 Cargando líneas para la familia:", insumo.familia);
+      await obtenerLineas(insumo.familia);
     }
 
-    setSelectedPartida({ noPartida: partida });
+    // 🟢 Establecer el proveedor después de cargarlo
+    setTimeout(() => {
+      setProveedor(proveedorEncontrado ? proveedorEncontrado.CLAVE : "");
+    }, 200);
+
+    // 🟢 Guardar el ID del insumo en editIndex para saber que estamos editando
+    setEditIndex(insumoId);
+
+    // 🔄 Mostrar el modal de edición
     setShowAddModal(true);
+  } catch (error) {
+    console.error("⚠️ Error al obtener el insumo:", error);
+  }
 };
   const handleSaveManoObra = () => {
     const nuevoRegistro = {
@@ -1109,7 +1090,7 @@ const EditarPreCotizacion = () => {
                         <button
                           className="btn btn-primary"
                           onClick={() =>
-                            handleEditInsumo(itemPC.noPartidaPC, itemPC)
+                            handleEditInsumo(itemPC.noPartidaPC, itemPC.id)
                           }
                         >
                           <FaPencilAlt />

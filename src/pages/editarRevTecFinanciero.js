@@ -184,7 +184,7 @@ const EditarRecTecFinanciero = () => {
           useEffect(() => {
             const cargarManoObra = async () => {
               const manoObraList = await obtenerTrabajadores();
-              console.log(manoObraList)
+              //console.log(manoObraList)
               setManoObra(manoObraList);
             };
           
