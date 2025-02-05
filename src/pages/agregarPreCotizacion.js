@@ -289,7 +289,6 @@ const AgregarPreCotizacion = () => {
     };
     cargarManoObra();
   }, []); // Eliminamos manoObra de las dependencias para evitar recargas innecesarias
-  
 
   /* ------------------------------------ - ENCONTRAR MANO DE OBRA POR PARTIDA -------------------------------*/
 
@@ -543,7 +542,7 @@ const AgregarPreCotizacion = () => {
         "http://localhost:5000/api/proveedores"
       );
       setProveedores(responseProvedores.data);
-      console.log("Proveedores: ", responseProvedores.data);
+      //console.log("Proveedores: ", responseProvedores.data);
       // Mostrar el modal después de obtener los datos
     } catch (error) {
       console.error("Error al obtener los datos necesarios:", error);
@@ -589,7 +588,7 @@ const AgregarPreCotizacion = () => {
 
     // 🟢 Buscar proveedor eliminando espacios en blanco de ambos lados
     const proveedorEncontrado = proveedores.find(
-        (prov) => prov.CLAVE.trim() === insumo.proveedor.trim()
+      (prov) => prov.CLAVE.trim() === insumo.proveedor.trim()
     );
 
     console.log("🟢 Proveedor encontrado:", proveedorEncontrado);
@@ -598,17 +597,17 @@ const AgregarPreCotizacion = () => {
 
     // 🟢 Cargar familia si hay categoría
     if (insumo.categoria) {
-        obtenerFamilia(insumo.categoria);
+      obtenerFamilia(insumo.categoria);
     }
 
     // 🟢 Cargar línea si hay familia
     if (insumo.familia) {
-        obtenerLineas(insumo.familia);
+      obtenerLineas(insumo.familia);
     }
 
     setSelectedPartida({ noPartida: partida });
     setShowAddModal(true);
-};
+  };
   const handleSaveManoObra = () => {
     const nuevoRegistro = {
       noPartidaMO: noPartidaMO,
@@ -639,92 +638,95 @@ const AgregarPreCotizacion = () => {
   };
   const guardarPartida = () => {
     if (!selectedPartida || !insumo || !cantidad || !unidad || !claveSae) {
-        alert("Faltan datos para completar la operación.");
-        return;
+      alert("Faltan datos para completar la operación.");
+      return;
     }
 
     // 🟢 Normaliza el proveedor eliminando espacios en blanco
     const proveedorNormalizado = proveedor ? proveedor.trim() : "";
     const proveedorClave =
-        proveedores.find((prov) => prov.CLAVE.trim() === proveedorNormalizado)?.CLAVE || "";
+      proveedores.find((prov) => prov.CLAVE.trim() === proveedorNormalizado)
+        ?.CLAVE || "";
 
     console.log("🔍 Guardando partida con proveedor:", proveedorClave);
 
     const updatedList = listPartidas.map((item) => {
-        if (item.noPartida === selectedPartida.noPartida) {
-            const insumosActualizados = item.insumos.map((existingInsumo) => {
-                if (existingInsumo.insumo === insumo) {
-                    return {
-                        ...existingInsumo,
-                        cantidad,
-                        unidad,
-                        claveSae,
-                        descripcionInsumo,
-                        comentariosAdi,
-                        costoCotizado,
-                        proveedor: proveedorClave, // 🟢 Guarda sin espacios
-                        categoria,
-                        familia,
-                        linea,
-                    };
-                }
-                return existingInsumo;
-            });
-
-            const insumoYaExiste = item.insumos.some(
-                (existingInsumo) => existingInsumo.insumo === insumo
-            );
-
+      if (item.noPartida === selectedPartida.noPartida) {
+        const insumosActualizados = item.insumos.map((existingInsumo) => {
+          if (existingInsumo.insumo === insumo) {
             return {
-                ...item,
-                insumos: insumoYaExiste
-                    ? insumosActualizados
-                    : [
-                          ...item.insumos,
-                          {
-                              insumo,
-                              cantidad,
-                              unidad,
-                              claveSae,
-                              descripcionInsumo,
-                              comentariosAdi,
-                              costoCotizado,
-                              proveedor: proveedorClave, // 🟢 Guarda sin espacios
-                              categoria,
-                              familia,
-                              linea,
-                          },
-                      ],
+              ...existingInsumo,
+              cantidad,
+              unidad,
+              claveSae,
+              descripcionInsumo,
+              comentariosAdi,
+              costoCotizado,
+              proveedor: proveedorClave, // 🟢 Guarda sin espacios
+              categoria,
+              familia,
+              linea,
             };
-        }
-        return item;
+          }
+          return existingInsumo;
+        });
+
+        const insumoYaExiste = item.insumos.some(
+          (existingInsumo) => existingInsumo.insumo === insumo
+        );
+
+        return {
+          ...item,
+          insumos: insumoYaExiste
+            ? insumosActualizados
+            : [
+                ...item.insumos,
+                {
+                  insumo,
+                  cantidad,
+                  unidad,
+                  claveSae,
+                  descripcionInsumo,
+                  comentariosAdi,
+                  costoCotizado,
+                  proveedor: proveedorClave, // 🟢 Guarda sin espacios
+                  categoria,
+                  familia,
+                  linea,
+                },
+              ],
+        };
+      }
+      return item;
     });
 
-    if (!updatedList.some((item) => item.noPartida === selectedPartida.noPartida)) {
-        updatedList.push({
-            noPartida: selectedPartida.noPartida,
-            insumos: [
-                {
-                    insumo,
-                    cantidad,
-                    unidad,
-                    claveSae,
-                    descripcionInsumo,
-                    comentariosAdi,
-                    costoCotizado,
-                    proveedor: proveedorClave, // 🟢 Guarda sin espacios
-                    categoria,
-                    familia,
-                    linea,
-                },
-            ],
-        });
+    if (
+      !updatedList.some((item) => item.noPartida === selectedPartida.noPartida)
+    ) {
+      updatedList.push({
+        noPartida: selectedPartida.noPartida,
+        insumos: [
+          {
+            insumo,
+            cantidad,
+            unidad,
+            claveSae,
+            descripcionInsumo,
+            comentariosAdi,
+            costoCotizado,
+            proveedor: proveedorClave, // 🟢 Guarda sin espacios
+            categoria,
+            familia,
+            linea,
+          },
+        ],
+      });
     }
 
     console.log("Lista de partidas actualizada:", updatedList);
     setListPartidas(updatedList);
     handleCloseModal();
-};
+  };
 
   useEffect(() => {
     // Filtrar las claves cuando la línea cambie
@@ -972,7 +974,7 @@ const AgregarPreCotizacion = () => {
         noPartida: "N/A",
       });
 
-      // 📝 Guardar PRE-COTIZACIÓN
+      // Guardar PRE-COTIZACIÓN
       await addDoc(precotizacioncoleccion, {
         cve_precot: selectedFolio + folioSiguiente.toString(),
         cve_clie: cve_clie,
@@ -986,7 +988,7 @@ const AgregarPreCotizacion = () => {
         fechaModificacion: formattedDate,
       });
 
-      // 🔒 Bloqueo del documento en LEVANTAMIENTO DIGITAL
+      // Bloqueo del documento en LEVANTAMIENTO DIGITAL
       await addDoc(bitacora, {
         cve_Docu: cve_levDig,
         tiempo: horaFormateada,
@@ -1064,8 +1066,14 @@ const AgregarPreCotizacion = () => {
           personal: item.personal,
           cantidadTrabajadores: parseInt(item.cantidadTrabajadores),
           diasTrabajados: item.diasTrabajados,
-          valorLider: parseInt(item.cantidadTrabajadores) * valorHombre * parseInt(item.diasTrabajados),
-          costoLider: parseInt(item.cantidadTrabajadores) * salarioDiario * parseInt(item.diasTrabajados),
+          valorLider:
+            parseInt(item.cantidadTrabajadores) *
+            valorHombre *
+            parseInt(item.diasTrabajados),
+          costoLider:
+            parseInt(item.cantidadTrabajadores) *
+            salarioDiario *
+            parseInt(item.diasTrabajados),
           salarioDiario: parseFloat(salarioDiario),
           fechaRegistro: formattedDate,
           fechaModificacion: formattedDate,
@@ -1077,7 +1085,7 @@ const AgregarPreCotizacion = () => {
     } else {
       alert("Selecciona un folio válido");
     }
-};
+  };
 
   return (
     <div className="container">
@@ -1681,26 +1689,35 @@ const AgregarPreCotizacion = () => {
                 <div className="mb-3">
                   <label>Proveedor</label>
                   <Select
-    options={proveedores.map((prov) => ({
-        value: prov.CLAVE,
-        label: prov.NOMBRE,
-    }))}    
-    value={
-        proveedor
-            ? { value: proveedor, label: proveedores.find((prov) => prov.CLAVE === proveedor)?.NOMBRE || "" }
-            : null
-    }
-    onChange={(selectedOption) => {
-        console.log("🔹 Nuevo proveedor seleccionado:", selectedOption);
-        setProveedor(selectedOption.value);
-    }}
-    placeholder="Buscar proveedor..."
-    menuPortalTarget={document.body} // Renderiza fuera del modal
-    menuPlacement="auto" // Ajusta la posición automáticamente
-    styles={{
-        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-    }}
-/>
+                    options={proveedores.map((prov) => ({
+                      value: prov.CLAVE,
+                      label: prov.NOMBRE,
+                    }))}
+                    value={
+                      proveedor
+                        ? {
+                            value: proveedor,
+                            label:
+                              proveedores.find(
+                                (prov) => prov.CLAVE === proveedor
+                              )?.NOMBRE || "",
+                          }
+                        : null
+                    }
+                    onChange={(selectedOption) => {
+                      console.log(
+                        "🔹 Nuevo proveedor seleccionado:",
+                        selectedOption
+                      );
+                      setProveedor(selectedOption.value);
+                    }}
+                    placeholder="Buscar proveedor..."
+                    menuPortalTarget={document.body} // Renderiza fuera del modal
+                    menuPlacement="auto" // Ajusta la posición automáticamente
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                    }}
+                  />
                 </div>
               </div>
             </div>
