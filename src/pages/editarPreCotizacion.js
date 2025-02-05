@@ -338,8 +338,42 @@ const handleEditInsumo = async (partida, insumoId) => {
     }
 
     const insumo = insumoDoc.data();
+    console.log("🟢 Insumo obtenido desde Firestore:", insumo);
 
-    // 🟢 Si la lista de proveedores está vacía, cargarla antes de continuar
+    // 🔄 Asignar valores al estado para mostrar en el modal
+    setSelectedPartida({ noPartida: insumo.noPartidaPC });
+    setInsumo(insumo.insumo);
+    setCantidad(insumo.cantidad);
+    setUnidad(insumo.unidad);
+    setClaveSae(insumo.claveSae);
+    setCostoCotizado(insumo.costoCotizado);
+    setComentariosAdi(insumo.comentariosAdi);
+    setDescripcionInsumo(insumo.descripcionInsumo);
+
+    // 🟢 Cargar Categoría antes de continuar
+    console.log("🔄 Cargando categorías...");
+    const responseCategorias = await axios.get("http://localhost:5000/api/lineasMaster");
+    setCategorias(responseCategorias.data);
+
+    setTimeout(() => {
+      setCategoria(insumo.categoria || "");
+    }, 200); // Pequeño delay para asegurarnos de que la categoría ya está cargada
+
+    // 🟢 Cargar familia si hay categoría
+    if (insumo.categoria) {
+      console.log("🔄 Cargando familias para la categoría:", insumo.categoria);
+      await obtenerFamilia(insumo.categoria);
+      setFamilia(insumo.familia || "");
+    }
+
+    // 🟢 Cargar líneas si hay familia
+    if (insumo.familia) {
+      console.log("🔄 Cargando líneas para la familia:", insumo.familia);
+      await obtenerLineas(insumo.familia);
+      setLinea(insumo.linea || "");
+    }
+
+    // 🟢 Asegurar que los proveedores estén cargados antes de asignar el proveedor
     let listaProveedores = [...proveedores];
     if (proveedores.length === 0) {
       console.log("🔄 Cargando proveedores antes de editar...");
@@ -350,33 +384,7 @@ const handleEditInsumo = async (partida, insumoId) => {
 
     // 🟢 Buscar el proveedor en la lista de proveedores
     const proveedorEncontrado = listaProveedores.find((prov) => prov.CLAVE === insumo.proveedor);
-
-    // 🔄 Asignar valores al estado para mostrar en el modal
-    setSelectedPartida({ noPartida: insumo.noPartidaPC });
-    setInsumo(insumo.insumo);
-    setCantidad(insumo.cantidad);
-    setUnidad(insumo.unidad);
-    setCategoria(insumo.categoria || "");
-    setFamilia(insumo.familia || "");
-    setLinea(insumo.linea || "");
-    setClaveSae(insumo.claveSae);
-    setCostoCotizado(insumo.costoCotizado);
-    setComentariosAdi(insumo.comentariosAdi);
-    setDescripcionInsumo(insumo.descripcionInsumo);
-
-    // 🟢 Cargar familia si hay categoría
-    if (insumo.categoria) {
-      console.log("🔄 Cargando familias para la categoría:", insumo.categoria);
-      await obtenerFamilia(insumo.categoria);
-    }
-
-    // 🟢 Cargar líneas si hay familia
-    if (insumo.familia) {
-      console.log("🔄 Cargando líneas para la familia:", insumo.familia);
-      await obtenerLineas(insumo.familia);
-    }
-
-    // 🟢 Establecer el proveedor después de cargarlo
+    
     setTimeout(() => {
       setProveedor(proveedorEncontrado ? proveedorEncontrado.CLAVE : "");
     }, 200);
@@ -390,34 +398,65 @@ const handleEditInsumo = async (partida, insumoId) => {
     console.error("⚠️ Error al obtener el insumo:", error);
   }
 };
-  const handleSaveManoObra = () => {
-    const nuevoRegistro = {
-      noPartidaMO: noPartidaMO,
-      personal:
-        typeof selectedTrabajador === "object"
-          ? selectedTrabajador.nombre
-          : selectedTrabajador,
-      cantidadTrabajadores: parseInt(cantidadTrabajadores, 10),
-      diasTrabajados: parseInt(diasTrabajados, 10),
-    };
+const handleSaveManoObra = async () => {
+  if (!noPartidaMO || !selectedTrabajador || !cantidadTrabajadores || !diasTrabajados) {
+      alert("⚠️ Faltan datos para completar la operación.");
+      return;
+  }
 
-    let updatedListMano;
+  try {
+      const today = new Date();
+      const ahora = new Date();
+      const hora = ahora.getHours();
+      const minuto = ahora.getMinutes();
+      const segundo = ahora.getSeconds();
+      const formattedDate = today.toLocaleDateString(); // Formatea la fecha
+      const horaFormateada = `${hora}:${minuto}:${segundo}`;
 
-    if (editIndex !== null) {
-      // Modo edición: Actualiza el registro existente
-      updatedListMano = listMano.map((item, index) =>
-        index === editIndex ? { ...item, ...nuevoRegistro } : item
-      );
-    } else {
-      // Modo creación: Agrega un nuevo registro
-      updatedListMano = [...listMano, nuevoRegistro];
-    }
+      // 🟢 Crear objeto con los datos de la partida de mano de obra
+      const manoObraData = {
+          cve_precot: cve_precot,
+          noPartidaMO: noPartidaMO,
+          personal:
+              typeof selectedTrabajador === "object"
+                  ? selectedTrabajador.nombre
+                  : selectedTrabajador,
+          cantidadTrabajadores: parseInt(cantidadTrabajadores, 10),
+          diasTrabajados: parseInt(diasTrabajados, 10),
+          estatus: "Activa",
+          fechaRegistro: formattedDate,
+          fechaModificacion: formattedDate,
+      };
 
-    // Actualiza el estado
-    setListMano(updatedListMano);
-    setEditIndex(null); // Resetea el índice de edición
-    setShowAddModalMO(false); // Cierra el modal
-  };
+      if (editIndex) {
+          // 🟢 Si estamos en modo edición, actualizar la partida en Firestore
+          const partidaRef = doc(db, "PAR_PRECOTIZACION_MO", editIndex);
+          await updateDoc(partidaRef, manoObraData);
+          console.log("✅ Partida de mano de obra actualizada correctamente en Firestore");
+      } else {
+          // 🟢 Si no hay `editIndex`, agregar una nueva partida en Firestore
+          await addDoc(parPrecotizacionMO, manoObraData);
+          console.log("✅ Partida de mano de obra agregada correctamente en Firestore");
+      }
+
+      // 🟢 Registrar la operación en la bitácora
+      const bitacora = collection(db, "BITACORA");
+      await addDoc(bitacora, {
+          cve_Docu: cve_precot,
+          tiempo: horaFormateada,
+          fechaRegistro: formattedDate,
+          tipoDocumento: editIndex ? "Edición de partida MO" : "Registro de partidas MO",
+          noPartida: noPartidaMO,
+      });
+
+      // 🔄 Resetear los valores después de guardar
+      setEditIndex(null);
+      setShowAddModalMO(false);
+      window.location.reload(); // Recargar para reflejar cambios
+  } catch (error) {
+      console.error("⚠️ Error al guardar la partida de mano de obra:", error);
+  }
+};
   /* --------------------- JALAR INFORMACIÓN DE PARTIDAS ANTERIORES ------------------------------------- */
   const getParPreCot = async () => {
     try {
@@ -749,42 +788,39 @@ const handleEditInsumo = async (partida, insumoId) => {
       alert("Debes ingresar los días trabajados");
     }
   };
-  const EditPartidaMO = (indexMO) => {
-    if (!listMO || listMO.length === 0) {
-      console.error(
-        "❌ Error: La lista de mano de obra está vacía o no definida."
-      );
-      return;
+  const EditPartidaMO = async (partidaId) => {
+    console.log("🟢 Editando partida de mano de obra, ID:", partidaId);
+  
+    try {
+        // 🔄 Obtener la partida desde Firestore
+        const partidaDoc = await getDoc(doc(db, "PAR_PRECOTIZACION_MO", partidaId));
+  
+        if (!partidaDoc.exists()) {
+            console.error("❌ Error: No se encontró la partida en Firestore.");
+            return;
+        }
+  
+        const partida = partidaDoc.data();
+        console.log("✅ Partida obtenida desde Firestore:", partida);
+  
+        // 🟢 Asignar valores a los estados para mostrar en el modal
+        setNoParatidaMO(partida.noPartidaMO || "");
+        setSelectedTrabajador(partida.personal || "");
+        setCantidadTrabajadores(partida.cantidadTrabajadores || 0);
+        setDiasTrabajados(partida.diasTrabajados || 0);
+        setNoPartida(partida.noPartidaMO || "");
+        setDescripcion(partida.personal || "");
+        setObservacion(partida.diasTrabajados || "");
+  
+        // 🟢 Guardar el ID de la partida en `editIndex` para saber que estamos editando
+        setEditIndex(partidaId);
+  
+        // 🔄 Mostrar el modal de edición
+        setShowAddModalMO(true);
+    } catch (error) {
+        console.error("⚠️ Error al obtener la partida de mano de obra:", error);
     }
-
-    if (indexMO < 0 || indexMO >= listMO.length) {
-      console.error("❌ Error: Índice fuera de rango.");
-      return;
-    }
-
-    const partidaEditada = listMO[indexMO];
-    console.log("✅ Partida encontrada para editar:", partidaEditada);
-
-    if (!partidaEditada) {
-      console.error("❌ Error: No se encontró la partida.");
-      return;
-    }
-
-    // Asignar valores a los estados
-    setNoParatidaMO(partidaEditada.noPartidaMO || ""); // Previene undefined
-    setSelectedTrabajador(partidaEditada.personal || "");
-    setCantidadTrabajadores(partidaEditada.cantidadTrabajadores || 0);
-    setDiasTrabajados(partidaEditada.diasTrabajados || 0);
-    setNoPartida(partidaEditada.noPartidaMO || "");
-    setDescripcion(partidaEditada.personal || "");
-    setObservacion(partidaEditada.diasTrabajados || "");
-
-    // Establece el índice de edición
-    setEditIndex(indexMO);
-
-    // Abre el modal de edición
-    setShowAddModalMO(true);
-  };
+  };  
   const DeletePartidaMO = (index) => {
     const updatedList = [...listMO];
     updatedList.splice(index, 1);
@@ -1137,7 +1173,7 @@ const handleEditInsumo = async (partida, insumoId) => {
                       <td>
                         <button
                           className="btn btn-primary"
-                          onClick={() => EditPartidaMO(indexMO)}
+                          onClick={() => EditPartidaMO(itemMO.id)}
                         >
                           <FaPencilAlt />
                         </button>
