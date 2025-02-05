@@ -27,6 +27,7 @@ import axios from "axios";
 import Select from "react-select";
 
 const AgregarPreCotizacion = () => {
+  const [partida_levDi, setPartida_levDig] = useState("");
   const [showAgregar, setShowAgregar] = useState(false);
   const [cve_levDig, setCve_levDig] = useState("");
   const [folios, setFolios] = useState([]);
@@ -307,7 +308,7 @@ const AgregarPreCotizacion = () => {
     }
   };
   /* -------------------------------------------------------------------------------------------------------------------------------- */
-  const agregarPartidaAdicional = async (e) => {
+  /*const agregarPartidaAdicional = async (e) => {
     e.preventDefault();
     if (folioSiguiente != 0) {
       const bitacora = collection(db, "BITACORA");
@@ -337,7 +338,58 @@ const AgregarPreCotizacion = () => {
     } else {
       alert("Antes debes seleccionar el folio de Pre-cotización ");
     }
-  };
+  };*/
+  const agregarPartidaAdicional = async (e) => {
+    e.preventDefault();
+    if (folioSiguiente !== 0) {
+        try {
+            const bitacora = collection(db, "BITACORA");
+            const today = new Date();
+            const ahora = new Date();
+            const hora = ahora.getHours();
+            const minuto = ahora.getMinutes();
+            const segundo = ahora.getSeconds();
+            const formattedDate = today.toLocaleDateString(); // Formatear fecha
+            const horaFormateada = `${hora}:${minuto}:${segundo}`;
+
+            // 🟢 Registrar en la bitácora
+            await addDoc(bitacora, {
+                cve_Docu: cve_levDig,
+                tiempo: horaFormateada,
+                fechaRegistro: formattedDate,
+                tipoDocumento: "Registro de partidas",
+                noPartida: noPartida,
+            });
+
+            // 🟢 Agregar la nueva partida a Firestore
+            const nuevaPartida = {
+                cve_levDig: cve_levDig,
+                noPartida: noPartida,
+                cantidad: cantidadPartida,
+                descripcion: descripcion,
+                observacion: observacion,
+                estatusPartida: "Activa",
+            };
+
+            const docRef = await addDoc(partida_levDig, nuevaPartida);
+            console.log("✅ Nueva partida agregada con ID:", docRef.id);
+
+            // 🔄 Actualizar el estado local sin recargar la página
+            setPartida_levDig((prevPartidas) => [...prevPartidas, { id: docRef.id, ...nuevaPartida }]);
+
+            // 🟢 Resetear los valores del formulario
+            setCantidadPartida("");
+            setDescripcion("");
+            setObservacion("");
+
+        } catch (error) {
+            console.error("⚠️ Error al agregar la partida:", error);
+        }
+    } else {
+        alert("Antes debes seleccionar el folio de Pre-cotización");
+    }
+};
+
   /* ----------------------------------------- OBTENER PARTDIAS DE INSUMOS PARA LA PRECOTIZACIÓN -------------------------*/
 
   const getParPreCotizacion = async () => {

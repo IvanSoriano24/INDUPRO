@@ -57,7 +57,7 @@ const [isAuthenticated, setIsAuthenticated] = useState(
             style={{ textDecoration: "none", border: "none", background: "transparent" }}
           >
             <ul className="list-unstyled ps-3">
-            {(userRole === "ADMINISTRADOR" || userRole === "LIDER" || userRole === "VENTAS" || userRole === "COMPRAS") && (
+            {(userRole === "ADMINISTRADOR" || userRole === "LIDER" || userRole === "COMPRAS") && ( // || userRole === "VENTAS"
               <li>
                 <NavLink
                   exact="true"
