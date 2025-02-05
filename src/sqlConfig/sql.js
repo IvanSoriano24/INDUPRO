@@ -51,9 +51,6 @@ app.get('/api/proveedores', async (req, res) => {
             return res.status(404).json({ message: "No hay proveedores activos." });
         }
 
-        // Log para depuración
-        console.log("Proveedores obtenidos:", result.recordset);
-
         // Enviar la respuesta
         res.json(result.recordset);
     } catch (err) {
@@ -67,13 +64,18 @@ app.get('/api/lineasMaster', async (req, res) => {
     try {
         const pool = await sql.connect(config);
         const result = await pool.request()
-            .query('SELECT CVE_LIN, DESC_LIN FROM CLIN01');
-        
-        // Crear un objeto único basado en los primeros dos dígitos y asociar la descripción
+            .query("SELECT CVE_LIN, DESC_LIN, CUENTA_COI FROM CLIN01 WHERE CUENTA_COI IS NOT NULL");
+
+        // Crear lista única de unidades con descripción
         const unidades = result.recordset.reduce((acc, linea) => {
-            const unidad = linea.CVE_LIN.slice(0, 2);
-            if (!acc.some(item => item.unidad === unidad)) {
-                acc.push({ unidad, descripcion: linea.DESC_LIN });
+            if (linea.CUENTA_COI) {
+                // Extraer los primeros dos segmentos de CUENTA_COI (Ejemplo: "12" de "12.01.01")
+                const cuenta = linea.CUENTA_COI.split('.')[0]; 
+
+                // Agregar solo si no existe en la lista
+                if (!acc.some(item => item.cuenta === cuenta)) {
+                    acc.push({ cuenta, descripcion: linea.DESC_LIN });
+                }
             }
             return acc;
         }, []);
@@ -81,7 +83,7 @@ app.get('/api/lineasMaster', async (req, res) => {
         res.json(unidades); // Enviar unidades con descripciones
     } catch (err) {
         console.error('Error al ejecutar la consulta de líneas:', err);
-        res.status(500).json({ error: 'Error al obtener las líneas de la base de datos', details: err });
+        res.status(500).json({ error: 'Error al obtener las líneas de la base de datos', details: err.message });
     }
 });
 /*app.get('/api/lineasMaster', async (req, res) => {
@@ -110,15 +112,16 @@ app.get('/api/categorias/:unidad', async (req, res) => {
         const { unidad } = req.params; // Obtener el primer par (unidad) de los parámetros
         const pool = await sql.connect(config);
 
-        // Query para obtener categorías (segundo par) relacionadas con la unidad
+        // Query para obtener solo el segundo nivel (00.00) de la estructura CUENTA_COI (00.00.00)
         const result = await pool.request()
-            .input('unidad', sql.VarChar, unidad)
-            .query(`SELECT CVE_LIN, DESC_LIN 
+            .input('unidad', sql.VarChar, unidad + '.%') // Filtra con LIKE basado en unidad
+            .query(`SELECT CVE_LIN, DESC_LIN, CUENTA_COI 
                     FROM CLIN01 
-                    WHERE CVE_LIN LIKE @unidad + '.%' 
-                    AND CHARINDEX('.', CVE_LIN) > 0`);
+                    WHERE CUENTA_COI LIKE @unidad 
+                    AND CHARINDEX('.', CUENTA_COI) > 0 
+                    AND LEN(CUENTA_COI) - LEN(REPLACE(CUENTA_COI, '.', '')) = 1`); // Solo incluir 1 punto (nivel 2)
 
-        res.json(result.recordset); // Enviar las categorías al cliente
+        res.json(result.recordset); // Enviar las categorías filtradas
     } catch (err) {
         console.error('Error al obtener las categorías:', err);
         res.status(500).json({ error: 'Error al obtener las categorías', details: err });
@@ -126,16 +129,15 @@ app.get('/api/categorias/:unidad', async (req, res) => {
 });
 app.get('/api/lineas/:categoria', async (req, res) => {
     const { categoria } = req.params;
-    console.log("Categoría recibida:", categoria); // Log para verificar el parámetro recibido
+
     try {
         const pool = await sql.connect(config);
         const result = await pool.request()
-            .input('categoria', sql.VarChar, `${categoria}%`)
-            .query(`SELECT CVE_LIN, DESC_LIN 
+            .input('categoria', sql.VarChar, `${categoria}.%`) // Filtra con LIKE basado en la categoría
+            .query(`SELECT CVE_LIN, DESC_LIN, CUENTA_COI 
                     FROM CLIN01 
-                    WHERE CVE_LIN LIKE @categoria 
-                    AND CHARINDEX('.', CVE_LIN) > 0`);
-        console.log("Líneas obtenidas:", result.recordset); // Verifica el resultado de la consulta
+                    WHERE CUENTA_COI LIKE @categoria 
+                    AND LEN(CUENTA_COI) - LEN(REPLACE(CUENTA_COI, '.', '')) = 2`); // Solo traer tercer nivel
         res.json(result.recordset);
     } catch (err) {
         console.error("Error al obtener las líneas:", err);

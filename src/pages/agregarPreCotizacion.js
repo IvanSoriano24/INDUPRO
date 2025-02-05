@@ -60,6 +60,9 @@ const AgregarPreCotizacion = () => {
   const [lineas, setLineas] = useState([]); // Lista de líneas disponibles
   const [categorias, setCategorias] = useState([]);
   const [categoria, setCategoria] = useState("");
+  const [familia, setFamilia] = useState("");
+  const [familias, setFamilias] = useState([]);
+  const [subLinea, setSubLinea] = useState("");
 
   const [idPartida, setIdPartida] = useState("");
 
@@ -270,7 +273,7 @@ const AgregarPreCotizacion = () => {
     }
   };
 
-  useEffect(() => {
+  /*useEffect(() => {
     const cargarManoObra = async () => {
       const manoObraList = await obtenerTrabajadores();
       //console.log(manoObraList)
@@ -278,7 +281,15 @@ const AgregarPreCotizacion = () => {
     };
 
     cargarManoObra();
-  }, [manoObra]);
+  }, [manoObra]);*/
+  useEffect(() => {
+    const cargarManoObra = async () => {
+      const manoObraList = await obtenerTrabajadores();
+      setManoObra(manoObraList);
+    };
+    cargarManoObra();
+  }, []); // Eliminamos manoObra de las dependencias para evitar recargas innecesarias
+  
 
   /* ------------------------------------ - ENCONTRAR MANO DE OBRA POR PARTIDA -------------------------------*/
 
@@ -525,7 +536,7 @@ const AgregarPreCotizacion = () => {
       const responseUnidades = await axios.get(
         "http://localhost:5000/api/lineasMaster"
       );
-      setUnidades(responseUnidades.data); // Guardar las unidades con descripciones
+      setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
       console.log("Unidades obtenidas:", responseUnidades.data);
 
       const responseProvedores = await axios.get(
@@ -561,30 +572,43 @@ const AgregarPreCotizacion = () => {
     setUnidad("servicio");
   };
   const handleEditInsumo = (partida, insumo) => {
-    console.log("Partida seleccionada:", partida);
-    console.log("Insumo seleccionado:", insumo);
+    console.log("🟢 Editando partida:", partida);
+    console.log("🟢 Editando insumo:", insumo);
+    console.log("Proveedor recibido:", `"${insumo.proveedor}"`); // ✅ Verifica los espacios
 
     setInsumo(insumo.insumo);
     setCantidad(insumo.cantidad);
     setUnidad(insumo.unidad);
     setCategoria(insumo.categoria);
+    setFamilia(insumo.familia);
     setLinea(insumo.linea);
     setClaveSae(insumo.claveSae);
     setCostoCotizado(insumo.costoCotizado);
     setComentariosAdi(insumo.comentariosAdi);
     setDescripcionInsumo(insumo.descripcionInsumo);
 
-    // Asegurar que el proveedor seleccionado coincide con la lista
+    // 🟢 Buscar proveedor eliminando espacios en blanco de ambos lados
     const proveedorEncontrado = proveedores.find(
-      (prov) => prov.CLAVE === insumo.proveedor
+        (prov) => prov.CLAVE.trim() === insumo.proveedor.trim()
     );
+
+    console.log("🟢 Proveedor encontrado:", proveedorEncontrado);
+
     setProveedor(proveedorEncontrado ? proveedorEncontrado.CLAVE : "");
 
-    // Asigna la partida seleccionada
-    setSelectedPartida({ noPartida: partida });
+    // 🟢 Cargar familia si hay categoría
+    if (insumo.categoria) {
+        obtenerFamilia(insumo.categoria);
+    }
 
+    // 🟢 Cargar línea si hay familia
+    if (insumo.familia) {
+        obtenerLineas(insumo.familia);
+    }
+
+    setSelectedPartida({ noPartida: partida });
     setShowAddModal(true);
-  };
+};
   const handleSaveManoObra = () => {
     const nuevoRegistro = {
       noPartidaMO: noPartidaMO,
@@ -615,90 +639,92 @@ const AgregarPreCotizacion = () => {
   };
   const guardarPartida = () => {
     if (!selectedPartida || !insumo || !cantidad || !unidad || !claveSae) {
-      alert("Faltan datos para completar la operación.");
-      return;
+        alert("Faltan datos para completar la operación.");
+        return;
     }
 
-    // Actualizar lista de partidas
+    // 🟢 Normaliza el proveedor eliminando espacios en blanco
+    const proveedorNormalizado = proveedor ? proveedor.trim() : "";
+    const proveedorClave =
+        proveedores.find((prov) => prov.CLAVE.trim() === proveedorNormalizado)?.CLAVE || "";
+
+    console.log("🔍 Guardando partida con proveedor:", proveedorClave);
+
     const updatedList = listPartidas.map((item) => {
-      if (item.noPartida === selectedPartida.noPartida) {
-        // Si es la partida seleccionada
-        const insumosActualizados = item.insumos.map((existingInsumo) => {
-          if (existingInsumo.insumo === insumo) {
-            // Actualiza el insumo existente
+        if (item.noPartida === selectedPartida.noPartida) {
+            const insumosActualizados = item.insumos.map((existingInsumo) => {
+                if (existingInsumo.insumo === insumo) {
+                    return {
+                        ...existingInsumo,
+                        cantidad,
+                        unidad,
+                        claveSae,
+                        descripcionInsumo,
+                        comentariosAdi,
+                        costoCotizado,
+                        proveedor: proveedorClave, // 🟢 Guarda sin espacios
+                        categoria,
+                        familia,
+                        linea,
+                    };
+                }
+                return existingInsumo;
+            });
+
+            const insumoYaExiste = item.insumos.some(
+                (existingInsumo) => existingInsumo.insumo === insumo
+            );
+
             return {
-              ...existingInsumo,
-              cantidad,
-              unidad,
-              claveSae,
-              descripcionInsumo,
-              comentariosAdi,
-              costoCotizado,
-              proveedor, // Ahora proveedor es el CLAVE, no el nombre
-              categoria,
-              linea,
+                ...item,
+                insumos: insumoYaExiste
+                    ? insumosActualizados
+                    : [
+                          ...item.insumos,
+                          {
+                              insumo,
+                              cantidad,
+                              unidad,
+                              claveSae,
+                              descripcionInsumo,
+                              comentariosAdi,
+                              costoCotizado,
+                              proveedor: proveedorClave, // 🟢 Guarda sin espacios
+                              categoria,
+                              familia,
+                              linea,
+                          },
+                      ],
             };
-          }
-          return existingInsumo; // Mantén los insumos no editados
-        });
-
-        // Verifica si el insumo es nuevo
-        const insumoYaExiste = item.insumos.some(
-          (existingInsumo) => existingInsumo.insumo === insumo
-        );
-
-        return {
-          ...item,
-          insumos: insumoYaExiste
-            ? insumosActualizados // Actualiza si ya existe
-            : [
-                ...item.insumos,
-                {
-                  insumo,
-                  cantidad,
-                  unidad,
-                  claveSae,
-                  descripcionInsumo,
-                  comentariosAdi,
-                  costoCotizado,
-                  proveedor, // Guarda solo el CLAVE del proveedor
-                  categoria,
-                  linea,
-                },
-              ], // Agrega un nuevo insumo
-        };
-      }
-      return item; // Mantén las partidas que no se están editando
+        }
+        return item;
     });
 
-    // Si no se encontró la partida, agrega una nueva
-    if (
-      !updatedList.some((item) => item.noPartida === selectedPartida.noPartida)
-    ) {
-      updatedList.push({
-        noPartida: selectedPartida.noPartida,
-        insumos: [
-          {
-            insumo,
-            cantidad,
-            unidad,
-            claveSae,
-            descripcionInsumo,
-            comentariosAdi,
-            costoCotizado,
-            proveedor, // Solo CLAVE, no nombre
-            categoria,
-            linea,
-          },
-        ],
-      });
+    if (!updatedList.some((item) => item.noPartida === selectedPartida.noPartida)) {
+        updatedList.push({
+            noPartida: selectedPartida.noPartida,
+            insumos: [
+                {
+                    insumo,
+                    cantidad,
+                    unidad,
+                    claveSae,
+                    descripcionInsumo,
+                    comentariosAdi,
+                    costoCotizado,
+                    proveedor: proveedorClave, // 🟢 Guarda sin espacios
+                    categoria,
+                    familia,
+                    linea,
+                },
+            ],
+        });
     }
 
     console.log("Lista de partidas actualizada:", updatedList);
-
-    setListPartidas(updatedList); // Actualiza el estado con la lista modificada
-    handleCloseModal(); // Cierra el modal
-  };
+    setListPartidas(updatedList);
+    handleCloseModal();
+};
 
   useEffect(() => {
     // Filtrar las claves cuando la línea cambie
@@ -743,31 +769,32 @@ const AgregarPreCotizacion = () => {
   /*const lineasFiltradas = lineas.filter(linea =>
     linea.tipoLinea === unidad // Compara el tipoLinea con el tipoUnidad seleccionado
   );*/
-  const obtenerCategorias = async (unidadSeleccionada) => {
+  const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/categorias/${unidadSeleccionada}`
+        `http://localhost:5000/api/categorias/${categoriaSeleccionada}`
       );
-      setCategorias(response.data); // Guardar las categorías filtradas en el estado
-      console.log("Categorías filtradas obtenidas:", response.data);
+      setFamilias(response.data); // Guarda las familias filtradas en el estado
+      console.log("Familias filtradas obtenidas:", response.data);
     } catch (error) {
-      console.error("Error al obtener las categorías:", error);
+      console.error("Error al obtener las familias:", error);
     }
   };
-  const handleUnidadChange = (e) => {
-    const unidadSeleccionada = e.target.value;
-    setUnidad(unidadSeleccionada); // Actualiza la unidad seleccionada
-    if (unidadSeleccionada) {
-      obtenerCategorias(unidadSeleccionada); // Cargar categorías
+  const handleCategoriaChange = (e) => {
+    const categoriaSeleccionada = e.target.value;
+    setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
+
+    if (categoriaSeleccionada) {
+      obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
     } else {
-      setCategorias([]); // Limpiar categorías si no hay unidad seleccionada
+      setFamilia([]); // Limpia la familia si no hay categoría seleccionada
     }
   };
-  const obtenerLineas = async (categoriaSeleccionada) => {
-    console.log("Obteniendo líneas para la categoría:", categoriaSeleccionada); // Verifica la entrada
+  const obtenerLineas = async (familiaSeleccionada) => {
+    console.log("Obteniendo líneas para la familia:", familiaSeleccionada); // Verifica la entrada
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/lineas/${categoriaSeleccionada}`
+        `http://localhost:5000/api/lineas/${familiaSeleccionada}`
       );
       setLineas(response.data); // Guardar las líneas en el estado
       console.log("Líneas filtradas obtenidas:", response.data); // Verifica la respuesta
@@ -775,15 +802,17 @@ const AgregarPreCotizacion = () => {
       console.error("Error al obtener las líneas:", error);
     }
   };
-  const handleCategoriaChange = (e) => {
-    const categoriaSeleccionada = e.target.value;
-    setCategoria(categoriaSeleccionada); // Actualiza la categoría seleccionada
-    if (categoriaSeleccionada) {
-      obtenerLineas(categoriaSeleccionada); // Obtén las líneas asociadas
+  const handleFamiliaChange = (e) => {
+    const familiaSeleccionada = e.target.value;
+    setFamilia(familiaSeleccionada); // Guarda la familia seleccionada
+
+    if (familiaSeleccionada) {
+      obtenerLineas(familiaSeleccionada); // Llama a la API para obtener líneas
     } else {
-      setLineas([]); // Limpia las líneas si no hay categoría seleccionada
+      setLineas([]); // Limpia las líneas si no hay familia seleccionada
     }
   };
+
   /* Modales */
   const handleDelete = async (noPartida, cve_levDig) => {
     try {
@@ -904,37 +933,37 @@ const AgregarPreCotizacion = () => {
   /* --------------------------------------------------- - AGREGAR NUEVO DOCUMENTO --------------------------------------------------*/
   const addPreCotizacion = async (e) => {
     e.preventDefault();
+
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
     );
+
     if (!folioSnapshot.empty) {
-      // Tomar el primer documento encontrado (suponiendo que hay uno)
       const folioDoc = folioSnapshot.docs[0];
-      // Obtener el id del documento
       const folioId = folioDoc.id;
-      // Obtener el valor actual de folioSiguiente
       const folioData = folioDoc.data();
       const folioSiguienteActual = folioData.folioSiguiente;
-      // Incrementar el valor de "folioSiguiente"
       const nuevoFolioSiguiente = folioSiguienteActual + 1;
-      // Actualizar el documento en la colección FOLIOS
+
       await updateDoc(doc(db, "FOLIOS", folioId), {
         folioSiguiente: nuevoFolioSiguiente,
       });
     } else {
       console.log("No se encontró el documento en la colección FOLIOS.");
+      return;
     }
-    if (folioSiguiente != 0) {
-      /* ******************************************* AGREGAR A BITACORA DE DOCUMENTO DE PRE COTIZACIÓN ******************************************* */
+
+    if (folioSiguiente !== 0) {
       const bitacora = collection(db, "BITACORA");
       const today = new Date();
       const ahora = new Date();
       const hora = ahora.getHours();
       const minuto = ahora.getMinutes();
       const segundo = ahora.getSeconds();
-      const formattedDate = today.toLocaleDateString(); // Opcional: Puedes pasar opciones de formato
+      const formattedDate = today.toLocaleDateString();
       const horaFormateada = `${hora}:${minuto}:${segundo}`;
+
       await addDoc(bitacora, {
         cve_Docu: selectedFolio + folioSiguiente.toString(),
         tiempo: horaFormateada,
@@ -942,7 +971,8 @@ const AgregarPreCotizacion = () => {
         tipoDocumento: "Registro",
         noPartida: "N/A",
       });
-      /* ******************************************* AGREGAR DOCUMENTO DE PRE COTIZACIÓN ******************************************* */
+
+      // 📝 Guardar PRE-COTIZACIÓN
       await addDoc(precotizacioncoleccion, {
         cve_precot: selectedFolio + folioSiguiente.toString(),
         cve_clie: cve_clie,
@@ -955,7 +985,8 @@ const AgregarPreCotizacion = () => {
         fechaRegistro: formattedDate,
         fechaModificacion: formattedDate,
       });
-      /* ******************************************* AGREGAR A BITACORA EL BLOQUEO DEL DOCUMENTO DE LEV DIG ******************************************* */
+
+      // 🔒 Bloqueo del documento en LEVANTAMIENTO DIGITAL
       await addDoc(bitacora, {
         cve_Docu: cve_levDig,
         tiempo: horaFormateada,
@@ -963,17 +994,17 @@ const AgregarPreCotizacion = () => {
         tipoDocumento: "Bloqueo de documento",
         noPartida: "N/A",
       });
+
       const statusLevDig = "Bloqueado";
       const preCotizacionRef = doc(db, "LEVDIGITAL", id);
-      const datos = {
+      await updateDoc(preCotizacionRef, {
         estatus: statusLevDig,
         docSig: selectedFolio + folioSiguiente.toString(),
         fechaModificacion: formattedDate,
-      };
-      await updateDoc(preCotizacionRef, datos);
+      });
 
-      /* ******************************************* AGREGAR PARTIDAS DE LEVANTAMIENTO DIGITAL ******************************************* */
-      par_levDigital.forEach(async (itemLD) => {
+      // 📌 **Guardar PARTIDAS de Levantamiento Digital**
+      for (const itemLD of par_levDigital) {
         await addDoc(parPrecotizacion, {
           cve_precot: selectedFolio + folioSiguiente.toString(),
           noPartida: itemLD.noPartida,
@@ -984,37 +1015,38 @@ const AgregarPreCotizacion = () => {
           estatus: "Activo",
           fechaModificacion: formattedDate,
         });
-      });
+      }
 
-      /* ******************************************* AGREGAR PARTIDAS DE INSUMO ******************************************* */
-      listInsumos.forEach(async (itemINSU) => {
-        await addDoc(bitacora, {
-          cve_Docu: selectedFolio + folioSiguiente.toString(),
-          tiempo: horaFormateada,
-          fechaRegistro: formattedDate,
-          tipoDocumento: "Registro de partida",
-          noPartida: "N/A",
-        });
-        //const factorSeleccionado = await obtenerFactorPorNombre(itemINSU.insumo)
-        //const { costoFijo, factoraje, fianzas, utilidad } = factorSeleccionado;
-        //alert("Valor de costo fijo: " + costoFijo  + " Y valor de factoraje: " + factoraje + " Y valor de fianzas: " + fianzas)
-        await addDoc(parPrecotizacionInsumos, {
-          cve_precot: selectedFolio + folioSiguiente.toString(),
-          noPartidaPC: parseInt(itemINSU.noPartidaPC),
-          docAnteriorPPC: cve_levDig,
-          insumo: itemINSU.insumo,
-          proveedor: itemINSU.proveedor,
-          descripcionInsumo: itemINSU.descripcionInsumo,
-          comentariosAdi: itemINSU.comentariosAdi,
-          unidad: itemINSU.unidad,
-          costoCotizado: itemINSU.costoCotizado,
-          cantidad: itemINSU.cantidad,
-          total: itemINSU.costoCotizado * itemINSU.cantidad,
-          estatus: "Activo",
-        });
-      });
-      /* ******************************************* AGREGAR PARTIDAS DE MANO DE OBRA ******************************************* */
-      manoObra.forEach(async (item) => {
+      // 📌 **Guardar PARTIDAS de INSUMOS (listPartidas)**
+      for (const item of listPartidas) {
+        for (const insumo of item.insumos) {
+          await addDoc(bitacora, {
+            cve_Docu: selectedFolio + folioSiguiente.toString(),
+            tiempo: horaFormateada,
+            fechaRegistro: formattedDate,
+            tipoDocumento: "Registro de partida",
+            noPartida: "N/A",
+          });
+
+          await addDoc(parPrecotizacionInsumos, {
+            cve_precot: selectedFolio + folioSiguiente.toString(),
+            noPartidaPC: parseInt(item.noPartida),
+            docAnteriorPPC: cve_levDig,
+            insumo: insumo.insumo,
+            proveedor: insumo.proveedor, // Ahora guarda la CLAVE con espacios
+            descripcionInsumo: insumo.descripcionInsumo,
+            comentariosAdi: insumo.comentariosAdi,
+            unidad: insumo.unidad,
+            costoCotizado: insumo.costoCotizado,
+            cantidad: insumo.cantidad,
+            total: insumo.costoCotizado * insumo.cantidad,
+            estatus: "Activo",
+          });
+        }
+      }
+
+      // 📌 **Guardar PARTIDAS de MANO DE OBRA (listMano)**
+      for (const item of listMano) {
         const personalSeleccionado = await obtenerMOPorNombre(item.personal);
         const { valorHombre, salarioDiario } = personalSeleccionado;
 
@@ -1025,31 +1057,27 @@ const AgregarPreCotizacion = () => {
           tipoDocumento: "Registro de partida",
           noPartida: item.noPartidaMO,
         });
+
         await addDoc(parPrecotizacionMO, {
           cve_precot: selectedFolio + folioSiguiente.toString(),
-          noPartidaMO: parseInt(item.noPartidaMO), // Convertir a número entero
+          noPartidaMO: parseInt(item.noPartidaMO),
           personal: item.personal,
-          cantidadTrabajadores: parseInt(item.cantidadTrabajadores), // Convertir a número entero
+          cantidadTrabajadores: parseInt(item.cantidadTrabajadores),
           diasTrabajados: item.diasTrabajados,
-          valorLider:
-            parseInt(item.cantidadTrabajadores) *
-            valorHombre *
-            parseInt(item.diasTrabajados), // Convertir a número entero
-          costoLider:
-            parseInt(item.cantidadTrabajadores) *
-            salarioDiario *
-            parseInt(item.diasTrabajados), // Convertir a número entero
-          salarioDiario: parseFloat(salarioDiario), // Convertir a número de punto flotante
+          valorLider: parseInt(item.cantidadTrabajadores) * valorHombre * parseInt(item.diasTrabajados),
+          costoLider: parseInt(item.cantidadTrabajadores) * salarioDiario * parseInt(item.diasTrabajados),
+          salarioDiario: parseFloat(salarioDiario),
           fechaRegistro: formattedDate,
           fechaModificacion: formattedDate,
           estatus: "Activo",
         });
-      });
+      }
+
       navigate("/levantamientoDigital");
     } else {
-      alert("Selecciona un folio valido");
+      alert("Selecciona un folio válido");
     }
-  };
+};
 
   return (
     <div className="container">
@@ -1349,9 +1377,15 @@ const AgregarPreCotizacion = () => {
                 {listPartidas.map((item, index) => (
                   <React.Fragment key={index}>
                     {item.insumos.map((insumo, subIndex) => {
-                      // Buscar la unidad en la lista de unidades
+                      // 🔄 Buscar la unidad en la lista de unidades
                       const unidadEncontrada = unidades.find(
-                        (u) => u.unidad === insumo.unidad
+                        (u) =>
+                          String(u.unidad || "")
+                            .trim()
+                            .toLowerCase() ===
+                          String(insumo.unidad || "")
+                            .trim()
+                            .toLowerCase()
                       );
 
                       return (
@@ -1363,11 +1397,11 @@ const AgregarPreCotizacion = () => {
                           )}
                           <td>{insumo.insumo}</td>
                           <td>{insumo.cantidad}</td>
-                          {/* Mostrar el nombre de la unidad en lugar del número */}
+                          {/* 🔄 Muestra el nombre de la unidad o "Sin definir" si no existe */}
                           <td>
                             {unidadEncontrada
                               ? unidadEncontrada.descripcion
-                              : "Desconocida"}
+                              : insumo.unidad || "Sin definir"}
                           </td>
                           <td>{insumo.claveSae}</td>
                           <td>
@@ -1561,15 +1595,13 @@ const AgregarPreCotizacion = () => {
                 <label>Unidad</label>
                 <select
                   className="form-control"
-                  value={unidad} // Estado de la unidad seleccionada
-                  onChange={handleUnidadChange} // Llama a la función al cambiar la unidad
+                  value={unidad}
+                  onChange={(e) => setUnidad(e.target.value)}
                 >
                   <option value="">Seleccionar...</option>
-                  {unidades.map((unidad, index) => (
-                    <option key={index} value={unidad.unidad}>
-                      {unidad.unidad} - {unidad.descripcion}
-                    </option>
-                  ))}
+                  <option value="Kg">Kg</option>
+                  <option value="Toneladas">Toneladas</option>
+                  <option value="Servicios">Servicios</option>
                 </select>
               </div>
             </div>
@@ -1577,14 +1609,49 @@ const AgregarPreCotizacion = () => {
           {/* Columna para Línea en la misma fila */}
           <div className="row mb-6">
             {/* Columna para Línea en la misma fila */}
-            <div className="col-md-2">
+            <div className="col-md-4">
+              <div className="mb-3">
+                <label>Categoría</label>
+                <select
+                  className="form-control"
+                  value={categoria}
+                  onChange={handleCategoriaChange} // Llama a la función cuando cambie
+                >
+                  <option value="">Seleccionar...</option>
+                  {categorias.map((categoria, index) => (
+                    <option key={index} value={categoria.cuenta}>
+                      {categoria.cuenta} - {categoria.descripcion}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="mb-3">
+                <label>Familia</label>
+                <select
+                  className="form-control"
+                  value={familia}
+                  onChange={handleFamiliaChange} // Llama a la función cuando cambie
+                  disabled={!categoria} // Solo habilita si hay categoría seleccionada
+                >
+                  <option value="">Seleccionar...</option>
+                  {familias.map((familia, index) => (
+                    <option key={index} value={familia.CVE_LIN}>
+                      {familia.CVE_LIN} - {familia.DESC_LIN}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="col-md-4">
               <div className="mb-3">
                 <label>Línea</label>
                 <select
                   className="form-control"
                   value={linea}
-                  onChange={(e) => setLinea(e.target.value)} // Manejar la línea seleccionada
-                  disabled={!categoria} // Deshabilitar si no hay categoría seleccionada
+                  onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
+                  disabled={!familia} // Solo habilita si hay una familia seleccionada
                 >
                   <option value="">Seleccionar...</option>
                   {lineas.map((linea, index) => (
@@ -1595,62 +1662,50 @@ const AgregarPreCotizacion = () => {
                 </select>
               </div>
             </div>
-            <div className="col-md-4">
-              <div className="mb-3">
-                <label>Sub Linea</label>
-                <select
-                  className="form-control"
-                  value={categoria}
-                  onChange={(e) => setCategoria(e.target.value)}
-                  disabled={!unidad} // Deshabilitar si no hay unidad seleccionada
-                >
-                  <option value="">Seleccionar...</option>
-                  {categorias.map((categoria, index) => (
-                    <option key={index} value={categoria.CVE_LIN}>
-                      {categoria.CVE_LIN} - {categoria.DESC_LIN}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="col-md-2">
-              <div className="mb-3">
-                <label>Clave SAE</label>
-                <select
-                  className="form-control"
-                  value={claveSae}
-                  onChange={(e) => setClaveSae(e.target.value)}
-                >
-                  <option value={0}>0</option>
-                  <option value={1}>1</option>
-                </select>
-              </div>
-            </div>
             {/* Fila 2: Proveedor, Descripcion */}
             <div className="row mb-6">
+              <div className="col-md-2">
+                <div className="mb-3">
+                  <label>Clave SAE</label>
+                  <select
+                    className="form-control"
+                    value={claveSae}
+                    onChange={(e) => setClaveSae(e.target.value)}
+                  >
+                    <option value={0}>0</option>
+                    <option value={1}>1</option>
+                  </select>
+                </div>
+              </div>
               <div className="col-md-6">
                 <div className="mb-3">
                   <label>Proveedor</label>
                   <Select
-                    options={proveedores.map((prov) => ({
-                      value: prov.CLAVE,
-                      label: prov.NOMBRE,
-                    }))}
-                    value={proveedores.find(
-                      (prov) => prov.NOMBRE === proveedor
-                    )}
-                    onChange={(selectedOption) =>
-                      setProveedor(selectedOption.value)
-                    }
-                    placeholder="Buscar proveedor..."
-                    menuPortalTarget={document.body} // Renderiza fuera del modal
-                    menuPlacement="auto" // Ajusta la posición automáticamente
-                    styles={{
-                      menuPortal: (base) => ({ ...base, zIndex: 9999 }), // Asegura que esté encima del modal
-                    }}
-                  />
+    options={proveedores.map((prov) => ({
+        value: prov.CLAVE,
+        label: prov.NOMBRE,
+    }))}    
+    value={
+        proveedor
+            ? { value: proveedor, label: proveedores.find((prov) => prov.CLAVE === proveedor)?.NOMBRE || "" }
+            : null
+    }
+    onChange={(selectedOption) => {
+        console.log("🔹 Nuevo proveedor seleccionado:", selectedOption);
+        setProveedor(selectedOption.value);
+    }}
+    placeholder="Buscar proveedor..."
+    menuPortalTarget={document.body} // Renderiza fuera del modal
+    menuPlacement="auto" // Ajusta la posición automáticamente
+    styles={{
+        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+    }}
+/>
                 </div>
               </div>
+            </div>
+            {/*Fila 3*/}
+            <div className="row mb-9">
               <div className="col-md-6">
                 <div className="mb-3">
                   <label>Descripción</label>
@@ -1662,9 +1717,6 @@ const AgregarPreCotizacion = () => {
                   />
                 </div>
               </div>
-            </div>
-            {/*Fila 3*/}
-            <div className="row mb-9">
               <div className="col-md-6">
                 <div className="mb-3">
                   <label>Comentarios Adicionales</label>
@@ -1676,6 +1728,8 @@ const AgregarPreCotizacion = () => {
                   />
                 </div>
               </div>
+            </div>
+            <div className="row mb-9">
               <div className="col-md-2">
                 <div className="mb-3">
                   <label>Cantidad</label>
@@ -1690,7 +1744,7 @@ const AgregarPreCotizacion = () => {
               <div className="col-md-4">
                 <div className="mb-3">
                   <label>Costo Cotizado</label>
-                  <input 
+                  <input
                     type="number"
                     className="form-control"
                     value={costoCotizado}
