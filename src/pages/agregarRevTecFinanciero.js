@@ -18,7 +18,7 @@ import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { FaCircleQuestion, FaCirclePlus } from "react-icons/fa6";
 import { HiDocumentPlus } from "react-icons/hi2";
 import { IoSearchSharp } from "react-icons/io5";
-import swal from "sweetalert";
+import swal from "sweetalert2";
 import { CiCirclePlus } from "react-icons/ci";
 import { MdDelete } from "react-icons/md";
 import { FaPencilAlt } from "react-icons/fa";
@@ -43,7 +43,13 @@ const AgregarRevTecFinanciero = () => {
   const [lineas, setLineas] = useState([]); // Lista de líneas disponibles
   const [linea, setLinea] = useState(""); // Estado para la línea seleccionada
   const [showAddModal, setShowAddModal] = useState(false);
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false);
+    setSelectedPartida(null);
+    setCantidad("");
+    setDescripcion("");
+    setObservacion("");
+  };
   const handleShow = () => setShow(true);
   const [show, setShow] = useState(false);
   const [idPartida, setIdPartida] = useState("");
@@ -328,10 +334,101 @@ const AgregarRevTecFinanciero = () => {
   //console.log("Prueba" + par_PreCoti_insu);
 
   /* -------------------------------------- Eliminar partidas de levantamiento dígital en precotización ----------------------------  */
-  const handleDelete = async (id) => {
-    const parLevDigitalRef = doc(db, "PAR_LEVDIGITAL", id);
-    // Ejecutar la operación de eliminación
-    await deleteDoc(parLevDigitalRef);
+  const handleDelete = async (id, noPartida) => {
+    if (!id || !noPartida) {
+      console.error("❌ Error: ID o número de partida no válido.");
+      return;
+    }
+
+    try {
+      console.log("🔍 Buscando dependencias para la partida:", noPartida);
+
+      // 🔍 **Buscar si la partida tiene insumos o mano de obra asociada**
+      const insumosQuery = query(
+        collection(db, "PAR_PRECOTIZACION_INSU"),
+        where("noPartidaPC", "==", noPartida)
+      );
+      const manoObraQuery = query(
+        collection(db, "PAR_PRECOTIZACION_MO"),
+        where("noPartidaMO", "==", noPartida)
+      );
+
+      const [insumosSnapshot, manoObraSnapshot] = await Promise.all([
+        getDocs(insumosQuery),
+        getDocs(manoObraQuery),
+      ]);
+
+      const tieneInsumos = !insumosSnapshot.empty;
+      const tieneManoObra = !manoObraSnapshot.empty;
+
+      let mensajeHTML = `<p style="font-size: 18px; font-weight: bold;">¿Seguro que deseas eliminar esta partida?</p>`;
+
+      if (tieneInsumos || tieneManoObra) {
+        mensajeHTML += `<p style="font-size: 14px; font-weight: normal;">
+                ⚠️ <strong>Ten en cuenta que esta partida cuenta con:</strong><br>`;
+
+        if (tieneInsumos) mensajeHTML += `🛠️ Insumo(s) <br>`;
+        if (tieneManoObra) mensajeHTML += `👷 Mano de obra <br>`;
+
+        mensajeHTML += `<br>Si la eliminas, también se eliminarán sus dependencias.</p>`;
+      }
+
+      // 🛑 **Mostrar alerta de confirmación con `Swal`**
+      const confirmDelete = await swal.fire({
+        title: "Confirmar Eliminación",
+        html: mensajeHTML,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (!confirmDelete.isConfirmed) return;
+
+      // 🗑️ **Eliminar insumos asociados**
+      if (tieneInsumos) {
+        await Promise.all(
+          insumosSnapshot.docs.map((doc) => deleteDoc(doc.ref))
+        );
+        console.log("✅ Insumos eliminados.");
+      }
+
+      // 🗑️ **Eliminar mano de obra asociada**
+      if (tieneManoObra) {
+        await Promise.all(
+          manoObraSnapshot.docs.map((doc) => deleteDoc(doc.ref))
+        );
+        console.log("✅ Mano de obra eliminada.");
+      }
+
+      // 🗑️ **Eliminar la partida principal**
+      console.log(id);
+      const parLevDigitalRef = doc(db, "PAR_PRECOTIZACION", id);
+      await deleteDoc(parLevDigitalRef);
+      console.log("✅ Partida eliminada correctamente.");
+
+      // 🔄 **Recargar la página para reflejar los cambios**
+      swal
+        .fire({
+          title: "Eliminación Exitosa",
+          text: "La partida y sus dependencias han sido eliminadas.",
+          icon: "success",
+          confirmButtonText: "Aceptar",
+        })
+        .then(() => {
+          window.location.reload(); // 🔄 Recarga la página después de cerrar la alerta
+        });
+    } catch (error) {
+      console.error("⚠️ Error al eliminar la partida:", error);
+      swal.fire({
+        title: "Error",
+        text: "Hubo un problema al eliminar la partida. Intenta de nuevo.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
   };
   /* ----------------------------------- ENCONTRAR FACTORES POR PARTIDA -------------------------------------*/
 
@@ -801,10 +898,53 @@ const AgregarRevTecFinanciero = () => {
       console.error("⚠️ Error al obtener la partida de mano de obra:", error);
     }
   };
-  const DeletePartidaMO = (index) => {
-    const updatedList = [...listMO];
-    updatedList.splice(index, 1);
-    setList(updatedList);
+  const DeletePartidaMO = async (noPartidaMO, partidaMOId) => {
+    try {
+      console.log(
+        "🔍 Eliminando partida de Mano de Obra ID:",
+        partidaMOId,
+        " de la partida:",
+        noPartidaMO
+      );
+
+      // 🛑 **Mostrar alerta de confirmación con `Swal`**
+      const confirmDelete = await swal.fire({
+        title: "Eliminar Mano de Obra",
+        text: "¿Seguro que deseas eliminar esta partida de mano de obra?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (!confirmDelete.isConfirmed) return;
+
+      // 🗑️ **Eliminar la partida de mano de obra en Firestore**
+      const partidaMORef = doc(db, "PAR_PRECOTIZACION_MO", partidaMOId);
+      await deleteDoc(partidaMORef);
+      console.log("✅ Partida de mano de obra eliminada correctamente.");
+
+      // 🔄 **Actualizar el estado en React**
+      setListMO((prev) => prev.filter((mo) => mo.id !== partidaMOId));
+
+      // 🎉 **Mostrar mensaje de éxito**
+      swal.fire({
+        title: "Eliminación Exitosa",
+        text: "La partida de mano de obra ha sido eliminada.",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+    } catch (error) {
+      console.error("⚠️ Error al eliminar la partida de mano de obra:", error);
+      swal.fire({
+        title: "Error",
+        text: "Hubo un problema al eliminar la partida de mano de obra. Intenta de nuevo.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
   };
   const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
@@ -829,24 +969,69 @@ const AgregarRevTecFinanciero = () => {
       console.error("Error al obtener las líneas:", error);
     }
   };
-  const handleDeleteInsumo = (noPartida, insumoToDelete) => {
-    // Filtra el insumo dentro de la partida seleccionada
-    const updatedList = listPartidas.map((item) => {
-      if (item.noPartida === noPartida) {
-        return {
-          ...item,
-          insumos: item.insumos.filter(
-            (insumo) => insumo.insumo !== insumoToDelete.insumo
-          ), // Filtra el insumo a eliminar
-        };
-      }
-      return item; // Mantén las demás partidas sin cambios
-    });
+  const handleDeleteInsumo = async (noPartida, insumoId) => {
+    try {
+      console.log(
+        "🔍 Eliminando insumo ID:",
+        insumoId,
+        " de la partida:",
+        noPartida
+      );
 
-    // Filtrar las partidas sin insumos
-    const finalList = updatedList.filter((item) => item.insumos.length > 0);
+      // 🛑 **Mostrar alerta de confirmación con `Swal`**
+      const confirmDelete = await swal.fire({
+        title: "Eliminar Insumo",
+        text: "¿Seguro que deseas eliminar este insumo?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+      });
 
-    setListPartidas(finalList); // Actualiza el estado eliminando el insumo
+      if (!confirmDelete.isConfirmed) return;
+
+      // 🗑️ **Eliminar insumo en Firestore**
+      const insumoRef = doc(db, "PAR_PRECOTIZACION_INSU", insumoId);
+      await deleteDoc(insumoRef);
+      console.log("✅ Insumo eliminado correctamente.");
+
+      // 🔄 **Actualizar el estado en React**
+      setListPartidas((prev) =>
+        prev.map((partida) => {
+          if (partida.noPartida === noPartida) {
+            return {
+              ...partida,
+              insumos: partida.insumos.filter(
+                (insumo) => insumo.id !== insumoId
+              ),
+            };
+          }
+          return partida;
+        })
+      );
+
+      // 🎉 **Mostrar mensaje de éxito y recargar la página**
+      swal
+        .fire({
+          title: "Eliminación Exitosa",
+          text: "El insumo ha sido eliminado.",
+          icon: "success",
+          confirmButtonText: "Aceptar",
+        })
+        .then(() => {
+          window.location.reload(); // 🔄 Recargar la página después de cerrar la alerta
+        });
+    } catch (error) {
+      console.error("⚠️ Error al eliminar el insumo:", error);
+      swal.fire({
+        title: "Error",
+        text: "Hubo un problema al eliminar el insumo. Intenta de nuevo.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
   };
   const handleSaveManoObra = async () => {
     if (
@@ -953,10 +1138,19 @@ const AgregarRevTecFinanciero = () => {
       };
 
       if (editIndex) {
-        // 🟢 Si editIndex tiene un valor, actualizamos el insumo existente en Firestore
+        // 🟢 Obtener referencia al documento en Firestore
         const insumoRef = doc(db, "PAR_PRECOTIZACION_INSU", editIndex);
-        await updateDoc(insumoRef, insumoData);
-        console.log("✅ Insumo actualizado correctamente en Firestore");
+        const insumoDoc = await getDoc(insumoRef);
+
+        if (insumoDoc.exists()) {
+          // 🟢 Si el documento existe, actualizarlo
+          await updateDoc(insumoRef, insumoData);
+          console.log("✅ Insumo actualizado correctamente en Firestore");
+        } else {
+          console.warn("⚠️ El documento no existe, se creará uno nuevo.");
+          await addDoc(parPrecotizacionInsumos, insumoData);
+          console.log("✅ Insumo agregado correctamente en Firestore");
+        }
       } else {
         // 🟢 Si no hay editIndex, significa que estamos creando un nuevo insumo
         await addDoc(parPrecotizacionInsumos, insumoData);
@@ -1096,6 +1290,64 @@ const AgregarRevTecFinanciero = () => {
     } catch (error) {
       console.error("⚠️ Error al obtener el insumo:", error);
     }
+  };
+  const recolectarDatos = (
+    id,
+    cve_levDig,
+    noPartida,
+    cantidad,
+    descripcion,
+    observacion
+  ) => {
+    setSelectedPartida({ id, noPartida, cve_levDig }); // Asegura que el número de partida está definido
+    setCantidad(cantidad);
+    setDescripcion(descripcion);
+    setObservacion(observacion);
+
+    setShow(true); // Abrir el modal
+  };
+  const handleOpenModal = async (noPartida) => {
+    setShowAddModal(true);
+    try {
+      const partidaSeleccionada = par_levDigital.find(
+        (item) => item.noPartida === noPartida
+      );
+      setSelectedPartida(partidaSeleccionada);
+
+      setCantidad(0);
+      setCostoCotizado(0);
+      // Llamar a la API para obtener las líneas
+      /*const responseLineas = await axios.get("http://localhost:5000/api/lineas");
+      setLineas(responseLineas.data); // Guardar las líneas obtenidas en el estado
+      console.log("Líneas obtenidas:", responseLineas.data);*/
+
+      // Llamar a la API para obtener las unidades
+      const responseUnidades = await axios.get(
+        "http://localhost:5000/api/lineasMaster"
+      );
+      setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
+      //console.log("Unidades obtenidas:", responseUnidades.data);
+
+      const responseProvedores = await axios.get(
+        "http://localhost:5000/api/proveedores"
+      );
+      setProveedores(responseProvedores.data);
+      //console.log("Proveedores: ", responseProvedores.data);
+      // Mostrar el modal después de obtener los datos
+    } catch (error) {
+      console.error("Error al obtener los datos necesarios:", error);
+      if (error.response) {
+        console.error("Error del servidor:", error.response.data);
+      } else if (error.request) {
+        console.error("No se recibió respuesta:", error.request);
+      } else {
+        console.error("Error al configurar la petición:", error.message);
+      }
+    }
+  };
+  const handleOpenModalMO = (noPartida) => {
+    setNoParatidaMO(noPartida); // Establece el noPartida seleccionado
+    setShowAddModalMO(true); // Muestra el modal de Mano de Obra
   };
   /*------------------------------------------------------------------------*/
   return (
@@ -1300,6 +1552,10 @@ const AgregarRevTecFinanciero = () => {
                       <th scope="col">No. Partida</th>
                       <th scope="col">Descripción</th>
                       <th scope="col">Observaciones</th>
+                      <th scope="col">Editar</th>
+                      <th scope="col">Eliminar</th>
+                      <th scope="col">Agregar Insumos</th>
+                      <th scope="col">Agregar Mano</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1308,6 +1564,57 @@ const AgregarRevTecFinanciero = () => {
                         <td>{item.noPartida}</td>
                         <td>{item.descripcion}</td>
                         <td>{item.observacion}</td>
+                        <td>
+                          <button
+                            className="btn btn-primary"
+                            onClick={(e) => {
+                              e.preventDefault(); // 🚫 Previene el reload
+                              recolectarDatos(
+                                item.id,
+                                item.cve_levDig,
+                                item.noPartida,
+                                item.cantidad,
+                                item.descripcion,
+                                item.observacion
+                              );
+                            }}
+                          >
+                            <FaPencilAlt />
+                          </button>
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-danger"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleDelete(item.id, item.noPartida);
+                            }}
+                          >
+                            <MdDelete />
+                          </button>
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-success"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleOpenModal(item.noPartida);
+                            }}
+                          >
+                            <CiCirclePlus />
+                          </button>
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-success"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleOpenModalMO(item.noPartida);
+                            }}
+                          >
+                            <CiCirclePlus />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -1371,9 +1678,10 @@ const AgregarRevTecFinanciero = () => {
                         <td>
                           <button
                             className="btn btn-danger"
-                            onClick={() =>
-                              handleDeleteInsumo(itemPC.noPartida, insumo)
-                            }
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleDeleteInsumo(itemPC.noPartidaPC, itemPC.id);
+                            }}
                           >
                             <MdDelete />
                           </button>
@@ -1418,8 +1726,9 @@ const AgregarRevTecFinanciero = () => {
                         <td>
                           <button
                             className="btn btn-danger"
-                            onClick={() => {
-                              DeletePartidaMO(indexMO);
+                            onClick={(e) => {
+                              e.preventDefault();
+                              DeletePartidaMO(itemMO.noPartidaMO, itemMO.id);
                             }}
                           >
                             <MdDelete />
@@ -1455,7 +1764,7 @@ const AgregarRevTecFinanciero = () => {
             <input
               type="text"
               className="form-control"
-              value={noPartida}
+              value={selectedPartida?.noPartida || ""}
               readOnly
             />
           </div>

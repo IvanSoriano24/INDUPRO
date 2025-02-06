@@ -18,7 +18,7 @@ import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { FaCircleQuestion, FaCirclePlus } from "react-icons/fa6";
 import { HiDocumentPlus } from "react-icons/hi2";
 import { IoSearchSharp } from "react-icons/io5";
-import swal from "sweetalert";
+import swal from "sweetalert2";
 import { CiCirclePlus } from "react-icons/ci";
 import { MdDelete } from "react-icons/md";
 import { FaPencilAlt } from "react-icons/fa";
@@ -108,7 +108,13 @@ const EditarPreCotizacion = () => {
   const { id } = useParams();
   const [show, setShow] = useState(false);
 
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false);
+    setSelectedPartida(null);
+    setCantidad("");
+    setDescripcion("");
+    setObservacion("");
+  };
   const handleShow = () => setShow(true);
   /* ---------------------JALAR INFORMACIÓN DE DOCUMENTO ANTERIOR ------------------------------------- */
   const getFactoresById = async (id) => {
@@ -139,27 +145,24 @@ const EditarPreCotizacion = () => {
       console.error("Error al obtener las familias:", error);
     }
   };
-  const recolectarDatos = async (
-    idPartida,
-    cve_tecFin,
-    cantidad,
+  const recolectarDatos = (
+    id,
+    cve_levDig,
     noPartida,
+    cantidad,
     descripcion,
     observacion
   ) => {
-    //alert("CLAVE: " + cve_tecFin + "Y TAMBIEN NO PARTIDA: " + noPartida)
-    //alert("ID: " + idPartida);
-    setIdPartida(idPartida);
-    setCve_levDig(cve_tecFin);
+    setSelectedPartida({ id, noPartida, cve_levDig }); // Asegura que el número de partida está definido
     setCantidad(cantidad);
-    setNoPartida(noPartida);
     setDescripcion(descripcion);
     setObservacion(observacion);
-    handleShow(); // Muestra el modal
+
+    setShow(true); // Abrir el modal
   };
   const guardarEdicion = async () => {
     if (idPartida) {
-      const partidaRef = doc(db, "PAR_LEVDIGITAL", idPartida);
+      const partidaRef = doc(db, "PAR_PRECOTIZACION", idPartida);
       await updateDoc(partidaRef, {
         cantidad: cantidad,
         descripcion: descripcion,
@@ -169,24 +172,113 @@ const EditarPreCotizacion = () => {
       //getParLevDigital(); // Actualiza la tabla
     }
   };
-  const handleDeleteInsumo = (noPartida, insumoToDelete) => {
-    // Filtra el insumo dentro de la partida seleccionada
-    const updatedList = listPartidas.map((item) => {
-      if (item.noPartida === noPartida) {
-        return {
-          ...item,
-          insumos: item.insumos.filter(
-            (insumo) => insumo.insumo !== insumoToDelete.insumo
-          ), // Filtra el insumo a eliminar
-        };
-      }
-      return item; // Mantén las demás partidas sin cambios
-    });
+  const handleDeleteInsumo = async (noPartida, insumoId) => {
+    try {
+      console.log(
+        "🔍 Eliminando insumo ID:",
+        insumoId,
+        " de la partida:",
+        noPartida
+      );
 
-    // Filtrar las partidas sin insumos
-    const finalList = updatedList.filter((item) => item.insumos.length > 0);
+      // 🛑 **Mostrar alerta de confirmación con `Swal`**
+      const confirmDelete = await swal.fire({
+        title: "Eliminar Insumo",
+        text: "¿Seguro que deseas eliminar este insumo?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+      });
 
-    setListPartidas(finalList); // Actualiza el estado eliminando el insumo
+      if (!confirmDelete.isConfirmed) return;
+
+      // 🗑️ **Eliminar insumo en Firestore**
+      const insumoRef = doc(db, "PAR_PRECOTIZACION_INSU", insumoId);
+      await deleteDoc(insumoRef);
+      console.log("✅ Insumo eliminado correctamente.");
+
+      // 🔄 **Actualizar el estado en React**
+      setListPartidas((prev) =>
+        prev.map((partida) => {
+          if (partida.noPartida === noPartida) {
+            return {
+              ...partida,
+              insumos: partida.insumos.filter(
+                (insumo) => insumo.id !== insumoId
+              ),
+            };
+          }
+          return partida;
+        })
+      );
+
+      // 🎉 **Mostrar mensaje de éxito**
+      swal.fire({
+        title: "Eliminación Exitosa",
+        text: "El insumo ha sido eliminado.",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+    } catch (error) {
+      console.error("⚠️ Error al eliminar el insumo:", error);
+      swal.fire({
+        title: "Error",
+        text: "Hubo un problema al eliminar el insumo. Intenta de nuevo.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
+  };
+  const DeletePartidaMO = async (noPartidaMO, partidaMOId) => {
+    try {
+      console.log(
+        "🔍 Eliminando partida de Mano de Obra ID:",
+        partidaMOId,
+        " de la partida:",
+        noPartidaMO
+      );
+
+      // 🛑 **Mostrar alerta de confirmación con `Swal`**
+      const confirmDelete = await swal.fire({
+        title: "Eliminar Mano de Obra",
+        text: "¿Seguro que deseas eliminar esta partida de mano de obra?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (!confirmDelete.isConfirmed) return;
+
+      // 🗑️ **Eliminar la partida de mano de obra en Firestore**
+      const partidaMORef = doc(db, "PAR_PRECOTIZACION_MO", partidaMOId);
+      await deleteDoc(partidaMORef);
+      console.log("✅ Partida de mano de obra eliminada correctamente.");
+
+      // 🔄 **Actualizar el estado en React**
+      setListMO((prev) => prev.filter((mo) => mo.id !== partidaMOId));
+
+      // 🎉 **Mostrar mensaje de éxito**
+      swal.fire({
+        title: "Eliminación Exitosa",
+        text: "La partida de mano de obra ha sido eliminada.",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+    } catch (error) {
+      console.error("⚠️ Error al eliminar la partida de mano de obra:", error);
+      swal.fire({
+        title: "Error",
+        text: "Hubo un problema al eliminar la partida de mano de obra. Intenta de nuevo.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
   };
   const handleCategoriaChange = (e) => {
     const categoriaSeleccionada = e.target.value;
@@ -209,42 +301,34 @@ const EditarPreCotizacion = () => {
     }
   };
   const handleOpenModal = async (noPartida) => {
-    setShowAddModal(true);
     try {
-      const partidaSeleccionada = par_levDigital.find(
-        (item) => item.noPartida === noPartida
-      );
-      setSelectedPartida(partidaSeleccionada);
+      console.log("🔄 Abriendo modal para Insumos. No. Partida:", noPartida);
 
+      // 🟢 Establecer el número de partida correctamente
+      setSelectedPartida({ noPartida });
+
+      // 🟢 Reiniciar valores del formulario
       setCantidad(0);
       setCostoCotizado(0);
-      // Llamar a la API para obtener las líneas
-      /*const responseLineas = await axios.get("http://localhost:5000/api/lineas");
-      setLineas(responseLineas.data); // Guardar las líneas obtenidas en el estado
-      console.log("Líneas obtenidas:", responseLineas.data);*/
 
-      // Llamar a la API para obtener las unidades
+      // 🟢 Cargar unidades (categorías)
       const responseUnidades = await axios.get(
         "http://localhost:5000/api/lineasMaster"
       );
-      setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
-      //console.log("Unidades obtenidas:", responseUnidades.data);
+      setCategorias(responseUnidades.data);
 
+      // 🟢 Cargar proveedores
       const responseProvedores = await axios.get(
         "http://localhost:5000/api/proveedores"
       );
       setProveedores(responseProvedores.data);
-      //console.log("Proveedores: ", responseProvedores.data);
-      // Mostrar el modal después de obtener los datos
+
+      // 🟢 Esperar un breve momento para que el estado se actualice antes de mostrar el modal
+      setTimeout(() => {
+        setShowAddModal(true);
+      }, 100);
     } catch (error) {
-      console.error("Error al obtener los datos necesarios:", error);
-      if (error.response) {
-        console.error("Error del servidor:", error.response.data);
-      } else if (error.request) {
-        console.error("No se recibió respuesta:", error.request);
-      } else {
-        console.error("Error al configurar la petición:", error.message);
-      }
+      console.error("⚠️ Error al obtener los datos necesarios:", error);
     }
   };
   const handleOpenModalMO = (noPartida) => {
@@ -258,7 +342,11 @@ const EditarPreCotizacion = () => {
     setComentariosAdi("");
     setCostoCotizado("");
     setCantidad("");
-    setUnidad("servicio");
+    setUnidad("");
+    setCategoria("");
+    setFamilia("");
+    setLinea("");
+    setClaveSae("");
   };
   const obtenerLineas = async (familiaSeleccionada) => {
     //console.log("Obteniendo líneas para la familia:", familiaSeleccionada); // Verifica la entrada
@@ -274,137 +362,165 @@ const EditarPreCotizacion = () => {
   };
   const guardarPartida = async () => {
     if (!selectedPartida || !insumo || !cantidad || !unidad || !claveSae) {
-        alert("Faltan datos para completar la operación.");
-        return;
+      alert("Faltan datos para completar la operación.");
+      return;
     }
 
     try {
-        // 🟢 Se mantiene la estructura original de la clave del proveedor (varchar(10))
-        const proveedorConEspacios = proveedor || ""; // Si proveedor es null, lo dejamos como cadena vacía
+      // 🟢 Se mantiene la estructura original de la clave del proveedor (varchar(10))
+      const proveedorConEspacios = proveedor || ""; // Si proveedor es null, lo dejamos como cadena vacía
 
-        console.log("🔍 Guardando partida con proveedor:", `"${proveedorConEspacios}"`);
+      console.log(
+        "🔍 Guardando partida con proveedor:",
+        `"${proveedorConEspacios}"`
+      );
 
-        // 🟢 Construye el objeto con los datos a guardar
-        const insumoData = {
-            cve_precot: cve_precot, // Asegurar que el folio de la precotización se guarde
-            noPartidaPC: parseInt(selectedPartida.noPartida, 10), // Convertir a número
-            insumo,
-            proveedor: proveedorConEspacios, // Guardar con espacios
-            descripcionInsumo,
-            comentariosAdi,
-            unidad,
-            costoCotizado,
-            cantidad,
-            total: costoCotizado * cantidad,
-            categoria,
-            familia,
-            linea,
-            claveSae,
-            estatus: "Activo",
-            fechaRegistro: new Date().toLocaleDateString(),
-            fechaModificacion: new Date().toLocaleDateString(),
-        };
+      // 🟢 Construye el objeto con los datos a guardar
+      const insumoData = {
+        cve_precot: cve_precot, // Asegurar que el folio de la precotización se guarde
+        noPartidaPC: parseInt(selectedPartida.noPartida, 10), // Convertir a número
+        insumo,
+        proveedor: proveedorConEspacios, // Guardar con espacios
+        descripcionInsumo,
+        comentariosAdi,
+        unidad,
+        costoCotizado,
+        cantidad,
+        total: costoCotizado * cantidad,
+        categoria,
+        familia,
+        linea,
+        claveSae,
+        estatus: "Activo",
+        fechaRegistro: new Date().toLocaleDateString(),
+        fechaModificacion: new Date().toLocaleDateString(),
+      };
 
-        if (editIndex) {
-            // 🟢 Si editIndex tiene un valor, actualizamos el insumo existente en Firestore
-            const insumoRef = doc(db, "PAR_PRECOTIZACION_INSU", editIndex);
-            await updateDoc(insumoRef, insumoData);
-            console.log("✅ Insumo actualizado correctamente en Firestore");
+      if (editIndex) {
+        // 🟢 Obtener referencia al documento en Firestore
+        const insumoRef = doc(db, "PAR_PRECOTIZACION_INSU", editIndex);
+        const insumoDoc = await getDoc(insumoRef);
+
+        if (insumoDoc.exists()) {
+          // 🟢 Si el documento existe, actualizarlo
+          await updateDoc(insumoRef, insumoData);
+          console.log("✅ Insumo actualizado correctamente en Firestore");
         } else {
-            // 🟢 Si no hay editIndex, significa que estamos creando un nuevo insumo
-            await addDoc(parPrecotizacionInsumos, insumoData);
-            console.log("✅ Insumo agregado correctamente en Firestore");
+          console.warn("⚠️ El documento no existe, se creará uno nuevo.");
+          await addDoc(parPrecotizacionInsumos, insumoData);
+          console.log("✅ Insumo agregado correctamente en Firestore");
         }
+      } else {
+        // 🟢 Si no hay editIndex, significa que estamos creando un nuevo insumo
+        await addDoc(parPrecotizacionInsumos, insumoData);
+        console.log("✅ Insumo agregado correctamente en Firestore");
+      }
 
-        // 🔄 Resetear los valores después de guardar
-        setEditIndex(null);
-        setShowAddModal(false);
-        window.location.reload(); // Recargar para reflejar cambios
+      // 🔄 Resetear los valores después de guardar
+      setEditIndex(null);
+      setShowAddModal(false);
+      window.location.reload(); // Recargar para reflejar cambios
     } catch (error) {
-        console.error("⚠️ Error al guardar la partida:", error);
+      console.error("⚠️ Error al guardar la partida:", error);
     }
-};
-const handleEditInsumo = async (partida, insumoId) => {
-  try {
-    console.log("🟢 Editando partida:", partida);
-    console.log("🟢 ID del insumo a editar:", insumoId);
+  };
+  const handleEditInsumo = async (partida, insumoId) => {
+    try {
+      console.log("🟢 Editando partida:", partida);
+      console.log("🟢 ID del insumo a editar:", insumoId);
 
-    // 🟢 Obtener el insumo desde Firestore
-    const insumoDoc = await getDoc(doc(db, "PAR_PRECOTIZACION_INSU", insumoId));
+      // 🟢 Obtener el insumo desde Firestore
+      const insumoDoc = await getDoc(
+        doc(db, "PAR_PRECOTIZACION_INSU", insumoId)
+      );
 
-    if (!insumoDoc.exists()) {
-      console.error("⚠️ Error: No se encontró el insumo en Firestore.");
-      return;
+      if (!insumoDoc.exists()) {
+        console.error("⚠️ Error: No se encontró el insumo en Firestore.");
+        return;
+      }
+
+      const insumo = insumoDoc.data();
+      console.log("🟢 Insumo obtenido desde Firestore:", insumo);
+
+      // 🔄 Asignar valores al estado para mostrar en el modal
+      setSelectedPartida({ noPartida: insumo.noPartidaPC });
+      setInsumo(insumo.insumo);
+      setCantidad(insumo.cantidad);
+      setUnidad(insumo.unidad);
+      setClaveSae(insumo.claveSae);
+      setCostoCotizado(insumo.costoCotizado);
+      setComentariosAdi(insumo.comentariosAdi);
+      setDescripcionInsumo(insumo.descripcionInsumo);
+
+      // 🟢 Cargar Categoría antes de continuar
+      console.log("🔄 Cargando categorías...");
+      const responseCategorias = await axios.get(
+        "http://localhost:5000/api/lineasMaster"
+      );
+      setCategorias(responseCategorias.data);
+
+      setTimeout(() => {
+        setCategoria(insumo.categoria || "");
+      }, 200); // Pequeño delay para asegurarnos de que la categoría ya está cargada
+
+      // 🟢 Cargar familia si hay categoría
+      if (insumo.categoria) {
+        console.log(
+          "🔄 Cargando familias para la categoría:",
+          insumo.categoria
+        );
+        await obtenerFamilia(insumo.categoria);
+        setFamilia(insumo.familia || "");
+      }
+
+      // 🟢 Cargar líneas si hay familia
+      if (insumo.familia) {
+        console.log("🔄 Cargando líneas para la familia:", insumo.familia);
+        await obtenerLineas(insumo.familia);
+        setLinea(insumo.linea || "");
+      }
+
+      // 🟢 Asegurar que los proveedores estén cargados antes de asignar el proveedor
+      let listaProveedores = [...proveedores];
+      if (proveedores.length === 0) {
+        console.log("🔄 Cargando proveedores antes de editar...");
+        const responseProvedores = await axios.get(
+          "http://localhost:5000/api/proveedores"
+        );
+        listaProveedores = responseProvedores.data;
+        setProveedores(listaProveedores);
+      }
+
+      // 🟢 Buscar el proveedor en la lista de proveedores
+      const proveedorEncontrado = listaProveedores.find(
+        (prov) => prov.CLAVE === insumo.proveedor
+      );
+
+      setTimeout(() => {
+        setProveedor(proveedorEncontrado ? proveedorEncontrado.CLAVE : "");
+      }, 200);
+
+      // 🟢 Guardar el ID del insumo en editIndex para saber que estamos editando
+      setEditIndex(insumoId);
+
+      // 🔄 Mostrar el modal de edición
+      setShowAddModal(true);
+    } catch (error) {
+      console.error("⚠️ Error al obtener el insumo:", error);
     }
-
-    const insumo = insumoDoc.data();
-    console.log("🟢 Insumo obtenido desde Firestore:", insumo);
-
-    // 🔄 Asignar valores al estado para mostrar en el modal
-    setSelectedPartida({ noPartida: insumo.noPartidaPC });
-    setInsumo(insumo.insumo);
-    setCantidad(insumo.cantidad);
-    setUnidad(insumo.unidad);
-    setClaveSae(insumo.claveSae);
-    setCostoCotizado(insumo.costoCotizado);
-    setComentariosAdi(insumo.comentariosAdi);
-    setDescripcionInsumo(insumo.descripcionInsumo);
-
-    // 🟢 Cargar Categoría antes de continuar
-    console.log("🔄 Cargando categorías...");
-    const responseCategorias = await axios.get("http://localhost:5000/api/lineasMaster");
-    setCategorias(responseCategorias.data);
-
-    setTimeout(() => {
-      setCategoria(insumo.categoria || "");
-    }, 200); // Pequeño delay para asegurarnos de que la categoría ya está cargada
-
-    // 🟢 Cargar familia si hay categoría
-    if (insumo.categoria) {
-      console.log("🔄 Cargando familias para la categoría:", insumo.categoria);
-      await obtenerFamilia(insumo.categoria);
-      setFamilia(insumo.familia || "");
-    }
-
-    // 🟢 Cargar líneas si hay familia
-    if (insumo.familia) {
-      console.log("🔄 Cargando líneas para la familia:", insumo.familia);
-      await obtenerLineas(insumo.familia);
-      setLinea(insumo.linea || "");
-    }
-
-    // 🟢 Asegurar que los proveedores estén cargados antes de asignar el proveedor
-    let listaProveedores = [...proveedores];
-    if (proveedores.length === 0) {
-      console.log("🔄 Cargando proveedores antes de editar...");
-      const responseProvedores = await axios.get("http://localhost:5000/api/proveedores");
-      listaProveedores = responseProvedores.data;
-      setProveedores(listaProveedores);
-    }
-
-    // 🟢 Buscar el proveedor en la lista de proveedores
-    const proveedorEncontrado = listaProveedores.find((prov) => prov.CLAVE === insumo.proveedor);
-    
-    setTimeout(() => {
-      setProveedor(proveedorEncontrado ? proveedorEncontrado.CLAVE : "");
-    }, 200);
-
-    // 🟢 Guardar el ID del insumo en editIndex para saber que estamos editando
-    setEditIndex(insumoId);
-
-    // 🔄 Mostrar el modal de edición
-    setShowAddModal(true);
-  } catch (error) {
-    console.error("⚠️ Error al obtener el insumo:", error);
-  }
-};
-const handleSaveManoObra = async () => {
-  if (!noPartidaMO || !selectedTrabajador || !cantidadTrabajadores || !diasTrabajados) {
+  };
+  const handleSaveManoObra = async () => {
+    if (
+      !noPartidaMO ||
+      !selectedTrabajador ||
+      !cantidadTrabajadores ||
+      !diasTrabajados
+    ) {
       alert("⚠️ Faltan datos para completar la operación.");
       return;
-  }
+    }
 
-  try {
+    try {
       const today = new Date();
       const ahora = new Date();
       const hora = ahora.getHours();
@@ -415,48 +531,54 @@ const handleSaveManoObra = async () => {
 
       // 🟢 Crear objeto con los datos de la partida de mano de obra
       const manoObraData = {
-          cve_precot: cve_precot,
-          noPartidaMO: noPartidaMO,
-          personal:
-              typeof selectedTrabajador === "object"
-                  ? selectedTrabajador.nombre
-                  : selectedTrabajador,
-          cantidadTrabajadores: parseInt(cantidadTrabajadores, 10),
-          diasTrabajados: parseInt(diasTrabajados, 10),
-          estatus: "Activa",
-          fechaRegistro: formattedDate,
-          fechaModificacion: formattedDate,
+        cve_precot: cve_precot,
+        noPartidaMO: noPartidaMO,
+        personal:
+          typeof selectedTrabajador === "object"
+            ? selectedTrabajador.nombre
+            : selectedTrabajador,
+        cantidadTrabajadores: parseInt(cantidadTrabajadores, 10),
+        diasTrabajados: parseInt(diasTrabajados, 10),
+        estatus: "Activa",
+        fechaRegistro: formattedDate,
+        fechaModificacion: formattedDate,
       };
 
       if (editIndex) {
-          // 🟢 Si estamos en modo edición, actualizar la partida en Firestore
-          const partidaRef = doc(db, "PAR_PRECOTIZACION_MO", editIndex);
-          await updateDoc(partidaRef, manoObraData);
-          console.log("✅ Partida de mano de obra actualizada correctamente en Firestore");
+        // 🟢 Si estamos en modo edición, actualizar la partida en Firestore
+        const partidaRef = doc(db, "PAR_PRECOTIZACION_MO", editIndex);
+        await updateDoc(partidaRef, manoObraData);
+        console.log(
+          "✅ Partida de mano de obra actualizada correctamente en Firestore"
+        );
       } else {
-          // 🟢 Si no hay `editIndex`, agregar una nueva partida en Firestore
-          await addDoc(parPrecotizacionMO, manoObraData);
-          console.log("✅ Partida de mano de obra agregada correctamente en Firestore");
+        // 🟢 Si no hay `editIndex`, agregar una nueva partida en Firestore
+        await addDoc(parPrecotizacionMO, manoObraData);
+        console.log(
+          "✅ Partida de mano de obra agregada correctamente en Firestore"
+        );
       }
 
       // 🟢 Registrar la operación en la bitácora
       const bitacora = collection(db, "BITACORA");
       await addDoc(bitacora, {
-          cve_Docu: cve_precot,
-          tiempo: horaFormateada,
-          fechaRegistro: formattedDate,
-          tipoDocumento: editIndex ? "Edición de partida MO" : "Registro de partidas MO",
-          noPartida: noPartidaMO,
+        cve_Docu: cve_precot,
+        tiempo: horaFormateada,
+        fechaRegistro: formattedDate,
+        tipoDocumento: editIndex
+          ? "Edición de partida MO"
+          : "Registro de partidas MO",
+        noPartida: noPartidaMO,
       });
 
       // 🔄 Resetear los valores después de guardar
       setEditIndex(null);
       setShowAddModalMO(false);
       window.location.reload(); // Recargar para reflejar cambios
-  } catch (error) {
+    } catch (error) {
       console.error("⚠️ Error al guardar la partida de mano de obra:", error);
-  }
-};
+    }
+  };
   /* --------------------- JALAR INFORMACIÓN DE PARTIDAS ANTERIORES ------------------------------------- */
   const getParPreCot = async () => {
     try {
@@ -690,10 +812,100 @@ const handleSaveManoObra = async () => {
     }
   };
   /* -------------------------------------- Eliminar partidas de levantamiento dígital en precotización ----------------------------  */
-  const handleDelete = async (id) => {
-    const parLevDigitalRef = doc(db, "PAR_LEVDIGITAL", id);
-    // Ejecutar la operación de eliminación
-    await deleteDoc(parLevDigitalRef);
+  const handleDelete = async (id, noPartida) => {
+    if (!id || !noPartida) {
+      console.error("❌ Error: ID o número de partida no válido.");
+      return;
+    }
+
+    try {
+      console.log("🔍 Buscando dependencias para la partida:", noPartida);
+
+      // 🔍 **Buscar si la partida tiene insumos o mano de obra asociada**
+      const insumosQuery = query(
+        collection(db, "PAR_PRECOTIZACION_INSU"),
+        where("noPartidaPC", "==", noPartida)
+      );
+      const manoObraQuery = query(
+        collection(db, "PAR_PRECOTIZACION_MO"),
+        where("noPartidaMO", "==", noPartida)
+      );
+
+      const [insumosSnapshot, manoObraSnapshot] = await Promise.all([
+        getDocs(insumosQuery),
+        getDocs(manoObraQuery),
+      ]);
+
+      const tieneInsumos = !insumosSnapshot.empty;
+      const tieneManoObra = !manoObraSnapshot.empty;
+
+      let mensajeHTML = `<p style="font-size: 18px; font-weight: bold;">¿Seguro que deseas eliminar esta partida?</p>`;
+
+      if (tieneInsumos || tieneManoObra) {
+        mensajeHTML += `<p style="font-size: 14px; font-weight: normal;">
+                ⚠️ <strong>Ten en cuenta que esta partida cuenta con:</strong><br>`;
+
+        if (tieneInsumos) mensajeHTML += `🛠️ Insumo(s) <br>`;
+        if (tieneManoObra) mensajeHTML += `👷 Mano de obra <br>`;
+
+        mensajeHTML += `<br>Si la eliminas, también se eliminarán sus dependencias.</p>`;
+      }
+
+      // 🛑 **Mostrar alerta de confirmación con `Swal`**
+      const confirmDelete = await swal.fire({
+        title: "Confirmar Eliminación",
+        html: mensajeHTML,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (!confirmDelete.isConfirmed) return;
+
+      // 🗑️ **Eliminar insumos asociados**
+      if (tieneInsumos) {
+        await Promise.all(
+          insumosSnapshot.docs.map((doc) => deleteDoc(doc.ref))
+        );
+        console.log("✅ Insumos eliminados.");
+      }
+
+      // 🗑️ **Eliminar mano de obra asociada**
+      if (tieneManoObra) {
+        await Promise.all(
+          manoObraSnapshot.docs.map((doc) => deleteDoc(doc.ref))
+        );
+        console.log("✅ Mano de obra eliminada.");
+      }
+
+      // 🗑️ **Eliminar la partida principal**
+      console.log(id);
+      const parLevDigitalRef = doc(db, "PAR_PRECOTIZACION", id);
+      await deleteDoc(parLevDigitalRef);
+      console.log("✅ Partida eliminada correctamente.");
+
+      // 🔄 **Actualizar el estado sin recargar la página**
+      setPar_preCot((prev) => prev.filter((item) => item.id !== id));
+
+      // 🎉 **Mostrar mensaje de éxito**
+      swal.fire({
+        title: "Eliminación Exitosa",
+        text: "La partida y sus dependencias han sido eliminadas.",
+        icon: "success",
+        confirmButtonText: "Aceptar",
+      });
+    } catch (error) {
+      console.error("⚠️ Error al eliminar la partida:", error);
+      swal.fire({
+        title: "Error",
+        text: "Hubo un problema al eliminar la partida. Intenta de nuevo.",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+      });
+    }
   };
   /* ----------------------------------- ENCONTRAR FACTORES POR PARTIDA -------------------------------------*/
 
@@ -790,41 +1002,46 @@ const handleSaveManoObra = async () => {
   };
   const EditPartidaMO = async (partidaId) => {
     console.log("🟢 Editando partida de mano de obra, ID:", partidaId);
-  
+
     try {
-        // 🔄 Obtener la partida desde Firestore
-        const partidaDoc = await getDoc(doc(db, "PAR_PRECOTIZACION_MO", partidaId));
-  
-        if (!partidaDoc.exists()) {
-            console.error("❌ Error: No se encontró la partida en Firestore.");
-            return;
-        }
-  
-        const partida = partidaDoc.data();
-        console.log("✅ Partida obtenida desde Firestore:", partida);
-  
-        // 🟢 Asignar valores a los estados para mostrar en el modal
-        setNoParatidaMO(partida.noPartidaMO || "");
-        setSelectedTrabajador(partida.personal || "");
-        setCantidadTrabajadores(partida.cantidadTrabajadores || 0);
-        setDiasTrabajados(partida.diasTrabajados || 0);
-        setNoPartida(partida.noPartidaMO || "");
-        setDescripcion(partida.personal || "");
-        setObservacion(partida.diasTrabajados || "");
-  
-        // 🟢 Guardar el ID de la partida en `editIndex` para saber que estamos editando
-        setEditIndex(partidaId);
-  
-        // 🔄 Mostrar el modal de edición
-        setShowAddModalMO(true);
+      // 🔄 Obtener la partida desde Firestore
+      const partidaDoc = await getDoc(
+        doc(db, "PAR_PRECOTIZACION_MO", partidaId)
+      );
+
+      if (!partidaDoc.exists()) {
+        console.error("❌ Error: No se encontró la partida en Firestore.");
+        return;
+      }
+
+      const partida = partidaDoc.data();
+      console.log("✅ Partida obtenida desde Firestore:", partida);
+
+      // 🟢 Asignar valores a los estados para mostrar en el modal
+      setNoParatidaMO(partida.noPartidaMO || "");
+      setSelectedTrabajador(partida.personal || "");
+      setCantidadTrabajadores(partida.cantidadTrabajadores || 0);
+      setDiasTrabajados(partida.diasTrabajados || 0);
+      setNoPartida(partida.noPartidaMO || "");
+      setDescripcion(partida.personal || "");
+      setObservacion(partida.diasTrabajados || "");
+
+      // 🟢 Guardar el ID de la partida en `editIndex` para saber que estamos editando
+      setEditIndex(partidaId);
+
+      // 🔄 Mostrar el modal de edición
+      setShowAddModalMO(true);
     } catch (error) {
-        console.error("⚠️ Error al obtener la partida de mano de obra:", error);
+      console.error("⚠️ Error al obtener la partida de mano de obra:", error);
     }
-  };  
-  const DeletePartidaMO = (index) => {
-    const updatedList = [...listMO];
-    updatedList.splice(index, 1);
-    setList(updatedList);
+  };
+  const handleCloseModalMO = () => {
+    setNoParatidaMO(""); // Limpia el número de partida
+    setSelectedTrabajador(""); // Limpia el trabajador seleccionado
+    setCantidadTrabajadores(""); // Limpia la cantidad de trabajadores
+    setDiasTrabajados(""); // Limpia los días trabajados
+    setEditIndex(null); // Reinicia el índice de edición
+    setShowAddModalMO(false); // Cierra el modal
   };
 
   const editarPar_Precotizacion = (id, noPartida) => {
@@ -1020,7 +1237,7 @@ const handleSaveManoObra = async () => {
                     <th scope="col">Descripción</th>
                     <th scope="col">Observaciones</th>
                     <th scope="col">Editar</th>
-                    <th scope="col">ELIMINAR</th>
+                    <th scope="col">Eliminar</th>
                     <th scope="col">Agregar Insumos</th>
                     <th scope="col">Agregar Mano</th>
                   </tr>
@@ -1051,10 +1268,9 @@ const handleSaveManoObra = async () => {
                       <td>
                         <button
                           className="btn btn-danger"
-                          onClick={() =>
-                            handleDelete(item.noPartida, item.cve_levDig)
-                          }
+                          onClick={() => handleDelete(item.id, item.noPartida)}
                         >
+                          {/*, item.cve_levDig*/}
                           <MdDelete />
                         </button>{" "}
                       </td>
@@ -1136,7 +1352,7 @@ const handleSaveManoObra = async () => {
                         <button
                           className="btn btn-danger"
                           onClick={() =>
-                            handleDeleteInsumo(itemPC.noPartida, insumo)
+                            handleDeleteInsumo(itemPC.noPartida, itemPC.id)
                           }
                         >
                           <MdDelete />
@@ -1182,7 +1398,7 @@ const handleSaveManoObra = async () => {
                         <button
                           className="btn btn-danger"
                           onClick={() => {
-                            DeletePartidaMO(indexMO);
+                            DeletePartidaMO(itemMO.noPartidaMO, itemMO.id);
                           }}
                         >
                           <MdDelete />
@@ -1201,6 +1417,7 @@ const handleSaveManoObra = async () => {
           </button>
         </div>
       </div>
+      {/*---------------------------------------------------------------------------------------------------*/}
       <Modal
         show={show}
         onHide={handleClose}
@@ -1217,7 +1434,7 @@ const handleSaveManoObra = async () => {
             <input
               type="text"
               className="form-control"
-              value={noPartida}
+              value={selectedPartida?.noPartida || ""}
               readOnly
             />
           </div>
@@ -1489,7 +1706,7 @@ const handleSaveManoObra = async () => {
       {/*---------------------------------------------------------*/}
       <Modal
         show={showAddModalMO}
-        onHide={() => setShowAddModalMO(false)}
+        onHide={handleCloseModalMO} // Ahora limpia al cerrar
         centered
         scrollable
         size="lg"
@@ -1506,7 +1723,7 @@ const handleSaveManoObra = async () => {
                   <input
                     type="text"
                     className="form-control"
-                    value={noPartidaMO || ""} // Aquí el valor se establece automáticamente
+                    value={noPartidaMO || ""}
                     readOnly
                   />
                 </div>
@@ -1561,7 +1778,7 @@ const handleSaveManoObra = async () => {
           </form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddModalMO(false)}>
+          <Button variant="secondary" onClick={handleCloseModalMO}>
             Cancelar
           </Button>
           <Button variant="primary" onClick={handleSaveManoObra}>
