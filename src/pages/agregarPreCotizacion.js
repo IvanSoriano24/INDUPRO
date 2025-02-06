@@ -584,13 +584,13 @@ const AgregarPreCotizacion = () => {
 
       // Llamar a la API para obtener las unidades
       const responseUnidades = await axios.get(
-        "http://localhost:5000/api/lineasMaster"
+        "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineasMaster"
       );
       setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
       //console.log("Unidades obtenidas:", responseUnidades.data);
 
       const responseProvedores = await axios.get(
-        "http://localhost:5000/api/proveedores"
+        "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/proveedores"
       );
       setProveedores(responseProvedores.data);
       //console.log("Proveedores: ", responseProvedores.data);
@@ -797,7 +797,7 @@ const AgregarPreCotizacion = () => {
     if (insumo && unidad && linea) {
       // Solo hacer la consulta cuando los campos están completos
       axios
-        .get("http://localhost:5000/api/claves")
+        .get("https://us-central1-gscotiza-cd748.cloudfunctions.net/api/claves")
         .then((response) => {
           setClavesSAE(response.data); // Guardar las claves obtenidas en el estado
         })
@@ -825,7 +825,7 @@ const AgregarPreCotizacion = () => {
   const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/categorias/${categoriaSeleccionada}`
+        `https://us-central1-gscotiza-cd748.cloudfunctions.net/api/categorias/${categoriaSeleccionada}`
       );
       setFamilias(response.data); // Guarda las familias filtradas en el estado
       console.log("Familias filtradas obtenidas:", response.data);
@@ -847,7 +847,7 @@ const AgregarPreCotizacion = () => {
     console.log("Obteniendo líneas para la familia:", familiaSeleccionada); // Verifica la entrada
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/lineas/${familiaSeleccionada}`
+        `https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineas/${familiaSeleccionada}`
       );
       setLineas(response.data); // Guardar las líneas en el estado
       console.log("Líneas filtradas obtenidas:", response.data); // Verifica la respuesta

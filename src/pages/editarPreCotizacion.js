@@ -137,7 +137,7 @@ const EditarPreCotizacion = () => {
   const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/categorias/${categoriaSeleccionada}`
+        `https://us-central1-gscotiza-cd748.cloudfunctions.net/api/categorias/${categoriaSeleccionada}`
       );
       setFamilias(response.data); // Guarda las familias filtradas en el estado
       console.log("Familias filtradas obtenidas:", response.data);
@@ -313,13 +313,13 @@ const EditarPreCotizacion = () => {
 
       // 🟢 Cargar unidades (categorías)
       const responseUnidades = await axios.get(
-        "http://localhost:5000/api/lineasMaster"
+        "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineasMaster"
       );
       setCategorias(responseUnidades.data);
 
       // 🟢 Cargar proveedores
       const responseProvedores = await axios.get(
-        "http://localhost:5000/api/proveedores"
+        "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/proveedores"
       );
       setProveedores(responseProvedores.data);
 
@@ -352,7 +352,7 @@ const EditarPreCotizacion = () => {
     //console.log("Obteniendo líneas para la familia:", familiaSeleccionada); // Verifica la entrada
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/lineas/${familiaSeleccionada}`
+        `https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineas/${familiaSeleccionada}`
       );
       setLineas(response.data); // Guardar las líneas en el estado
       //console.log("Líneas filtradas obtenidas:", response.data); // Verifica la respuesta
@@ -455,7 +455,7 @@ const EditarPreCotizacion = () => {
       // 🟢 Cargar Categoría antes de continuar
       console.log("🔄 Cargando categorías...");
       const responseCategorias = await axios.get(
-        "http://localhost:5000/api/lineasMaster"
+        "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineasMaster"
       );
       setCategorias(responseCategorias.data);
 
@@ -485,7 +485,7 @@ const EditarPreCotizacion = () => {
       if (proveedores.length === 0) {
         console.log("🔄 Cargando proveedores antes de editar...");
         const responseProvedores = await axios.get(
-          "http://localhost:5000/api/proveedores"
+          "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/proveedores"
         );
         listaProveedores = responseProvedores.data;
         setProveedores(listaProveedores);
