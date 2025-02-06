@@ -68,7 +68,6 @@ const AgregarPreCotizacion = () => {
   const [idPartida, setIdPartida] = useState("");
 
   const [busquedaProveedor, setBusquedaProveedor] = useState("");
-
   /* --------------------------- PARTIDAS DE INSUMO -----------*/
   const [cve_precot, setPrecot] = useState("");
   const [factores, setFactores] = useState([]);
