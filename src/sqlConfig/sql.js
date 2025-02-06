@@ -2,10 +2,8 @@ const express = require('express');
 const sql = require('mssql'); // Cambiar a mssql
 const app = express();
 const cors = require('cors');
-
 // Middleware para permitir solicitudes CORS
 app.use(cors());
-
 // Configuración de conexión a la base de datos SQL Server
 const config = {
     user: 'sa',
@@ -17,7 +15,6 @@ const config = {
         trustServerCertificate: true,  // Evita problemas con certificados en algunos entornos
     },
 };
-
 // Conexión a la base de datos
 sql.connect(config).then(pool => {
     console.log('Conexión exitosa a SQL Server');
@@ -58,7 +55,6 @@ app.get('/api/proveedores', async (req, res) => {
         res.status(500).json({ error: 'Error al obtener datos de la base de datos', details: err.message });
     }
 });
-
 // Ruta para obtener las líneas
 app.get('/api/lineasMaster', async (req, res) => {
     try {
@@ -86,27 +82,6 @@ app.get('/api/lineasMaster', async (req, res) => {
         res.status(500).json({ error: 'Error al obtener las líneas de la base de datos', details: err.message });
     }
 });
-/*app.get('/api/lineasMaster', async (req, res) => {
-    try {
-        const pool = await sql.connect(config);
-        const result = await pool.request()
-            .query('SELECT CUENTA_COI, DESC_LIN FROM CLIN01');
-        
-        // Crear un objeto único basado en los primeros dos dígitos y asociar la descripción
-        const unidades = result.recordset.reduce((acc, linea) => {
-            const cuentaCoi = linea.CUENTA_COI ;
-            //if (!acc.some(item => item.unidad === unidad)) {
-                acc.push({ cuentaCoi, descripcion: linea.DESC_LIN });
-            //}
-            return acc;
-        }, []);
-
-        res.json(unidades); // Enviar unidades con descripciones
-    } catch (err) {
-        console.error('Error al ejecutar la consulta de líneas:', err);
-        res.status(500).json({ error: 'Error al obtener las líneas de la base de datos', details: err });
-    }
-});*/
 app.get('/api/categorias/:unidad', async (req, res) => {
     try {
         const { unidad } = req.params; // Obtener el primer par (unidad) de los parámetros
