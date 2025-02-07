@@ -12,6 +12,7 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig/firebase";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
@@ -116,7 +117,7 @@ const AgregarRevTecFinanciero = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   /* --------------------   Obtener los folios correspondiente  -------------------------- */
-  useEffect(() => {
+  /*useEffect(() => {
     const obtenerFolios = async () => {
       const foliosCollection = collection(db, "FOLIOS");
       const q = query(foliosCollection, where("documento", "==", "ATF"));
@@ -146,8 +147,54 @@ const AgregarRevTecFinanciero = () => {
         setFolioSiguiente(folioSeleccionado.folioSiguiente);
       }
     }
-  }, [selectedFolio, folios]);
-
+  }, [selectedFolio, folios]);*/
+  /*AQUI*/
+  const obtenerFolios = (setFolios) => {
+    console.log("🛠️ Suscribiéndose a cambios en FOLIOS...");
+  
+    const foliosCollection = collection(db, "FOLIOS");
+    const q = query(foliosCollection, where("documento", "==", "ATF"));
+  
+    const unsubscribe = onSnapshot(q, (foliosSnapshot) => {
+      const listaFolios = foliosSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          folio: data.folio,
+          folioSiguiente: data.folioSiguiente,
+        };
+      });
+  
+      setFolios(listaFolios);
+      console.log("📌 Datos de FOLIOS actualizados:", listaFolios);
+    });
+  
+    // Cleanup: Nos desuscribimos si el componente se desmonta
+    return unsubscribe;
+  };
+  
+  useEffect(() => {
+    console.log("🛠️ useEffect ejecutado para FOLIOS");
+    const unsubscribe = obtenerFolios(setFolios);
+  
+    return () => {
+      console.log("❌ Desuscribiendo de FOLIOS");
+      unsubscribe && unsubscribe();
+    };
+  }, []); // 🔹 Se ejecuta solo una vez al cargar el componente
+  
+  useEffect(() => {
+    // Actualiza el secuencial cuando se selecciona un nuevo folio
+    if (selectedFolio) {
+      const folioSeleccionado = folios.find(
+        (folio) => folio.folio === selectedFolio
+      );
+      if (folioSeleccionado) {
+        setFolioSiguiente(folioSeleccionado.folioSiguiente);
+      }
+    }
+  }, [selectedFolio, folios]); // 🔹 Se ejecuta cuando cambia selectedFolio o folios
+  
   /* --------------------  fin de Obtener los folios correspondiente  -------------------------- */
   const infoCliente = () => {
     swal({
@@ -199,8 +246,9 @@ const AgregarRevTecFinanciero = () => {
   useEffect(() => {
     getFactoresById(id);
   }, [id]);
+  /*AQUI*/
   /* --------------------- JALAR INFORMACIÓN DE PARTIDAS ANTERIORES ------------------------------------- */
-  const getParLevDigital = async () => {
+  /*const getParLevDigital = async () => {
     try {
       const data = await getDocs(
         query(
@@ -227,8 +275,53 @@ const AgregarRevTecFinanciero = () => {
 
   useEffect(() => {
     getParLevDigital();
-  }, [cve_precot]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
-
+  }, [cve_precot]);*/ // Asegúrate de incluir cve_levDig en las dependencias del useEffect
+  const getParLevDigital = (cve_precot, setPar_levDigital, setNoPartida) => {
+    if (!cve_precot) return; // Evita ejecutar la consulta si cve_precot es null o undefined
+  
+    console.log(`🛠️ Suscribiéndose a cambios en PAR_PRECOTIZACION con cve_precot: ${cve_precot}`);
+  
+    const q = query(
+      collection(db, "PAR_PRECOTIZACION"),
+      where("cve_precot", "==", cve_precot)
+    );
+  
+    // Usamos `onSnapshot` para recibir actualizaciones en tiempo real
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const par_levDigList = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+  
+      console.log("📌 Datos de PAR_PRECOTIZACION actualizados:", par_levDigList);
+  
+      // Ordenar por número de partida
+      par_levDigList.sort((a, b) => a.noPartida - b.noPartida);
+      setPar_levDigital(par_levDigList);
+  
+      // Obtener el número máximo de partida
+      const maxPartida = Math.max(...par_levDigList.map((item) => item.noPartida), 0);
+      setNoPartida(maxPartida + 1);
+  
+      console.log("📌 Número máximo de partida actualizado:", maxPartida + 1);
+    });
+  
+    // Cleanup: Nos desuscribimos si cve_precot cambia o el componente se desmonta
+    return unsubscribe;
+  };
+  
+  useEffect(() => {
+    if (!cve_precot) return;
+  
+    console.log(`🛠️ useEffect ejecutado con cve_precot: ${cve_precot}`);
+    const unsubscribe = getParLevDigital(cve_precot, setPar_levDigital, setNoPartida);
+  
+    return () => {
+      console.log("❌ Desuscribiendo de Firestore para cve_precot:", cve_precot);
+      unsubscribe && unsubscribe();
+    };
+  }, [cve_precot]);
+  /*AQUI*/
   /* --------------------- AGREGAR PARTIDAS DE PRE COTIZACIÓN ------------------------------------- */
   const agregarPartidaAdicional = async (e) => {
     e.preventDefault();
@@ -257,7 +350,7 @@ const AgregarRevTecFinanciero = () => {
   };
 
   /* ------------------------------------ OBTENER TABLA DE INSUMOS -------------------------------*/
-  const obtenerFactores = async () => {
+  /*const obtenerFactores = async () => {
     try {
       const data = await getDocs(collection(db, "FACTORES"));
       const factoresList = data.docs.map((doc) => doc.data().nombre);
@@ -274,30 +367,64 @@ const AgregarRevTecFinanciero = () => {
     };
 
     cargarFactores();
-  }, [factores]);
-
-  /* ------------------------------------ OBTENER TABLA DE TRABAJADORES -------------------------------*/
-  const obtenerTrabajadores = async () => {
-    try {
-      const data = await getDocs(collection(db, "PERSONAL"));
-      const manoObraList = data.docs.map((doc) => doc.data().personal);
-
-      return manoObraList;
-    } catch (error) {
-      console.error("Error al obtener datos de PERSONAL:", error);
-      return [];
-    }
+  }, [factores]);*/
+  const obtenerFactores = (setFactores) => {
+    console.log("🛠️ Suscribiéndose a cambios en FACTORES...");
+  
+    const unsubscribe = onSnapshot(collection(db, "FACTORES"), (snapshot) => {
+      const factoresList = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        console.log("📌 Documento recuperado:", data); // Verifica qué datos trae Firestore
+        return data.nombre !== undefined ? data.nombre : "Sin nombre"; // Evita valores undefined
+      });
+  
+      setFactores(factoresList);
+      console.log("📌 Datos de FACTORES actualizados:", factoresList);
+    });
+  
+    // Cleanup: Nos desuscribimos si el componente se desmonta
+    return unsubscribe;
   };
-
+  
   useEffect(() => {
-    const cargarManoObra = async () => {
-      const manoObraList = await obtenerTrabajadores();
-      //console.log(manoObraList);
-      setManoObra(manoObraList);
+    console.log("🛠️ useEffect ejecutado para FACTORES");
+    const unsubscribe = obtenerFactores(setFactores);
+  
+    return () => {
+      console.log("❌ Desuscribiendo de FACTORES");
+      unsubscribe && unsubscribe();
     };
-
-    cargarManoObra();
-  }, [manoObra]);
+  }, []);
+/*AQUI*/
+  /* ------------------------------------ OBTENER TABLA DE TRABAJADORES -------------------------------*/
+  const obtenerTrabajadores = (setManoObra) => {
+    console.log("🛠️ Suscribiéndose a cambios en PERSONAL...");
+  
+    const unsubscribe = onSnapshot(collection(db, "PERSONAL"), (snapshot) => {
+      const manoObraList = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        console.log("📌 Documento recuperado:", data); // Verifica qué datos trae Firestore
+        return data.personal !== undefined ? data.personal : "Sin personal"; // Evita valores undefined
+      });
+  
+      setManoObra(manoObraList);
+      console.log("📌 Datos de PERSONAL actualizados:", manoObraList);
+    });
+  
+    // Cleanup: Nos desuscribimos si el componente se desmonta
+    return unsubscribe;
+  };
+  
+  useEffect(() => {
+    console.log("🛠️ useEffect ejecutado para PERSONAL");
+    const unsubscribe = obtenerTrabajadores(setManoObra);
+  
+    return () => {
+      console.log("❌ Desuscribiendo de PERSONAL");
+      unsubscribe && unsubscribe();
+    };
+  }, []); // 🔹 Eliminamos `manoObra` de las dependencias para evitar bucles innecesarios
+  /*AQUI*/
   /* ----------------------------------------- OBTENER PARTDIAS DE INSUMOS PARA LA PRECOTIZACIÓN -------------------------*/
 
   const getParPreCotizacion = async () => {
