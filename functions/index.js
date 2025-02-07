@@ -4,26 +4,40 @@ const sql = require("mssql");
 const cors = require("cors");
 
 const app = express();
-app.use(cors());
+
+// Configuración de CORS (Corrección)
 const corsOptions = {
-    origin: "https://gscotiza-cd748.web.app", // Cambia esto a tu dominio frontend
+    origin: "https://gscotiza-cd748.web.app",  // Asegura que este sea tu dominio correcto
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true,
-    optionsSuccessStatus: 204
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
 };
 
 app.use(cors(corsOptions));
 
-// Configuración de conexión a la base de datos SQL Server
+// Middleware para asegurarse de que CORS se aplica correctamente
+app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "https://gscotiza-cd748.web.app");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    
+    if (req.method === "OPTIONS") {
+        return res.status(204).end();
+    }
+
+    next();
+});
+
+// Configuración de conexión a SQL Server
 const config = {
     user: "sa",
     password: "Green2580a.",
-    server: "35.222.201.74",  
+    server: "35.222.201.74",
     database: "SAE90Empre01",
     options: {
-        encrypt: true,  
-        trustServerCertificate: true,
-    },
+        encrypt: true,
+        trustServerCertificate: true
+    }
 };
 
 // Función para conectar a SQL Server
