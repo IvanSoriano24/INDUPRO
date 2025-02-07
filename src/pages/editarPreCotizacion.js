@@ -12,6 +12,7 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig/firebase";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
@@ -117,7 +118,7 @@ const EditarPreCotizacion = () => {
   };
   const handleShow = () => setShow(true);
   /* ---------------------JALAR INFORMACIÓN DE DOCUMENTO ANTERIOR ------------------------------------- */
-  const getFactoresById = async (id) => {
+  /*const getFactoresById = async (id) => {
     const factoresDOC = await getDoc(doc(db, "PRECOTIZACION", id));
     if (factoresDOC.exists()) {
       setPrecot(factoresDOC.data().cve_precot);
@@ -132,7 +133,31 @@ const EditarPreCotizacion = () => {
 
   useEffect(() => {
     getFactoresById(id);
-  }, [id]);
+  }, [id]);*/
+  /*const getFactoresById = (setFactores) => {
+    console.log("🛠️ Suscribiéndose a cambios en FACTORES...");
+  
+    const unsubscribe = onSnapshot(collection(db, "PRECOTIZACION"), (snapshot) => {
+      const factoresList = snapshot.docs.map((doc) => doc.data().nombre);
+      setFactores(factoresList);
+  
+      console.log("📌 Datos de FACTORES actualizados:", factoresList);
+    });
+  
+    // Cleanup: nos desuscribimos si el componente se desmonta
+    return unsubscribe;
+  };
+  
+  useEffect(() => {
+    console.log("🛠️ useEffect ejecutado para FACTORES");
+    const unsubscribe = getFactoresById(setFactores);
+  
+    return () => {
+      console.log("❌ Desuscribiendo de FACTORES");
+      unsubscribe && unsubscribe();
+    };
+  }, []); // 🔹 Eliminamos `factores` de las dependencias*/
+  
   /*-------------------------------------------------------------------------------------------------------*/
   const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
@@ -580,35 +605,49 @@ const EditarPreCotizacion = () => {
     }
   };
   /* --------------------- JALAR INFORMACIÓN DE PARTIDAS ANTERIORES ------------------------------------- */
-  const getParPreCot = async () => {
-    try {
-      const data = await getDocs(
-        query(
-          collection(db, "PAR_PRECOTIZACION"),
-          where("cve_precot", "==", cve_precot)
-        )
-      );
-      //par_preCotList
-      const par_preCotList = data.docs.map((doc) => ({
+  /*const getParPreCot = (cve_precot, setPar_preCot, setNoPartida) => {
+    if (!cve_precot) return; // Evita ejecutar la consulta si cve_precot es null o undefined
+  
+    console.log(`🛠️ Suscribiéndose a cambios en PAR_PRECOTIZACION con cve_precot: ${cve_precot}`);
+  
+    const q = query(
+      collection(db, "PAR_PRECOTIZACION"),
+      where("cve_precot", "==", cve_precot)
+    );
+  
+    // Usamos `onSnapshot` para recibir actualizaciones en tiempo real
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const par_preCotList = snapshot.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
+  
+      // Ordenar por número de partida
       par_preCotList.sort((a, b) => a.noPartida - b.noPartida);
       setPar_preCot(par_preCotList);
-      const maxPartida = Math.max(
-        ...par_preCotList.map((item) => item.noPartida),
-        0
-      );
+  
+      // Obtener el número máximo de partida
+      const maxPartida = Math.max(...par_preCotList.map((item) => item.noPartida), 0);
       setNoPartida(maxPartida + 1);
-    } catch (error) {
-      console.error("Error fetching PAR_LEVDIGITAL data:", error);
-    }
+  
+      console.log("📌 Datos de PAR_PRECOTIZACION actualizados:", par_preCotList);
+    });
+  
+    // Cleanup: Nos desuscribimos si cve_precot cambia o el componente se desmonta
+    return unsubscribe;
   };
-
+  
   useEffect(() => {
-    getParPreCot();
-  }, [cve_precot]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
-
+    if (!cve_precot) return;
+  
+    console.log(`🛠️ useEffect ejecutado con cve_precot: ${cve_precot}`);
+    const unsubscribe = getParPreCot(cve_precot, setPar_preCot, setNoPartida);
+  
+    return () => {
+      console.log("❌ Desuscribiendo de Firestore para cve_precot:", cve_precot);
+      unsubscribe && unsubscribe();
+    };
+  }, [cve_precot]);*/
   /* ----------------------------------------- OBTENER PARTDIAS DE INSUMOS PARA LA PRECOTIZACIÓN -------------------------*/
 
   const getParPreCotizacion = async () => {

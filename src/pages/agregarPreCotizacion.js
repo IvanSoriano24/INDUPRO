@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   collection,
@@ -12,6 +12,7 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig/firebase";
 import { TabContent, TabPane, Nav, NavItem, NavLink, Alert } from "reactstrap";
@@ -145,7 +146,7 @@ const AgregarPreCotizacion = () => {
 
     obtenerFolios();
   }, []); // Se ejecutará solo una vez al cargar el componente
-
+  
   useEffect(() => {
     // Actualiza el secuencial cuando se selecciona un nuevo folio
     if (selectedFolio) {
@@ -210,55 +211,86 @@ const AgregarPreCotizacion = () => {
     getFactoresById(id);
   }, [id]);
   /* --------------------- JALAR INFORMACIÓN DE PARTIDAS ANTERIORES ------------------------------------- */
-  const getParLevDigital = async () => {
-    try {
-      const data = await getDocs(
-        query(
-          collection(db, "PAR_LEVDIGITAL"),
-          where("cve_levDig", "==", cve_levDig),
-          where("estatusPartida", "==", "Activa")
-        )
-      );
+  const getParLevDigital = (cve_levDig, setPar_levDigital, setNoPartida) => {
+    if (!cve_levDig) return; // Evita llamadas innecesarias si cve_levDig es null o undefined
 
-      const par_levDigList = data.docs.map((doc) => ({
+    console.log(
+      `🛠️ Suscribiéndose a cambios en PAR_LEVDIGITAL con cve_levDig: ${cve_levDig}`
+    );
+
+    const q = query(
+      collection(db, "PAR_LEVDIGITAL"),
+      where("cve_levDig", "==", cve_levDig),
+      where("estatusPartida", "==", "Activa")
+    );
+
+    // Usamos onSnapshot para actualizaciones en tiempo real
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const par_levDigList = snapshot.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
+
+      // Ordenar por número de partida
       par_levDigList.sort((a, b) => a.noPartida - b.noPartida);
       setPar_levDigital(par_levDigList);
+
+      // Obtener el número máximo de partida
       const maxPartida = Math.max(
         ...par_levDigList.map((item) => item.noPartida),
         0
       );
       setNoPartida(maxPartida + 1);
-    } catch (error) {
-      console.error("Error fetching PAR_LEVDIGITAL data:", error);
-    }
+
+      console.log("📌 Datos de PAR_LEVDIGITAL actualizados:", par_levDigList);
+    });
+
+    // Cleanup: Nos desuscribimos si cve_levDig cambia o el componente se desmonta
+    return unsubscribe;
   };
 
   useEffect(() => {
-    getParLevDigital();
-  }, [cve_levDig]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
+    if (!cve_levDig) return;
 
-  /* ------------------------------------ OBTENER TABLA DE INSUMOS -------------------------------*/
-  const obtenerFactores = async () => {
-    try {
-      const data = await getDocs(collection(db, "FACTORES"));
-      const factoresList = data.docs.map((doc) => doc.data().nombre);
-      return factoresList;
-    } catch (error) {
-      console.error("Error al obtener datos de FACTORES:", error);
-      return [];
-    }
-  };
-  useEffect(() => {
-    const cargarFactores = async () => {
-      const factoresList = await obtenerFactores();
-      setFactores(factoresList);
+    console.log(`🛠️ useEffect ejecutado con cve_levDig: ${cve_levDig}`);
+    const unsubscribe = getParLevDigital(
+      cve_levDig,
+      setPar_levDigital,
+      setNoPartida
+    );
+
+    return () => {
+      console.log(
+        "❌ Desuscribiendo de Firestore para cve_levDig:",
+        cve_levDig
+      );
+      unsubscribe && unsubscribe();
     };
+  }, [cve_levDig]);
+  /* ------------------------------------ OBTENER TABLA DE INSUMOS -------------------------------*/
+  const obtenerFactores = (setFactores) => {
+    console.log("🛠️ Suscribiéndose a cambios en FACTORES...");
 
-    cargarFactores();
-  }, [factores]);
+    const unsubscribe = onSnapshot(collection(db, "FACTORES"), (snapshot) => {
+      const factoresList = snapshot.docs.map((doc) => doc.data().nombre);
+      setFactores(factoresList);
+
+      console.log("📌 Datos de FACTORES actualizados:", factoresList);
+    });
+
+    // Cleanup: nos desuscribimos si el componente se desmonta
+    return unsubscribe;
+  };
+
+  useEffect(() => {
+    console.log("🛠️ useEffect ejecutado para FACTORES");
+    const unsubscribe = obtenerFactores(setFactores);
+
+    return () => {
+      console.log("❌ Desuscribiendo de FACTORES");
+      unsubscribe && unsubscribe();
+    };
+  }, []); // 🔹 Eliminamos `factores` de las dependencias
 
   /* ------------------------------------ OBTENER TABLA DE TRABAJADORES -------------------------------*/
   const obtenerTrabajadores = async () => {
@@ -341,53 +373,55 @@ const AgregarPreCotizacion = () => {
   const agregarPartidaAdicional = async (e) => {
     e.preventDefault();
     if (folioSiguiente !== 0) {
-        try {
-            const bitacora = collection(db, "BITACORA");
-            const today = new Date();
-            const ahora = new Date();
-            const hora = ahora.getHours();
-            const minuto = ahora.getMinutes();
-            const segundo = ahora.getSeconds();
-            const formattedDate = today.toLocaleDateString(); // Formatear fecha
-            const horaFormateada = `${hora}:${minuto}:${segundo}`;
+      try {
+        const bitacora = collection(db, "BITACORA");
+        const today = new Date();
+        const ahora = new Date();
+        const hora = ahora.getHours();
+        const minuto = ahora.getMinutes();
+        const segundo = ahora.getSeconds();
+        const formattedDate = today.toLocaleDateString(); // Formatear fecha
+        const horaFormateada = `${hora}:${minuto}:${segundo}`;
 
-            // 🟢 Registrar en la bitácora
-            await addDoc(bitacora, {
-                cve_Docu: cve_levDig,
-                tiempo: horaFormateada,
-                fechaRegistro: formattedDate,
-                tipoDocumento: "Registro de partidas",
-                noPartida: noPartida,
-            });
+        // 🟢 Registrar en la bitácora
+        await addDoc(bitacora, {
+          cve_Docu: cve_levDig,
+          tiempo: horaFormateada,
+          fechaRegistro: formattedDate,
+          tipoDocumento: "Registro de partidas",
+          noPartida: noPartida,
+        });
 
-            // 🟢 Agregar la nueva partida a Firestore
-            const nuevaPartida = {
-                cve_levDig: cve_levDig,
-                noPartida: noPartida,
-                cantidad: cantidadPartida,
-                descripcion: descripcion,
-                observacion: observacion,
-                estatusPartida: "Activa",
-            };
+        // 🟢 Agregar la nueva partida a Firestore
+        const nuevaPartida = {
+          cve_levDig: cve_levDig,
+          noPartida: noPartida,
+          cantidad: cantidadPartida,
+          descripcion: descripcion,
+          observacion: observacion,
+          estatusPartida: "Activa",
+        };
 
-            const docRef = await addDoc(partida_levDig, nuevaPartida);
-            console.log("✅ Nueva partida agregada con ID:", docRef.id);
+        const docRef = await addDoc(partida_levDig, nuevaPartida);
+        console.log("✅ Nueva partida agregada con ID:", docRef.id);
 
-            // 🔄 Actualizar el estado local sin recargar la página
-            setPartida_levDig((prevPartidas) => [...prevPartidas, { id: docRef.id, ...nuevaPartida }]);
+        // 🔄 Actualizar el estado local sin recargar la página
+        setPartida_levDig((prevPartidas) => [
+          ...prevPartidas,
+          { id: docRef.id, ...nuevaPartida },
+        ]);
 
-            // 🟢 Resetear los valores del formulario
-            setCantidadPartida("");
-            setDescripcion("");
-            setObservacion("");
-
-        } catch (error) {
-            console.error("⚠️ Error al agregar la partida:", error);
-        }
+        // 🟢 Resetear los valores del formulario
+        setCantidadPartida("");
+        setDescripcion("");
+        setObservacion("");
+      } catch (error) {
+        console.error("⚠️ Error al agregar la partida:", error);
+      }
     } else {
-        alert("Antes debes seleccionar el folio de Pre-cotización");
+      alert("Antes debes seleccionar el folio de Pre-cotización");
     }
-};
+  };
 
   /* ----------------------------------------- OBTENER PARTDIAS DE INSUMOS PARA LA PRECOTIZACIÓN -------------------------*/
 
@@ -556,13 +590,13 @@ const AgregarPreCotizacion = () => {
   };
   const DeletePartidaMO = (indexMO) => {
     // Verifica si el índice es correcto
-    console.log("Índice a eliminar:", indexMO);
+    //console.log("Índice a eliminar:", indexMO);
 
     // Filtra la lista para excluir el índice especificado
     const updatedList = listMano.filter((_, index) => index !== indexMO);
 
     // Depuración: Verifica el contenido de la lista después de filtrar
-    console.log("Lista después de eliminar:", updatedList);
+    //console.log("Lista después de eliminar:", updatedList);
 
     // Actualiza el estado con la lista filtrada
     setListMano(updatedList);
@@ -577,11 +611,6 @@ const AgregarPreCotizacion = () => {
 
       setCantidad(0);
       setCostoCotizado(0);
-      // Llamar a la API para obtener las líneas
-      /*const responseLineas = await axios.get("http://localhost:5000/api/lineas");
-      setLineas(responseLineas.data); // Guardar las líneas obtenidas en el estado
-      console.log("Líneas obtenidas:", responseLineas.data);*/
-
       // Llamar a la API para obtener las unidades
       const responseUnidades = await axios.get(
         "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineasMaster"
