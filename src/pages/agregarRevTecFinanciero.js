@@ -1438,6 +1438,7 @@ const AgregarRevTecFinanciero = () => {
     setShow(true); // Abrir el modal
   };
   const handleOpenModal = async (noPartida) => {
+    alert("Abrio");
     setShowAddModal(true);
     try {
       const partidaSeleccionada = par_levDigital.find(

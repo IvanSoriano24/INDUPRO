@@ -5,6 +5,14 @@ const cors = require("cors");
 
 const app = express();
 app.use(cors());
+const corsOptions = {
+    origin: "https://gscotiza-cd748.web.app", // Cambia esto a tu dominio frontend
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
+    optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
 
 // Configuración de conexión a la base de datos SQL Server
 const config = {
