@@ -12,6 +12,7 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig/firebase";
 import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
@@ -109,6 +110,7 @@ const EditarRecTecFinanciero = () => {
   useEffect(() => {
     getFactoresById(id);
   }, [id]);
+  /*AQUI*/
 
   /* --------------------- JALAR INFORMACIÓN DE PARTIDAS ANTERIORES ------------------------------------- */
   const getParPreCot = async () => {
@@ -244,6 +246,15 @@ const EditarRecTecFinanciero = () => {
     }
   };
 
+  /*useEffect(() => {
+    const cargarManoObra = async () => {
+      const manoObraList = await obtenerTrabajadores();
+      //console.log(manoObraList)
+      setManoObra(manoObraList);
+    };
+
+    cargarManoObra();
+  }, [manoObra]);*/
   useEffect(() => {
     const cargarManoObra = async () => {
       const manoObraList = await obtenerTrabajadores();
@@ -252,8 +263,7 @@ const EditarRecTecFinanciero = () => {
     };
 
     cargarManoObra();
-  }, [manoObra]);
-
+  }, []);
   /* ------------------------------------ - AGREGAR NUEVO DOCUMENTO -------------------------------*/
   const updateEncabezado = async (e) => {
     e.preventDefault();
