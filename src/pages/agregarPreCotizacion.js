@@ -612,7 +612,7 @@ const AgregarPreCotizacion = () => {
       setCantidad(0);
       setCostoCotizado(0);
       // Llamar a la API para obtener las unidades
-      const responseUnidades = await axios.get(
+      /*const responseUnidades = await axios.get(
         "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineasMaster"
         //"https://api-afud53jq7q-uc.a.run.app/api/lineasMaster",
       );
@@ -622,9 +622,15 @@ const AgregarPreCotizacion = () => {
       const responseProvedores = await axios.get(
         "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/proveedores"
         //"https://api-afud53jq7q-uc.a.run.app/api/proveedores",
-      );
-      setProveedores(responseProvedores.data);
+      );*/
+      //setProveedores(responseProvedores.data);
       //console.log("Proveedores: ", responseProvedores.data);
+      // 🔹 Obtener las categorías y proveedores usando las nuevas funciones
+    const categorias = await cargarCategoriasDesdeFirestore();
+    setCategorias(categorias);
+
+    const proveedores = await cargarProveedoresDesdeFirestore();
+    setProveedores(proveedores);
       // Mostrar el modal después de obtener los datos
     } catch (error) {
       console.error("Error al obtener los datos necesarios:", error);
@@ -652,6 +658,28 @@ const AgregarPreCotizacion = () => {
     setCantidad("");
     setUnidad("servicio");
   };
+  const cargarCategoriasDesdeFirestore = async () => {
+    try {
+      const refCategorias = collection(db, "LINEA"); // Cambiado a "categorias"
+      const snapshot = await getDocs(refCategorias);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error("❌ Error al obtener las categorías:", error);
+      return [];
+    }
+  };
+  
+  // 🔹 Función para obtener la lista de proveedores desde Firestore
+  const cargarProveedoresDesdeFirestore = async () => {
+    try {
+      const refProveedores = collection(db, "PROVEEDORES"); // Cambiado a "listaProveedores"
+      const snapshot = await getDocs(refProveedores);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error("❌ Error al obtener los proveedores:", error);
+      return [];
+    }
+  };
   const handleEditInsumo = (partida, insumo) => {
     console.log("🟢 Editando partida:", partida);
     console.log("🟢 Editando insumo:", insumo);
@@ -678,14 +706,14 @@ const AgregarPreCotizacion = () => {
     setProveedor(proveedorEncontrado ? proveedorEncontrado.CLAVE : "");
 
     // 🟢 Cargar familia si hay categoría
-    if (insumo.categoria) {
+    /*if (insumo.categoria) {
       obtenerFamilia(insumo.categoria);
     }
 
     // 🟢 Cargar línea si hay familia
     if (insumo.familia) {
       obtenerLineas(insumo.familia);
-    }
+    }*/
 
     setSelectedPartida({ noPartida: partida });
     setShowAddModal(true);
@@ -823,7 +851,7 @@ const AgregarPreCotizacion = () => {
       setProveedor(proveedoresFiltrados[0]);
     }
   }, [linea]);
-  useEffect(() => {
+  /*useEffect(() => {
     // Verifica si los campos esenciales están llenos
     if (insumo && unidad && linea) {
       // Solo hacer la consulta cuando los campos están completos
@@ -836,7 +864,7 @@ const AgregarPreCotizacion = () => {
           console.error("Error al obtener las claves:", error);
         });
     }
-  }, [insumo, unidad, linea]); // Dependencias: se ejecuta cuando estos campos cambian
+  }, [insumo, unidad, linea]); // Dependencias: se ejecuta cuando estos campos cambian*/
 
   const filtrarClavesPorLinea = (linea) => {
     return clavesSAE.filter((clave) => clave.LINEA === linea); // Ajusta a tu estructura
@@ -853,7 +881,7 @@ const AgregarPreCotizacion = () => {
   /*const lineasFiltradas = lineas.filter(linea =>
     linea.tipoLinea === unidad // Compara el tipoLinea con el tipoUnidad seleccionado
   );*/
-  const obtenerFamilia = async (categoriaSeleccionada) => {
+  /*const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
       const response = await axios.get(
         `https://us-central1-gscotiza-cd748.cloudfunctions.net/api/categorias/${categoriaSeleccionada}`
@@ -863,18 +891,44 @@ const AgregarPreCotizacion = () => {
     } catch (error) {
       console.error("Error al obtener las familias:", error);
     }
-  };
-  const handleCategoriaChange = (e) => {
+  };*/
+  const obtenerFamiliaDesdeFirestore = async (categoriaSeleccionada) => {
+    try {
+      const refFamilias = collection(db, "LINEA"); // Colección en Firestore
+      const q = query(refFamilias, where("categoria", "==", categoriaSeleccionada));
+      const snapshot = await getDocs(q);
+  
+      const familiasFiltradas = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter(familia => {
+          // Simular la lógica SQL: la cuenta debe tener exactamente 1 punto (.)
+          const cuentaCoi = familia.CUENTA_COI || "";
+          return cuentaCoi.split(".").length - 1 === 1; // Debe tener exactamente 1 punto
+        });
+  
+      console.log("🔹 Familias filtradas desde Firestore:", familiasFiltradas);
+      return familiasFiltradas;
+    } catch (error) {
+      console.error("❌ Error al obtener familias desde Firestore:", error);
+      return [];
+    }
+  };  
+  const handleCategoriaChange = async (e) => {
     const categoriaSeleccionada = e.target.value;
     setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
 
     if (categoriaSeleccionada) {
-      obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
+      const familiasDesdeFirestore = await obtenerFamiliaDesdeFirestore(categoriaSeleccionada);
+      setFamilia(familiasDesdeFirestore);
+      //obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
     } else {
       setFamilia([]); // Limpia la familia si no hay categoría seleccionada
     }
   };
-  const obtenerLineas = async (familiaSeleccionada) => {
+  /*const obtenerLineas = async (familiaSeleccionada) => {
     console.log("Obteniendo líneas para la familia:", familiaSeleccionada); // Verifica la entrada
     try {
       const response = await axios.get(
@@ -885,13 +939,39 @@ const AgregarPreCotizacion = () => {
     } catch (error) {
       console.error("Error al obtener las líneas:", error);
     }
-  };
-  const handleFamiliaChange = (e) => {
+  };*/
+  const obtenerLineasDesdeFirestore = async (familiaSeleccionada) => {
+    try {
+      const refLineas = collection(db, "lineas"); // Colección en Firestore
+      const q = query(refLineas, where("LINEA", "==", familiaSeleccionada));
+      const snapshot = await getDocs(q);
+  
+      const lineasFiltradas = snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter(linea => {
+          // Simular la lógica SQL: la cuenta debe tener exactamente 2 puntos (.)
+          const cuentaCoi = linea.CUENTA_COI || "";
+          return cuentaCoi.split(".").length - 1 === 2; // Debe tener exactamente 2 puntos
+        });
+  
+      console.log("🔹 Líneas filtradas desde Firestore:", lineasFiltradas);
+      return lineasFiltradas;
+    } catch (error) {
+      console.error("❌ Error al obtener líneas desde Firestore:", error);
+      return [];
+    }
+  };  
+  const handleFamiliaChange = async (e) => {
     const familiaSeleccionada = e.target.value;
     setFamilia(familiaSeleccionada); // Guarda la familia seleccionada
 
     if (familiaSeleccionada) {
-      obtenerLineas(familiaSeleccionada); // Llama a la API para obtener líneas
+      //obtenerLineas(familiaSeleccionada); // Llama a la API para obtener líneas
+      const lineasDesdeFirestore = await obtenerLineasDesdeFirestore(familiaSeleccionada);
+      setLineas(lineasDesdeFirestore);
     } else {
       setLineas([]); // Limpia las líneas si no hay familia seleccionada
     }
