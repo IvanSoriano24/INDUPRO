@@ -614,12 +614,14 @@ const AgregarPreCotizacion = () => {
       // Llamar a la API para obtener las unidades
       const responseUnidades = await axios.get(
         "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineasMaster"
+        //"https://api-afud53jq7q-uc.a.run.app/api/lineasMaster",
       );
       setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
       //console.log("Unidades obtenidas:", responseUnidades.data);
 
       const responseProvedores = await axios.get(
         "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/proveedores"
+        //"https://api-afud53jq7q-uc.a.run.app/api/proveedores",
       );
       setProveedores(responseProvedores.data);
       //console.log("Proveedores: ", responseProvedores.data);

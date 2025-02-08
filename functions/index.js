@@ -5,9 +5,9 @@ const cors = require("cors");
 
 const app = express();
 
-// Configuración de CORS (Corrección)
+// 🔴 CONFIGURACIÓN CORS MEJORADA
 const corsOptions = {
-    origin: "https://gscotiza-cd748.web.app",  // Asegura que este sea tu dominio correcto
+    origin: ["https://gscotiza-cd748.web.app"], // ✅ SOLO permite peticiones desde Firebase Hosting
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
@@ -15,40 +15,42 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Middleware para asegurarse de que CORS se aplica correctamente
+// Middleware CORS en cada respuesta (FORZADO)
 app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "https://gscotiza-cd748.web.app");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    
+    res.set("Access-Control-Allow-Origin", "https://gscotiza-cd748.web.app");  // ✅ ORIGEN PERMITIDO
+    res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+    res.set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+
     if (req.method === "OPTIONS") {
-        return res.status(204).end();
+        return res.sendStatus(204);
     }
 
     next();
 });
 
-// Configuración de conexión a SQL Server
-const config = {
-    user: "sa",
-    password: "Green2580a.",
-    server: "35.222.201.74",
-    database: "SAE90Empre01",
-    options: {
-        encrypt: true,
-        trustServerCertificate: true
-    }
-};
+// ✅ RUTA DE PRUEBA PARA VERIFICAR CORS
+app.get("/api/test", (req, res) => {
+    res.status(200).json({ mensaje: "CORS funcionando correctamente" });
+});
 
-// Función para conectar a SQL Server
-const getConnection = async () => {
+// ✅ RUTA ORIGINAL DE LINEAS MASTER
+app.get("/api/lineasMaster", async (req, res) => {
     try {
-        return await sql.connect(config);
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .query("SELECT CVE_LIN, DESC_LIN, CUENTA_COI FROM CLIN01 WHERE CUENTA_COI IS NOT NULL");
+
+        const unidades = result.recordset.map(linea => ({
+            cuenta: linea.CUENTA_COI.split(".")[0], 
+            descripcion: linea.DESC_LIN
+        }));
+
+        res.status(200).json(unidades);
     } catch (err) {
-        console.error("Error en la conexión a SQL Server:", err);
-        throw err;
+        console.error("Error al obtener líneas:", err);
+        res.status(500).json({ error: "Error en la base de datos", details: err });
     }
-};
+});
 
 // Ruta para obtener claves de INVE01
 app.get("/api/claves", async (req, res) => {
@@ -73,7 +75,7 @@ app.get("/api/proveedores", async (req, res) => {
         res.status(500).json({ error: "Error al obtener datos", details: err });
     }
 });
-
+/*
 // Ruta para obtener líneas
 app.get("/api/lineasMaster", async (req, res) => {
     try {
@@ -96,7 +98,7 @@ app.get("/api/lineasMaster", async (req, res) => {
         console.error("Error al obtener líneas:", err);
         res.status(500).json({ error: "Error en la base de datos", details: err });
     }
-});
+});*/
 
 // Ruta para obtener categorías según la unidad
 app.get("/api/categorias/:unidad", async (req, res) => {
@@ -137,5 +139,5 @@ app.get("/api/lineas/:categoria", async (req, res) => {
     }
 });
 
-// Exportar la API para Firebase Functions
+// Exportar API para Firebase Functions
 exports.api = functions.https.onRequest(app);
