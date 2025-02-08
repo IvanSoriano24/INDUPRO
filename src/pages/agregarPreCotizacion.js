@@ -660,15 +660,32 @@ const AgregarPreCotizacion = () => {
   };
   const cargarCategoriasDesdeFirestore = async () => {
     try {
-      const refCategorias = collection(db, "LINEA"); // Cambiado a "categorias"
+      const refCategorias = collection(db, "LINEA"); // Colección en Firestore
       const snapshot = await getDocs(refCategorias);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  
+      // Transformamos los datos para extraer solo la primera parte de CUENTA_COI
+      const categoriasProcesadas = snapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          return {
+            cuenta: data.CUENTA_COI ? data.CUENTA_COI.split(".")[0] : "", // Extraer la primera parte
+            descripcion: data.DESC_LIN || "Sin descripción", // Descripción de la línea
+          };
+        })
+        .filter(categoria => categoria.cuenta !== ""); // Filtrar cuentas vacías o nulas
+  
+      // 🔹 Eliminar duplicados basados en "cuenta"
+      const categoriasUnicas = Array.from(
+        new Map(categoriasProcesadas.map(cat => [cat.cuenta, cat])).values()
+      );
+  
+      console.log("🔹 Categorías obtenidas desde Firestore:", categoriasUnicas);
+      return categoriasUnicas;
     } catch (error) {
-      console.error("❌ Error al obtener las categorías:", error);
+      console.error("❌ Error al obtener las categorías desde Firestore:", error);
       return [];
     }
-  };
-  
+  };  
   // 🔹 Función para obtener la lista de proveedores desde Firestore
   const cargarProveedoresDesdeFirestore = async () => {
     try {
