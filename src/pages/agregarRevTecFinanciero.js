@@ -1077,7 +1077,7 @@ const AgregarRevTecFinanciero = () => {
       });
     }
   };
-  const obtenerFamilia = async (categoriaSeleccionada) => {
+  /*const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
       const response = await axios.get(
         `https://us-central1-gscotiza-cd748.cloudfunctions.net/api/categorias/${categoriaSeleccionada}`
@@ -1087,8 +1087,8 @@ const AgregarRevTecFinanciero = () => {
     } catch (error) {
       console.error("Error al obtener las familias:", error);
     }
-  };
-  const obtenerLineas = async (familiaSeleccionada) => {
+  };*/
+  /*const obtenerLineas = async (familiaSeleccionada) => {
     //console.log("Obteniendo líneas para la familia:", familiaSeleccionada); // Verifica la entrada
     try {
       const response = await axios.get(
@@ -1099,7 +1099,7 @@ const AgregarRevTecFinanciero = () => {
     } catch (error) {
       console.error("Error al obtener las líneas:", error);
     }
-  };
+  };*/
   const handleDeleteInsumo = async (noPartida, insumoId) => {
     try {
       console.log(
@@ -1305,26 +1305,78 @@ const AgregarRevTecFinanciero = () => {
     setCantidad("");
     setUnidad("servicio");
   };
-  const handleFamiliaChange = (e) => {
-    const familiaSeleccionada = e.target.value;
-    setFamilia(familiaSeleccionada); // Guarda la familia seleccionada
-
-    if (familiaSeleccionada) {
-      obtenerLineas(familiaSeleccionada); // Llama a la API para obtener líneas
-    } else {
-      setLineas([]); // Limpia las líneas si no hay familia seleccionada
-    }
-  };
-  const handleCategoriaChange = (e) => {
-    const categoriaSeleccionada = e.target.value;
-    setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
-
-    if (categoriaSeleccionada) {
-      obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
-    } else {
-      setFamilia([]); // Limpia la familia si no hay categoría seleccionada
-    }
-  };
+  const obtenerFamiliaDesdeFirestore = async (categoriaSeleccionada) => {
+      try {
+        const refFamilias = collection(db, "LINEA"); // Colección en Firestore
+        const q = query(refFamilias, where("categoria", "==", categoriaSeleccionada));
+        const snapshot = await getDocs(q);
+    
+        const familiasFiltradas = snapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter(familia => {
+            // Simular la lógica SQL: la cuenta debe tener exactamente 1 punto (.)
+            const cuentaCoi = familia.CUENTA_COI || "";
+            return cuentaCoi.split(".").length - 1 === 1; // Debe tener exactamente 1 punto
+          });
+    
+        console.log("🔹 Familias filtradas desde Firestore:", familiasFiltradas);
+        return familiasFiltradas;
+      } catch (error) {
+        console.error("❌ Error al obtener familias desde Firestore:", error);
+        return [];
+      }
+    };  
+    const handleCategoriaChange = async (e) => {
+      const categoriaSeleccionada = e.target.value;
+      setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
+  
+      if (categoriaSeleccionada) {
+        const familiasDesdeFirestore = await obtenerFamiliaDesdeFirestore(categoriaSeleccionada);
+        setFamilia(familiasDesdeFirestore);
+        //obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
+      } else {
+        setFamilia([]); // Limpia la familia si no hay categoría seleccionada
+      }
+    };
+    const obtenerLineasDesdeFirestore = async (familiaSeleccionada) => {
+        try {
+          const refLineas = collection(db, "lineas"); // Colección en Firestore
+          const q = query(refLineas, where("LINEA", "==", familiaSeleccionada));
+          const snapshot = await getDocs(q);
+      
+          const lineasFiltradas = snapshot.docs
+            .map(doc => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+            .filter(linea => {
+              // Simular la lógica SQL: la cuenta debe tener exactamente 2 puntos (.)
+              const cuentaCoi = linea.CUENTA_COI || "";
+              return cuentaCoi.split(".").length - 1 === 2; // Debe tener exactamente 2 puntos
+            });
+      
+          console.log("🔹 Líneas filtradas desde Firestore:", lineasFiltradas);
+          return lineasFiltradas;
+        } catch (error) {
+          console.error("❌ Error al obtener líneas desde Firestore:", error);
+          return [];
+        }
+      };  
+      const handleFamiliaChange = async (e) => {
+        const familiaSeleccionada = e.target.value;
+        setFamilia(familiaSeleccionada); // Guarda la familia seleccionada
+    
+        if (familiaSeleccionada) {
+          //obtenerLineas(familiaSeleccionada); // Llama a la API para obtener líneas
+          const lineasDesdeFirestore = await obtenerLineasDesdeFirestore(familiaSeleccionada);
+          setLineas(lineasDesdeFirestore);
+        } else {
+          setLineas([]); // Limpia las líneas si no hay familia seleccionada
+        }
+      };
   const guardarEdicion = async () => {
     if (idPartida) {
       const partidaRef = doc(db, "PAR_LEVDIGITAL", idPartida);
@@ -1367,31 +1419,31 @@ const AgregarRevTecFinanciero = () => {
 
       // 🟢 Cargar Categoría antes de continuar
       console.log("🔄 Cargando categorías...");
-      const responseCategorias = await axios.get(
+      /*const responseCategorias = await axios.get(
         "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineasMaster"
       );
-      setCategorias(responseCategorias.data);
+      setCategorias(responseCategorias.data);*/
 
       setTimeout(() => {
         setCategoria(insumo.categoria || "");
       }, 200); // Pequeño delay para asegurarnos de que la categoría ya está cargada
 
       // 🟢 Cargar familia si hay categoría
-      if (insumo.categoria) {
+      /*if (insumo.categoria) {
         console.log(
           "🔄 Cargando familias para la categoría:",
           insumo.categoria
         );
         await obtenerFamilia(insumo.categoria);
         setFamilia(insumo.familia || "");
-      }
+      }*/
 
       // 🟢 Cargar líneas si hay familia
-      if (insumo.familia) {
+     /* if (insumo.familia) {
         console.log("🔄 Cargando líneas para la familia:", insumo.familia);
         await obtenerLineas(insumo.familia);
         setLinea(insumo.linea || "");
-      }
+      }*/
 
       // 🟢 Asegurar que los proveedores estén cargados antes de asignar el proveedor
       let listaProveedores = [...proveedores];
@@ -1437,6 +1489,45 @@ const AgregarRevTecFinanciero = () => {
 
     setShow(true); // Abrir el modal
   };
+  const cargarCategoriasDesdeFirestore = async () => {
+      try {
+        const refCategorias = collection(db, "LINEA"); // Colección en Firestore
+        const snapshot = await getDocs(refCategorias);
+    
+        // Transformamos los datos para extraer solo la primera parte de CUENTA_COI
+        const categoriasProcesadas = snapshot.docs
+          .map(doc => {
+            const data = doc.data();
+            return {
+              cuenta: data.CUENTA_COI ? data.CUENTA_COI.split(".")[0] : "", // Extraer la primera parte
+              descripcion: data.DESC_LIN || "Sin descripción", // Descripción de la línea
+            };
+          })
+          .filter(categoria => categoria.cuenta !== ""); // Filtrar cuentas vacías o nulas
+    
+        // 🔹 Eliminar duplicados basados en "cuenta"
+        const categoriasUnicas = Array.from(
+          new Map(categoriasProcesadas.map(cat => [cat.cuenta, cat])).values()
+        );
+    
+        console.log("🔹 Categorías obtenidas desde Firestore:", categoriasUnicas);
+        return categoriasUnicas;
+      } catch (error) {
+        console.error("❌ Error al obtener las categorías desde Firestore:", error);
+        return [];
+      }
+    };  
+    // 🔹 Función para obtener la lista de proveedores desde Firestore
+    const cargarProveedoresDesdeFirestore = async () => {
+      try {
+        const refProveedores = collection(db, "PROVEEDORES"); // Cambiado a "listaProveedores"
+        const snapshot = await getDocs(refProveedores);
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      } catch (error) {
+        console.error("❌ Error al obtener los proveedores:", error);
+        return [];
+      }
+    };
   const handleOpenModal = async (noPartida) => {
     alert("Abrio");
     setShowAddModal(true);
@@ -1454,7 +1545,7 @@ const AgregarRevTecFinanciero = () => {
       console.log("Líneas obtenidas:", responseLineas.data);*/
 
       // Llamar a la API para obtener las unidades
-      const responseUnidades = await axios.get(
+      /*const responseUnidades = await axios.get(
         "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineasMaster"
       );
       setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
@@ -1463,7 +1554,13 @@ const AgregarRevTecFinanciero = () => {
       const responseProvedores = await axios.get(
         "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/proveedores"
       );
-      setProveedores(responseProvedores.data);
+      setProveedores(responseProvedores.data);*/
+      const categorias = await cargarCategoriasDesdeFirestore();
+      setCategorias(categorias);
+  
+      const proveedores = await cargarProveedoresDesdeFirestore();
+      setProveedores(proveedores);
+
       //console.log("Proveedores: ", responseProvedores.data);
       // Mostrar el modal después de obtener los datos
     } catch (error) {
