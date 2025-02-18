@@ -2007,20 +2007,20 @@ const AgregarPreCotizacion = () => {
             </div>
             {/* Fila 2: Proveedor, Descripcion */}
             <div className="row mb-6">
-              <div className="col-md-2">
-                <div className="mb-3">
+              <div className="col-md-6">
+                <div className="mb-4">
                   <label>Clave SAE</label>
                   <select
                     className="form-control"
-                    value={clavesSAE}
-                    onChange={(e) => setClavesSAE(e.target.value)}
+                    value={claveSae}
+                    onChange={(e) => setClaveSae(e.target.value)}
                     disabled={!linea || clavesSAE.length === 0} // Deshabilita si no hay claves disponibles
                   >
                     <option value="">Seleccionar...</option>
                     {Array.isArray(clavesSAE) && clavesSAE.length > 0 ? (
                       clavesSAE.map((item, index) => (
                         <option key={index} value={item.clave}>
-                          {item.clave} - {item.descripcion}
+                          {item.descripcion}
                         </option>
                       ))
                     ) : (
