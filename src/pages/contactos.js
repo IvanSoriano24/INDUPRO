@@ -38,6 +38,7 @@ const Contactos = () => {
   const navigate = useNavigate();
 
   const [isDetailMode, setIsDetailMode] = useState(false);
+  
 
   /***********************************************************************************/
 
