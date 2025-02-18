@@ -141,11 +141,17 @@ const AgregarPreCotizacion = () => {
           folioSiguiente: data.folioSiguiente,
         };
       });
+
       setFolios(listaFolios);
+
+      // Si hay folios y no se ha seleccionado ninguno, tomar el primero por defecto
+      if (listaFolios.length > 0 && !selectedFolio) {
+        setSelectedFolio(listaFolios[0].folio);
+      }
     };
 
     obtenerFolios();
-  }, []); // Se ejecutará solo una vez al cargar el componente
+  }, [selectedFolio]); // Se ejecutará solo una vez al cargar el componente
 
   useEffect(() => {
     // Actualiza el secuencial cuando se selecciona un nuevo folio
@@ -1386,7 +1392,8 @@ const AgregarPreCotizacion = () => {
                 <select
                   id="selectFolio"
                   className="form-control"
-                  value={selectedFolio}
+                  value={selectedFolio || ""}
+                  disabled
                   onChange={(e) => setSelectedFolio(e.target.value)}
                 >
                   <option value="" disabled>
@@ -1409,6 +1416,7 @@ const AgregarPreCotizacion = () => {
                   id="inputFolioSecuencial"
                   type="text"
                   value={`${selectedFolio}${folioSiguiente}`}
+                  disabled
                   onChange={(e) => setCve_levDig(e.target.value)}
                   readOnly
                 />

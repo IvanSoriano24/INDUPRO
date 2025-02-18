@@ -4,6 +4,7 @@ import { getDoc, updateDoc, doc } from "firebase/firestore";
 import { db } from "../firebaseConfig/firebase";
 import { FaCircleQuestion } from "react-icons/fa6";
 import {TabContent, TabPane, Nav, NavItem, NavLink  } from "reactstrap"
+import { Link } from "react-router-dom";
 
 const EditarCliente = () => {
     const [activeTab, setActiveTab] = useState("1");
@@ -335,8 +336,9 @@ const EditarCliente = () => {
                                 
                             </div>
                             {/* ... Otras columnas y campos aquí ... */}
-                            <div>
+                            <div className="buttons-container">
                                 <button type="submit" className="btn btn-primary">Editar</button>
+                                <Link to="/clientes"><button className="btn btn-danger" >Regresar</button></Link>
                              </div>
                     </TabPane>
                     <TabPane tabId="2">

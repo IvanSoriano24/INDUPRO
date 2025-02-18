@@ -150,7 +150,7 @@ const AgregarRevTecFinanciero = () => {
     }
   }, [selectedFolio, folios]);*/
   /*AQUI*/
-  const obtenerFolios = (setFolios) => {
+  /*const obtenerFolios = (setFolios) => {
     console.log("🛠️ Suscribiéndose a cambios en FOLIOS...");
 
     const foliosCollection = collection(db, "FOLIOS");
@@ -172,17 +172,33 @@ const AgregarRevTecFinanciero = () => {
 
     // Cleanup: Nos desuscribimos si el componente se desmonta
     return unsubscribe;
-  };
+  };*/
 
   useEffect(() => {
-    console.log("🛠️ useEffect ejecutado para FOLIOS");
-    const unsubscribe = obtenerFolios(setFolios);
-
-    return () => {
-      console.log("❌ Desuscribiendo de FOLIOS");
-      unsubscribe && unsubscribe();
-    };
-  }, []); // 🔹 Se ejecuta solo una vez al cargar el componente
+      const obtenerFolios = async () => {
+        const foliosCollection = collection(db, "FOLIOS");
+        const q = query(foliosCollection, where("documento", "==", "ATF"));
+        const foliosSnapshot = await getDocs(q);
+  
+        const listaFolios = foliosSnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            folio: data.folio,
+            folioSiguiente: data.folioSiguiente,
+          };
+        });
+  
+        setFolios(listaFolios);
+  
+        // Si hay folios y no se ha seleccionado ninguno, tomar el primero por defecto
+        if (listaFolios.length > 0 && !selectedFolio) {
+          setSelectedFolio(listaFolios[0].folio);
+        }
+      };
+  
+      obtenerFolios();
+    }, [selectedFolio]); // 🔹 Se ejecuta solo una vez al cargar el componente
 
   useEffect(() => {
     // Actualiza el secuencial cuando se selecciona un nuevo folio
@@ -1686,20 +1702,21 @@ const AgregarRevTecFinanciero = () => {
                 <div className="mb-3">
                   <label className="form-label">FOLIO</label>
                   <select
-                    id="selectFolio"
-                    className="form-control"
-                    value={selectedFolio}
-                    onChange={(e) => setSelectedFolio(e.target.value)}
-                  >
-                    <option value="" disabled>
-                      Folio
+                  id="selectFolio"
+                  className="form-control"
+                  value={selectedFolio || ""}
+                  disabled
+                  onChange={(e) => setSelectedFolio(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Folio
+                  </option>
+                  {folios.map((folio) => (
+                    <option key={folio.id} value={folio.folio}>
+                      {folio.folio}
                     </option>
-                    {folios.map((folio) => (
-                      <option key={folio.id} value={folio.folio}>
-                        {folio.folio}
-                      </option>
-                    ))}
-                  </select>
+                  ))}
+                </select>
                 </div>
               </div>
 
