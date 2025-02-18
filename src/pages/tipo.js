@@ -278,7 +278,6 @@ const Tipo = () => {
         show={showAddModalTp}
         onHide={handleCloseTp} // Ahora limpia al cerrar
         centered
-        scrollable
         size="lg"
       >
         <Modal.Header closeButton>
