@@ -1012,7 +1012,6 @@ const AgregarPreCotizacion = () => {
       return []; // 🔹 Retornar array vacío en caso de error
     }
   };
-
   const handleCategoriaChange = async (e) => {
     const categoriaSeleccionada = e.target.value;
     setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada

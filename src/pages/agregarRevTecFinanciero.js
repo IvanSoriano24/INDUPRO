@@ -32,6 +32,7 @@ const AgregarRevTecFinanciero = () => {
   const [showAddModalMO, setShowAddModalMO] = useState(false);
   const [selectedPartida, setSelectedPartida] = useState(null);
   const [claveSae, setClaveSae] = useState(""); // Estado para la clave SAE
+  const [clavesSAE, setClavesSAE] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [categoria, setCategoria] = useState("");
   const [familia, setFamilia] = useState("");
@@ -151,10 +152,10 @@ const AgregarRevTecFinanciero = () => {
   /*AQUI*/
   const obtenerFolios = (setFolios) => {
     console.log("🛠️ Suscribiéndose a cambios en FOLIOS...");
-  
+
     const foliosCollection = collection(db, "FOLIOS");
     const q = query(foliosCollection, where("documento", "==", "ATF"));
-  
+
     const unsubscribe = onSnapshot(q, (foliosSnapshot) => {
       const listaFolios = foliosSnapshot.docs.map((doc) => {
         const data = doc.data();
@@ -164,25 +165,25 @@ const AgregarRevTecFinanciero = () => {
           folioSiguiente: data.folioSiguiente,
         };
       });
-  
+
       setFolios(listaFolios);
       console.log("📌 Datos de FOLIOS actualizados:", listaFolios);
     });
-  
+
     // Cleanup: Nos desuscribimos si el componente se desmonta
     return unsubscribe;
   };
-  
+
   useEffect(() => {
     console.log("🛠️ useEffect ejecutado para FOLIOS");
     const unsubscribe = obtenerFolios(setFolios);
-  
+
     return () => {
       console.log("❌ Desuscribiendo de FOLIOS");
       unsubscribe && unsubscribe();
     };
   }, []); // 🔹 Se ejecuta solo una vez al cargar el componente
-  
+
   useEffect(() => {
     // Actualiza el secuencial cuando se selecciona un nuevo folio
     if (selectedFolio) {
@@ -194,7 +195,7 @@ const AgregarRevTecFinanciero = () => {
       }
     }
   }, [selectedFolio, folios]); // 🔹 Se ejecuta cuando cambia selectedFolio o folios
-  
+
   /* --------------------  fin de Obtener los folios correspondiente  -------------------------- */
   const infoCliente = () => {
     swal({
@@ -278,46 +279,61 @@ const AgregarRevTecFinanciero = () => {
   }, [cve_precot]);*/ // Asegúrate de incluir cve_levDig en las dependencias del useEffect
   const getParLevDigital = (cve_precot, setPar_levDigital, setNoPartida) => {
     if (!cve_precot) return; // Evita ejecutar la consulta si cve_precot es null o undefined
-  
-    console.log(`🛠️ Suscribiéndose a cambios en PAR_PRECOTIZACION con cve_precot: ${cve_precot}`);
-  
+
+    console.log(
+      `🛠️ Suscribiéndose a cambios en PAR_PRECOTIZACION con cve_precot: ${cve_precot}`
+    );
+
     const q = query(
       collection(db, "PAR_PRECOTIZACION"),
       where("cve_precot", "==", cve_precot)
     );
-  
+
     // Usamos `onSnapshot` para recibir actualizaciones en tiempo real
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const par_levDigList = snapshot.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
-  
-      console.log("📌 Datos de PAR_PRECOTIZACION actualizados:", par_levDigList);
-  
+
+      console.log(
+        "📌 Datos de PAR_PRECOTIZACION actualizados:",
+        par_levDigList
+      );
+
       // Ordenar por número de partida
       par_levDigList.sort((a, b) => a.noPartida - b.noPartida);
       setPar_levDigital(par_levDigList);
-  
+
       // Obtener el número máximo de partida
-      const maxPartida = Math.max(...par_levDigList.map((item) => item.noPartida), 0);
+      const maxPartida = Math.max(
+        ...par_levDigList.map((item) => item.noPartida),
+        0
+      );
       setNoPartida(maxPartida + 1);
-  
+
       console.log("📌 Número máximo de partida actualizado:", maxPartida + 1);
     });
-  
+
     // Cleanup: Nos desuscribimos si cve_precot cambia o el componente se desmonta
     return unsubscribe;
   };
-  
+
   useEffect(() => {
     if (!cve_precot) return;
-  
+
     console.log(`🛠️ useEffect ejecutado con cve_precot: ${cve_precot}`);
-    const unsubscribe = getParLevDigital(cve_precot, setPar_levDigital, setNoPartida);
-  
+    const unsubscribe = getParLevDigital(
+      cve_precot,
+      setPar_levDigital,
+      setNoPartida
+    );
+
     return () => {
-      console.log("❌ Desuscribiendo de Firestore para cve_precot:", cve_precot);
+      console.log(
+        "❌ Desuscribiendo de Firestore para cve_precot:",
+        cve_precot
+      );
       unsubscribe && unsubscribe();
     };
   }, [cve_precot]);
@@ -370,55 +386,55 @@ const AgregarRevTecFinanciero = () => {
   }, [factores]);*/
   const obtenerFactores = (setFactores) => {
     console.log("🛠️ Suscribiéndose a cambios en FACTORES...");
-  
+
     const unsubscribe = onSnapshot(collection(db, "FACTORES"), (snapshot) => {
       const factoresList = snapshot.docs.map((doc) => {
         const data = doc.data();
         console.log("📌 Documento recuperado:", data); // Verifica qué datos trae Firestore
         return data.nombre !== undefined ? data.nombre : "Sin nombre"; // Evita valores undefined
       });
-  
+
       setFactores(factoresList);
       console.log("📌 Datos de FACTORES actualizados:", factoresList);
     });
-  
+
     // Cleanup: Nos desuscribimos si el componente se desmonta
     return unsubscribe;
   };
-  
+
   useEffect(() => {
     console.log("🛠️ useEffect ejecutado para FACTORES");
     const unsubscribe = obtenerFactores(setFactores);
-  
+
     return () => {
       console.log("❌ Desuscribiendo de FACTORES");
       unsubscribe && unsubscribe();
     };
   }, []);
-/*AQUI*/
+  /*AQUI*/
   /* ------------------------------------ OBTENER TABLA DE TRABAJADORES -------------------------------*/
   const obtenerTrabajadores = (setManoObra) => {
     console.log("🛠️ Suscribiéndose a cambios en PERSONAL...");
-  
+
     const unsubscribe = onSnapshot(collection(db, "PERSONAL"), (snapshot) => {
       const manoObraList = snapshot.docs.map((doc) => {
         const data = doc.data();
         console.log("📌 Documento recuperado:", data); // Verifica qué datos trae Firestore
         return data.personal !== undefined ? data.personal : "Sin personal"; // Evita valores undefined
       });
-  
+
       setManoObra(manoObraList);
       console.log("📌 Datos de PERSONAL actualizados:", manoObraList);
     });
-  
+
     // Cleanup: Nos desuscribimos si el componente se desmonta
     return unsubscribe;
   };
-  
+
   useEffect(() => {
     console.log("🛠️ useEffect ejecutado para PERSONAL");
     const unsubscribe = obtenerTrabajadores(setManoObra);
-  
+
     return () => {
       console.log("❌ Desuscribiendo de PERSONAL");
       unsubscribe && unsubscribe();
@@ -1307,76 +1323,153 @@ const AgregarRevTecFinanciero = () => {
   };
   const obtenerFamiliaDesdeFirestore = async (categoriaSeleccionada) => {
       try {
+        console.log(
+          "🔎 Buscando familias para la categoría:",
+          categoriaSeleccionada
+        );
+  
         const refFamilias = collection(db, "LINEA"); // Colección en Firestore
-        const q = query(refFamilias, where("categoria", "==", categoriaSeleccionada));
+        const q = query(
+          refFamilias,
+          where("CUENTA_COI", ">=", categoriaSeleccionada),
+          where("CUENTA_COI", "<", categoriaSeleccionada + "Z")
+        );
         const snapshot = await getDocs(q);
-    
+  
+        if (snapshot.empty) {
+          console.warn(
+            "⚠️ No se encontraron familias en Firestore para esta categoría."
+          );
+          return [];
+        }
         const familiasFiltradas = snapshot.docs
-          .map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-          .filter(familia => {
-            // Simular la lógica SQL: la cuenta debe tener exactamente 1 punto (.)
-            const cuentaCoi = familia.CUENTA_COI || "";
-            return cuentaCoi.split(".").length - 1 === 1; // Debe tener exactamente 1 punto
-          });
-    
-        console.log("🔹 Familias filtradas desde Firestore:", familiasFiltradas);
+          .map((doc) => {
+            const data = doc.data();
+            const cuentaCoi = data.CUENTA_COI || "";
+  
+            return {
+              id: doc.id,
+              cuenta: cuentaCoi,
+              descripcion: data.DESC_LIN || "Sin descripción",
+              puntos: cuentaCoi.split(".").length - 1, // Contamos los puntos en CUENTA_COI
+            };
+          })
+          .filter((familia) => familia.puntos === 1); // Debe tener exactamente 1 punto (.)
+  
+        console.log(
+          "🔹 Familias filtradas (después del filtrado):",
+          familiasFiltradas
+        );
+  
         return familiasFiltradas;
       } catch (error) {
         console.error("❌ Error al obtener familias desde Firestore:", error);
         return [];
       }
-    };  
-    const handleCategoriaChange = async (e) => {
-      const categoriaSeleccionada = e.target.value;
-      setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
+    };
+    const handleLineaChange = async (e) => {
+      const lineaSeleccionada = e.target.value;
+      setLinea(lineaSeleccionada); // Guarda la línea seleccionada
   
-      if (categoriaSeleccionada) {
-        const familiasDesdeFirestore = await obtenerFamiliaDesdeFirestore(categoriaSeleccionada);
-        setFamilia(familiasDesdeFirestore);
-        //obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
+      if (lineaSeleccionada) {
+        const clavesDesdeFirestore = await obtenerClaveDesdeFirestore(
+          lineaSeleccionada
+        );
+        setClavesSAE(
+          Array.isArray(clavesDesdeFirestore) ? clavesDesdeFirestore : []
+        );
       } else {
-        setFamilia([]); // Limpia la familia si no hay categoría seleccionada
+        setClavesSAE([]); // 🔹 Limpia las claves si no hay línea seleccionada
       }
     };
-    const obtenerLineasDesdeFirestore = async (familiaSeleccionada) => {
-        try {
-          const refLineas = collection(db, "lineas"); // Colección en Firestore
-          const q = query(refLineas, where("LINEA", "==", familiaSeleccionada));
-          const snapshot = await getDocs(q);
-      
-          const lineasFiltradas = snapshot.docs
-            .map(doc => ({
-              id: doc.id,
-              ...doc.data(),
-            }))
-            .filter(linea => {
-              // Simular la lógica SQL: la cuenta debe tener exactamente 2 puntos (.)
-              const cuentaCoi = linea.CUENTA_COI || "";
-              return cuentaCoi.split(".").length - 1 === 2; // Debe tener exactamente 2 puntos
-            });
-      
-          console.log("🔹 Líneas filtradas desde Firestore:", lineasFiltradas);
-          return lineasFiltradas;
-        } catch (error) {
-          console.error("❌ Error al obtener líneas desde Firestore:", error);
-          return [];
+    const obtenerClaveDesdeFirestore = async (lineaSeleccionada) => {
+      try {
+        console.log("🔎 Buscando clave SAE para la línea:", lineaSeleccionada);
+  
+        const refInventario = collection(db, "INVENTARIO"); // Colección en Firestore
+        const q = query(
+          refInventario,
+          where("LIN_PROD", "==", lineaSeleccionada)
+        );
+        const snapshot = await getDocs(q);
+  
+        console.log(
+          "🔹 Documentos obtenidos desde Firestore:",
+          snapshot.docs.map((doc) => doc.data())
+        );
+  
+        if (snapshot.empty) {
+          console.warn(
+            "⚠️ No se encontró clave SAE en Firestore para esta línea."
+          );
+          return []; // 🔹 Ahora retorna un array vacío en lugar de null
         }
-      };  
-      const handleFamiliaChange = async (e) => {
-        const familiaSeleccionada = e.target.value;
-        setFamilia(familiaSeleccionada); // Guarda la familia seleccionada
-    
-        if (familiaSeleccionada) {
-          //obtenerLineas(familiaSeleccionada); // Llama a la API para obtener líneas
-          const lineasDesdeFirestore = await obtenerLineasDesdeFirestore(familiaSeleccionada);
-          setLineas(lineasDesdeFirestore);
-        } else {
-          setLineas([]); // Limpia las líneas si no hay familia seleccionada
-        }
-      };
+  
+        // 🔹 Retornamos un array de objetos con CVE_ART y DESCR
+        const clavesSaeEncontradas = snapshot.docs.map((doc) => ({
+          clave: doc.data().CVE_ART || "Clave no encontrada",
+          descripcion: doc.data().DESCR || "Descripción no encontrada",
+        }));
+  
+        console.log("🔹 Claves SAE obtenidas:", clavesSaeEncontradas);
+        return clavesSaeEncontradas;
+      } catch (error) {
+        console.error("❌ Error al obtener clave SAE desde Firestore:", error);
+        return []; // 🔹 Retornar array vacío en caso de error
+      }
+    };
+  const handleCategoriaChange = async (e) => {
+    const categoriaSeleccionada = e.target.value;
+    setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
+
+    if (categoriaSeleccionada) {
+      const familiasDesdeFirestore = await obtenerFamiliaDesdeFirestore(
+        categoriaSeleccionada
+      );
+      setFamilia(familiasDesdeFirestore);
+      //obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
+    } else {
+      setFamilia([]); // Limpia la familia si no hay categoría seleccionada
+    }
+  };
+  const obtenerLineasDesdeFirestore = async (familiaSeleccionada) => {
+    try {
+      const refLineas = collection(db, "lineas"); // Colección en Firestore
+      const q = query(refLineas, where("LINEA", "==", familiaSeleccionada));
+      const snapshot = await getDocs(q);
+
+      const lineasFiltradas = snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((linea) => {
+          // Simular la lógica SQL: la cuenta debe tener exactamente 2 puntos (.)
+          const cuentaCoi = linea.CUENTA_COI || "";
+          return cuentaCoi.split(".").length - 1 === 2; // Debe tener exactamente 2 puntos
+        });
+
+      console.log("🔹 Líneas filtradas desde Firestore:", lineasFiltradas);
+      return lineasFiltradas;
+    } catch (error) {
+      console.error("❌ Error al obtener líneas desde Firestore:", error);
+      return [];
+    }
+  };
+  const handleFamiliaChange = async (e) => {
+    const familiaSeleccionada = e.target.value;
+    setFamilia(familiaSeleccionada); // Guarda la familia seleccionada
+
+    if (familiaSeleccionada) {
+      //obtenerLineas(familiaSeleccionada); // Llama a la API para obtener líneas
+      const lineasDesdeFirestore = await obtenerLineasDesdeFirestore(
+        familiaSeleccionada
+      );
+      setLineas(lineasDesdeFirestore);
+    } else {
+      setLineas([]); // Limpia las líneas si no hay familia seleccionada
+    }
+  };
   const guardarEdicion = async () => {
     if (idPartida) {
       const partidaRef = doc(db, "PAR_LEVDIGITAL", idPartida);
@@ -1439,7 +1532,7 @@ const AgregarRevTecFinanciero = () => {
       }*/
 
       // 🟢 Cargar líneas si hay familia
-     /* if (insumo.familia) {
+      /* if (insumo.familia) {
         console.log("🔄 Cargando líneas para la familia:", insumo.familia);
         await obtenerLineas(insumo.familia);
         setLinea(insumo.linea || "");
@@ -1490,44 +1583,47 @@ const AgregarRevTecFinanciero = () => {
     setShow(true); // Abrir el modal
   };
   const cargarCategoriasDesdeFirestore = async () => {
-      try {
-        const refCategorias = collection(db, "LINEA"); // Colección en Firestore
-        const snapshot = await getDocs(refCategorias);
-    
-        // Transformamos los datos para extraer solo la primera parte de CUENTA_COI
-        const categoriasProcesadas = snapshot.docs
-          .map(doc => {
-            const data = doc.data();
-            return {
-              cuenta: data.CUENTA_COI ? data.CUENTA_COI.split(".")[0] : "", // Extraer la primera parte
-              descripcion: data.DESC_LIN || "Sin descripción", // Descripción de la línea
-            };
-          })
-          .filter(categoria => categoria.cuenta !== ""); // Filtrar cuentas vacías o nulas
-    
-        // 🔹 Eliminar duplicados basados en "cuenta"
-        const categoriasUnicas = Array.from(
-          new Map(categoriasProcesadas.map(cat => [cat.cuenta, cat])).values()
-        );
-    
-        console.log("🔹 Categorías obtenidas desde Firestore:", categoriasUnicas);
-        return categoriasUnicas;
-      } catch (error) {
-        console.error("❌ Error al obtener las categorías desde Firestore:", error);
-        return [];
-      }
-    };  
-    // 🔹 Función para obtener la lista de proveedores desde Firestore
-    const cargarProveedoresDesdeFirestore = async () => {
-      try {
-        const refProveedores = collection(db, "PROVEEDORES"); // Cambiado a "listaProveedores"
-        const snapshot = await getDocs(refProveedores);
-        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      } catch (error) {
-        console.error("❌ Error al obtener los proveedores:", error);
-        return [];
-      }
-    };
+    try {
+      const refCategorias = collection(db, "LINEA"); // Colección en Firestore
+      const snapshot = await getDocs(refCategorias);
+
+      // Transformamos los datos para extraer solo la primera parte de CUENTA_COI
+      const categoriasProcesadas = snapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          return {
+            cuenta: data.CUENTA_COI ? data.CUENTA_COI.split(".")[0] : "", // Extraer la primera parte
+            descripcion: data.DESC_LIN || "Sin descripción", // Descripción de la línea
+          };
+        })
+        .filter((categoria) => categoria.cuenta !== ""); // Filtrar cuentas vacías o nulas
+
+      // 🔹 Eliminar duplicados basados en "cuenta"
+      const categoriasUnicas = Array.from(
+        new Map(categoriasProcesadas.map((cat) => [cat.cuenta, cat])).values()
+      );
+
+      console.log("🔹 Categorías obtenidas desde Firestore:", categoriasUnicas);
+      return categoriasUnicas;
+    } catch (error) {
+      console.error(
+        "❌ Error al obtener las categorías desde Firestore:",
+        error
+      );
+      return [];
+    }
+  };
+  // 🔹 Función para obtener la lista de proveedores desde Firestore
+  const cargarProveedoresDesdeFirestore = async () => {
+    try {
+      const refProveedores = collection(db, "PROVEEDORES"); // Cambiado a "listaProveedores"
+      const snapshot = await getDocs(refProveedores);
+      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error("❌ Error al obtener los proveedores:", error);
+      return [];
+    }
+  };
   const handleOpenModal = async (noPartida) => {
     alert("Abrio");
     setShowAddModal(true);
@@ -1557,7 +1653,7 @@ const AgregarRevTecFinanciero = () => {
       setProveedores(responseProvedores.data);*/
       const categorias = await cargarCategoriasDesdeFirestore();
       setCategorias(categorias);
-  
+
       const proveedores = await cargarProveedoresDesdeFirestore();
       setProveedores(proveedores);
 
@@ -2116,7 +2212,7 @@ const AgregarRevTecFinanciero = () => {
               </div>
             </div>
             <div className="col-md-4">
-              <div className="mb-3">
+              {/*<div className="mb-3">
                 <label>Familia</label>
                 <select
                   className="form-control"
@@ -2131,10 +2227,33 @@ const AgregarRevTecFinanciero = () => {
                     </option>
                   ))}
                 </select>
+              </div>*/}
+              <div className="mb-3">
+                <label>Familia</label>
+                <select
+                  className="form-control"
+                  value={familia}
+                  onChange={handleFamiliaChange} // Llama a la función cuando cambie
+                  disabled={!categoria} // Asegurar que se habilite correctamente
+                >
+                  <option value="">Seleccionar...</option>
+                  {familias.length > 0 ? (
+                    familias.map((familia, index) => (
+                      <option key={index} value={familia.cuenta}>
+                        {" "}
+                        {/* Verifica el nombre correcto del campo */}
+                        {familia.cuenta} - {familia.descripcion}{" "}
+                        {/* Verifica que los datos existen */}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>Cargando familias...</option> // Mensaje si aún no hay datos
+                  )}
+                </select>
               </div>
             </div>
             <div className="col-md-4">
-              <div className="mb-3">
+              {/*<div className="mb-3">
                 <label>Línea</label>
                 <select
                   className="form-control"
@@ -2149,20 +2268,53 @@ const AgregarRevTecFinanciero = () => {
                     </option>
                   ))}
                 </select>
+              </div>*/}
+              <div className="mb-3">
+                <label>Línea</label>
+                <select
+                  className="form-control"
+                  value={linea}
+                  //onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
+                  onChange={handleLineaChange}
+                  disabled={!familia} // Asegurar que se habilite correctamente
+                >
+                  <option value="">Seleccionar...</option>
+                  {lineas.length > 0 ? (
+                    lineas.map((linea, index) => (
+                      <option key={index} value={linea.cuenta}>
+                        {" "}
+                        {/* Verifica que el nombre del campo sea correcto */}
+                        {linea.cuenta} - {linea.descripcion}{" "}
+                        {/* Usa los nombres correctos de los campos */}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>Cargando líneas...</option> // Mensaje si aún no hay datos
+                  )}
+                </select>
               </div>
             </div>
             {/* Fila 2: Proveedor, Descripcion */}
             <div className="row mb-6">
-              <div className="col-md-2">
-                <div className="mb-3">
+              <div className="col-md-6">
+                <div className="mb-4">
                   <label>Clave SAE</label>
                   <select
                     className="form-control"
                     value={claveSae}
                     onChange={(e) => setClaveSae(e.target.value)}
+                    disabled={!linea || clavesSAE.length === 0} // Deshabilita si no hay claves disponibles
                   >
-                    <option value={0}>0</option>
-                    <option value={1}>1</option>
+                    <option value="">Seleccionar...</option>
+                    {Array.isArray(clavesSAE) && clavesSAE.length > 0 ? (
+                      clavesSAE.map((item, index) => (
+                        <option key={index} value={item.clave}>
+                          {item.descripcion}
+                        </option>
+                      ))
+                    ) : (
+                      <option disabled>No hay claves disponibles</option>
+                    )}
                   </select>
                 </div>
               </div>

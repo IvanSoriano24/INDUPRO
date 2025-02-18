@@ -30,6 +30,7 @@ import Select from "react-select";
 
 const EditarPreCotizacion = () => {
   const [claveSae, setClaveSae] = useState(""); // Estado para la clave SAE
+  const [clavesSAE, setClavesSAE] = useState([]);
   const [idPartida, setIdPartida] = useState("");
   const [showAddModalMO, setShowAddModalMO] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -306,36 +307,111 @@ const EditarPreCotizacion = () => {
     }
   };
   const obtenerFamiliaDesdeFirestore = async (categoriaSeleccionada) => {
-        try {
-          const refFamilias = collection(db, "LINEA"); // Colección en Firestore
-          const q = query(refFamilias, where("categoria", "==", categoriaSeleccionada));
-          const snapshot = await getDocs(q);
-      
-          const familiasFiltradas = snapshot.docs
-            .map(doc => ({
-              id: doc.id,
-              ...doc.data(),
-            }))
-            .filter(familia => {
-              // Simular la lógica SQL: la cuenta debe tener exactamente 1 punto (.)
-              const cuentaCoi = familia.CUENTA_COI || "";
-              return cuentaCoi.split(".").length - 1 === 1; // Debe tener exactamente 1 punto
-            });
-      
-          console.log("🔹 Familias filtradas desde Firestore:", familiasFiltradas);
-          return familiasFiltradas;
-        } catch (error) {
-          console.error("❌ Error al obtener familias desde Firestore:", error);
+      try {
+        console.log(
+          "🔎 Buscando familias para la categoría:",
+          categoriaSeleccionada
+        );
+  
+        const refFamilias = collection(db, "LINEA"); // Colección en Firestore
+        const q = query(
+          refFamilias,
+          where("CUENTA_COI", ">=", categoriaSeleccionada),
+          where("CUENTA_COI", "<", categoriaSeleccionada + "Z")
+        );
+        const snapshot = await getDocs(q);
+  
+        if (snapshot.empty) {
+          console.warn(
+            "⚠️ No se encontraron familias en Firestore para esta categoría."
+          );
           return [];
         }
-      };  
+        const familiasFiltradas = snapshot.docs
+          .map((doc) => {
+            const data = doc.data();
+            const cuentaCoi = data.CUENTA_COI || "";
+  
+            return {
+              id: doc.id,
+              cuenta: cuentaCoi,
+              descripcion: data.DESC_LIN || "Sin descripción",
+              puntos: cuentaCoi.split(".").length - 1, // Contamos los puntos en CUENTA_COI
+            };
+          })
+          .filter((familia) => familia.puntos === 1); // Debe tener exactamente 1 punto (.)
+  
+        console.log(
+          "🔹 Familias filtradas (después del filtrado):",
+          familiasFiltradas
+        );
+  
+        return familiasFiltradas;
+      } catch (error) {
+        console.error("❌ Error al obtener familias desde Firestore:", error);
+        return [];
+      }
+    };
+    const handleLineaChange = async (e) => {
+      const lineaSeleccionada = e.target.value;
+      setLinea(lineaSeleccionada); // Guarda la línea seleccionada
+  
+      if (lineaSeleccionada) {
+        const clavesDesdeFirestore = await obtenerClaveDesdeFirestore(
+          lineaSeleccionada
+        );
+        setClavesSAE(
+          Array.isArray(clavesDesdeFirestore) ? clavesDesdeFirestore : []
+        );
+      } else {
+        setClavesSAE([]); // 🔹 Limpia las claves si no hay línea seleccionada
+      }
+    };
+    const obtenerClaveDesdeFirestore = async (lineaSeleccionada) => {
+      try {
+        console.log("🔎 Buscando clave SAE para la línea:", lineaSeleccionada);
+  
+        const refInventario = collection(db, "INVENTARIO"); // Colección en Firestore
+        const q = query(
+          refInventario,
+          where("LIN_PROD", "==", lineaSeleccionada)
+        );
+        const snapshot = await getDocs(q);
+  
+        console.log(
+          "🔹 Documentos obtenidos desde Firestore:",
+          snapshot.docs.map((doc) => doc.data())
+        );
+  
+        if (snapshot.empty) {
+          console.warn(
+            "⚠️ No se encontró clave SAE en Firestore para esta línea."
+          );
+          return []; // 🔹 Ahora retorna un array vacío en lugar de null
+        }
+  
+        // 🔹 Retornamos un array de objetos con CVE_ART y DESCR
+        const clavesSaeEncontradas = snapshot.docs.map((doc) => ({
+          clave: doc.data().CVE_ART || "Clave no encontrada",
+          descripcion: doc.data().DESCR || "Descripción no encontrada",
+        }));
+  
+        console.log("🔹 Claves SAE obtenidas:", clavesSaeEncontradas);
+        return clavesSaeEncontradas;
+      } catch (error) {
+        console.error("❌ Error al obtener clave SAE desde Firestore:", error);
+        return []; // 🔹 Retornar array vacío en caso de error
+      }
+    };  
       const handleCategoriaChange = async (e) => {
         const categoriaSeleccionada = e.target.value;
         setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
     
         if (categoriaSeleccionada) {
-          const familiasDesdeFirestore = await obtenerFamiliaDesdeFirestore(categoriaSeleccionada);
-          setFamilia(familiasDesdeFirestore);
+          const familiasDesdeFirestore = await obtenerFamiliaDesdeFirestore(
+            categoriaSeleccionada
+          );
+          setFamilias(familiasDesdeFirestore);
           //obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
         } else {
           setFamilia([]); // Limpia la familia si no hay categoría seleccionada
@@ -371,7 +447,9 @@ const EditarPreCotizacion = () => {
   
       if (familiaSeleccionada) {
         //obtenerLineas(familiaSeleccionada); // Llama a la API para obtener líneas
-        const lineasDesdeFirestore = await obtenerLineasDesdeFirestore(familiaSeleccionada);
+        const lineasDesdeFirestore = await obtenerLineasDesdeFirestore(
+          familiaSeleccionada
+        );
         setLineas(lineasDesdeFirestore);
       } else {
         setLineas([]); // Limpia las líneas si no hay familia seleccionada
@@ -1734,7 +1812,7 @@ const EditarPreCotizacion = () => {
               </div>
             </div>
             <div className="col-md-4">
-              <div className="mb-3">
+              {/*<div className="mb-3">
                 <label>Familia</label>
                 <select
                   className="form-control"
@@ -1749,10 +1827,33 @@ const EditarPreCotizacion = () => {
                     </option>
                   ))}
                 </select>
+              </div>*/}
+              <div className="mb-3">
+                <label>Familia</label>
+                <select
+                  className="form-control"
+                  value={familia}
+                  onChange={handleFamiliaChange} // Llama a la función cuando cambie
+                  disabled={!categoria} // Asegurar que se habilite correctamente
+                >
+                  <option value="">Seleccionar...</option>
+                  {familias.length > 0 ? (
+                    familias.map((familia, index) => (
+                      <option key={index} value={familia.cuenta}>
+                        {" "}
+                        {/* Verifica el nombre correcto del campo */}
+                        {familia.cuenta} - {familia.descripcion}{" "}
+                        {/* Verifica que los datos existen */}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>Cargando familias...</option> // Mensaje si aún no hay datos
+                  )}
+                </select>
               </div>
             </div>
             <div className="col-md-4">
-              <div className="mb-3">
+              {/*<div className="mb-3">
                 <label>Línea</label>
                 <select
                   className="form-control"
@@ -1767,20 +1868,53 @@ const EditarPreCotizacion = () => {
                     </option>
                   ))}
                 </select>
+              </div>*/}
+              <div className="mb-3">
+                <label>Línea</label>
+                <select
+                  className="form-control"
+                  value={linea}
+                  //onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
+                  onChange={handleLineaChange}
+                  disabled={!familia} // Asegurar que se habilite correctamente
+                >
+                  <option value="">Seleccionar...</option>
+                  {lineas.length > 0 ? (
+                    lineas.map((linea, index) => (
+                      <option key={index} value={linea.cuenta}>
+                        {" "}
+                        {/* Verifica que el nombre del campo sea correcto */}
+                        {linea.cuenta} - {linea.descripcion}{" "}
+                        {/* Usa los nombres correctos de los campos */}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>Cargando líneas...</option> // Mensaje si aún no hay datos
+                  )}
+                </select>
               </div>
             </div>
             {/* Fila 2: Proveedor, Descripcion */}
             <div className="row mb-6">
-              <div className="col-md-2">
-                <div className="mb-3">
+              <div className="col-md-6">
+                <div className="mb-4">
                   <label>Clave SAE</label>
                   <select
                     className="form-control"
                     value={claveSae}
                     onChange={(e) => setClaveSae(e.target.value)}
+                    disabled={!linea || clavesSAE.length === 0} // Deshabilita si no hay claves disponibles
                   >
-                    <option value={0}>0</option>
-                    <option value={1}>1</option>
+                    <option value="">Seleccionar...</option>
+                    {Array.isArray(clavesSAE) && clavesSAE.length > 0 ? (
+                      clavesSAE.map((item, index) => (
+                        <option key={index} value={item.clave}>
+                          {item.descripcion}
+                        </option>
+                      ))
+                    ) : (
+                      <option disabled>No hay claves disponibles</option>
+                    )}
                   </select>
                 </div>
               </div>
