@@ -190,7 +190,6 @@ const Contactos = () => {
         show={showAddModalAC}
         onHide={handleCloseContacto} // Ahora limpia al cerrar
         centered
-        scrollable
         size="lg"
       >
         <Modal.Header closeButton>

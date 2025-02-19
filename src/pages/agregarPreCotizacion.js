@@ -1230,14 +1230,14 @@ const AgregarPreCotizacion = () => {
     e.preventDefault();
 
     // Validación de fechas antes de continuar
-        if (!fechaInicio || !fechaFin) {
-          swal.fire({
-              icon: "warning",
-              title: "Fechas incompletas",
-              text: "Debes seleccionar tanto la fecha de inicio como la fecha de fin antes de continuar.",
-          });
-          return;
-      }
+    if (!fechaInicio || !fechaFin) {
+      swal.fire({
+        icon: "warning",
+        title: "Fechas incompletas",
+        text: "Debes seleccionar tanto la fecha de inicio como la fecha de fin antes de continuar.",
+      });
+      return;
+    }
 
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
@@ -1960,22 +1960,19 @@ const AgregarPreCotizacion = () => {
                 <label>Familia</label>
                 <select
                   className="form-control"
-                  value={familia}
-                  onChange={handleFamiliaChange} // Llama a la función cuando cambie
-                  disabled={!categoria} // Asegurar que se habilite correctamente
+                  value={familia} // Asegura que este estado también se actualiza correctamente
+                  onChange={handleFamiliaChange}
+                  disabled={!categoria || familias.length === 0} // Se desactiva si no hay familias
                 >
                   <option value="">Seleccionar...</option>
                   {familias.length > 0 ? (
                     familias.map((familia, index) => (
                       <option key={index} value={familia.cuenta}>
-                        {" "}
-                        {/* Verifica el nombre correcto del campo */}
-                        {familia.cuenta} - {familia.descripcion}{" "}
-                        {/* Verifica que los datos existen */}
+                        {familia.cuenta} - {familia.descripcion}
                       </option>
                     ))
                   ) : (
-                    <option disabled>Cargando familias...</option> // Mensaje si aún no hay datos
+                    <option disabled>Cargando familias...</option>
                   )}
                 </select>
               </div>

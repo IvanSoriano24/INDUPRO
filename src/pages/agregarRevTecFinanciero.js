@@ -1445,44 +1445,69 @@ const AgregarRevTecFinanciero = () => {
         return []; // 🔹 Retornar array vacío en caso de error
       }
     };
-  const handleCategoriaChange = async (e) => {
-    const categoriaSeleccionada = e.target.value;
-    setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
-
-    if (categoriaSeleccionada) {
-      const familiasDesdeFirestore = await obtenerFamiliaDesdeFirestore(
-        categoriaSeleccionada
-      );
-      setFamilia(familiasDesdeFirestore);
-      //obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
-    } else {
-      setFamilia([]); // Limpia la familia si no hay categoría seleccionada
-    }
-  };
+    const handleCategoriaChange = async (e) => {
+      const categoriaSeleccionada = e.target.value;
+      setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
+  
+      if (categoriaSeleccionada) {
+        const familiasDesdeFirestore = await obtenerFamiliaDesdeFirestore(
+          categoriaSeleccionada
+        );
+        setFamilias(familiasDesdeFirestore);
+        //obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
+      } else {
+        setFamilia([]); // Limpia la familia si no hay categoría seleccionada
+      }
+    };
   const obtenerLineasDesdeFirestore = async (familiaSeleccionada) => {
-    try {
-      const refLineas = collection(db, "lineas"); // Colección en Firestore
-      const q = query(refLineas, where("LINEA", "==", familiaSeleccionada));
-      const snapshot = await getDocs(q);
-
-      const lineasFiltradas = snapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        .filter((linea) => {
-          // Simular la lógica SQL: la cuenta debe tener exactamente 2 puntos (.)
-          const cuentaCoi = linea.CUENTA_COI || "";
-          return cuentaCoi.split(".").length - 1 === 2; // Debe tener exactamente 2 puntos
-        });
-
-      console.log("🔹 Líneas filtradas desde Firestore:", lineasFiltradas);
-      return lineasFiltradas;
-    } catch (error) {
-      console.error("❌ Error al obtener líneas desde Firestore:", error);
-      return [];
-    }
-  };
+      try {
+        console.log("🔎 Buscando líneas para la familia:", familiaSeleccionada);
+  
+        const refLineas = collection(db, "LINEA"); // Colección en Firestore
+        const q = query(
+          refLineas,
+          where("CUENTA_COI", ">=", familiaSeleccionada),
+          where("CUENTA_COI", "<", familiaSeleccionada + "Z")
+        );
+        const snapshot = await getDocs(q);
+  
+        console.log(
+          "🔹 Documentos obtenidos desde Firestore:",
+          snapshot.docs.map((doc) => doc.data())
+        );
+  
+        if (snapshot.empty) {
+          console.warn(
+            "⚠️ No se encontraron líneas en Firestore para esta familia."
+          );
+          return [];
+        }
+  
+        const lineasFiltradas = snapshot.docs
+          .map((doc) => {
+            const data = doc.data();
+            const cuentaCoi = data.CUENTA_COI || "";
+  
+            return {
+              id: doc.id,
+              cuenta: cuentaCoi, // La clave de la línea
+              descripcion: data.DESC_LIN || "Sin descripción", // Descripción
+              puntos: cuentaCoi.split(".").length - 1, // Contamos los puntos en CUENTA_COI
+            };
+          })
+          .filter((linea) => linea.puntos === 2); // Debe tener exactamente 2 puntos (.)
+  
+        console.log(
+          "🔹 Líneas filtradas (después del filtrado):",
+          lineasFiltradas
+        );
+  
+        return lineasFiltradas;
+      } catch (error) {
+        console.error("❌ Error al obtener líneas desde Firestore:", error);
+        return [];
+      }
+    };
   const handleFamiliaChange = async (e) => {
     const familiaSeleccionada = e.target.value;
     setFamilia(familiaSeleccionada); // Guarda la familia seleccionada
@@ -1610,41 +1635,45 @@ const AgregarRevTecFinanciero = () => {
     setShow(true); // Abrir el modal
   };
   const cargarCategoriasDesdeFirestore = async () => {
-    try {
-      const refCategorias = collection(db, "LINEA"); // Colección en Firestore
-      const snapshot = await getDocs(refCategorias);
-
-      // Transformamos los datos para extraer solo la primera parte de CUENTA_COI
-      const categoriasProcesadas = snapshot.docs
-        .map((doc) => {
-          const data = doc.data();
-          return {
-            cuenta: data.CUENTA_COI ? data.CUENTA_COI.split(".")[0] : "", // Extraer la primera parte
-            descripcion: data.DESC_LIN || "Sin descripción", // Descripción de la línea
-          };
-        })
-        .filter((categoria) => categoria.cuenta !== ""); // Filtrar cuentas vacías o nulas
-
-      // 🔹 Eliminar duplicados basados en "cuenta"
-      const categoriasUnicas = Array.from(
-        new Map(categoriasProcesadas.map((cat) => [cat.cuenta, cat])).values()
-      );
-
-      console.log("🔹 Categorías obtenidas desde Firestore:", categoriasUnicas);
-      return categoriasUnicas;
-    } catch (error) {
-      console.error(
-        "❌ Error al obtener las categorías desde Firestore:",
-        error
-      );
-      return [];
-    }
-  };
+      try {
+        const refCategorias = collection(db, "LINEA"); // Colección en Firestore
+        const snapshot = await getDocs(refCategorias);
+  
+        // 🔹 Filtramos solo las categorías padres (CUENTA_COI sin puntos)
+        const categoriasProcesadas = snapshot.docs
+          .map((doc) => {
+            const data = doc.data();
+            const cuentaCoi = data.CUENTA_COI || "";
+  
+            return {
+              cuenta: cuentaCoi, // Ahora tomamos CUENTA_COI completo, pero solo si no tiene puntos
+              descripcion: data.DESC_LIN || "Sin descripción", // Descripción de la línea
+              puntos: cuentaCoi.split(".").length - 1, // Contamos los puntos en CUENTA_COI
+            };
+          })
+          .filter((categoria) => categoria.cuenta && categoria.puntos === 0); // Solo categorías sin puntos y válidas
+  
+        // 🔹 Eliminar duplicados basados en "cuenta"
+        const categoriasUnicas = Array.from(
+          new Map(categoriasProcesadas.map((cat) => [cat.cuenta, cat])).values()
+        );
+  
+        console.log("🔹 Categorías obtenidas desde Firestore:", categoriasUnicas);
+        return categoriasUnicas;
+      } catch (error) {
+        console.error(
+          "❌ Error al obtener las categorías desde Firestore:",
+          error
+        );
+        return [];
+      }
+    };
   // 🔹 Función para obtener la lista de proveedores desde Firestore
   const cargarProveedoresDesdeFirestore = async () => {
     try {
       const refProveedores = collection(db, "PROVEEDORES"); // Cambiado a "listaProveedores"
       const snapshot = await getDocs(refProveedores);
+      //console.log(snapshot);
       return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
       console.error("❌ Error al obtener los proveedores:", error);
@@ -1652,7 +1681,6 @@ const AgregarRevTecFinanciero = () => {
     }
   };
   const handleOpenModal = async (noPartida) => {
-    alert("Abrio");
     setShowAddModal(true);
     try {
       const partidaSeleccionada = par_levDigital.find(

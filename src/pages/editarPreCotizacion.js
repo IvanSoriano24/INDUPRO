@@ -158,7 +158,7 @@ const EditarPreCotizacion = () => {
       unsubscribe && unsubscribe();
     };
   }, []); // 🔹 Eliminamos `factores` de las dependencias*/
-  
+
   /*-------------------------------------------------------------------------------------------------------*/
   /*const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
@@ -307,74 +307,125 @@ const EditarPreCotizacion = () => {
     }
   };
   const obtenerFamiliaDesdeFirestore = async (categoriaSeleccionada) => {
-      try {
-        console.log(
-          "🔎 Buscando familias para la categoría:",
-          categoriaSeleccionada
+    try {
+      console.log(
+        "🔎 Buscando familias para la categoría:",
+        categoriaSeleccionada
+      );
+
+      const refFamilias = collection(db, "LINEA"); // Colección en Firestore
+      const q = query(
+        refFamilias,
+        where("CUENTA_COI", ">=", categoriaSeleccionada),
+        where("CUENTA_COI", "<", categoriaSeleccionada + "Z")
+      );
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        console.warn(
+          "⚠️ No se encontraron familias en Firestore para esta categoría."
         );
-  
-        const refFamilias = collection(db, "LINEA"); // Colección en Firestore
-        const q = query(
-          refFamilias,
-          where("CUENTA_COI", ">=", categoriaSeleccionada),
-          where("CUENTA_COI", "<", categoriaSeleccionada + "Z")
-        );
-        const snapshot = await getDocs(q);
-  
-        if (snapshot.empty) {
-          console.warn(
-            "⚠️ No se encontraron familias en Firestore para esta categoría."
-          );
-          return [];
-        }
-        const familiasFiltradas = snapshot.docs
-          .map((doc) => {
-            const data = doc.data();
-            const cuentaCoi = data.CUENTA_COI || "";
-  
-            return {
-              id: doc.id,
-              cuenta: cuentaCoi,
-              descripcion: data.DESC_LIN || "Sin descripción",
-              puntos: cuentaCoi.split(".").length - 1, // Contamos los puntos en CUENTA_COI
-            };
-          })
-          .filter((familia) => familia.puntos === 1); // Debe tener exactamente 1 punto (.)
-  
-        console.log(
-          "🔹 Familias filtradas (después del filtrado):",
-          familiasFiltradas
-        );
-  
-        return familiasFiltradas;
-      } catch (error) {
-        console.error("❌ Error al obtener familias desde Firestore:", error);
         return [];
       }
-    };
-    const handleLineaChange = async (e) => {
-      const lineaSeleccionada = e.target.value;
-      setLinea(lineaSeleccionada); // Guarda la línea seleccionada
-  
-      if (lineaSeleccionada) {
-        const clavesDesdeFirestore = await obtenerClaveDesdeFirestore(
-          lineaSeleccionada
+      const familiasFiltradas = snapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          const cuentaCoi = data.CUENTA_COI || "";
+
+          return {
+            id: doc.id,
+            cuenta: cuentaCoi,
+            descripcion: data.DESC_LIN || "Sin descripción",
+            puntos: cuentaCoi.split(".").length - 1, // Contamos los puntos en CUENTA_COI
+          };
+        })
+        .filter((familia) => familia.puntos === 1); // Debe tener exactamente 1 punto (.)
+
+      console.log(
+        "🔹 Familias filtradas (después del filtrado):",
+        familiasFiltradas
+      );
+
+      return familiasFiltradas;
+    } catch (error) {
+      console.error("❌ Error al obtener familias desde Firestore:", error);
+      return [];
+    }
+  };
+  const handleLineaChange = async (e) => {
+    const lineaSeleccionada = e.target.value;
+    setLinea(lineaSeleccionada); // Guarda la línea seleccionada
+
+    if (lineaSeleccionada) {
+      const clavesDesdeFirestore = await obtenerClaveDesdeFirestore(
+        lineaSeleccionada
+      );
+      setClavesSAE(
+        Array.isArray(clavesDesdeFirestore) ? clavesDesdeFirestore : []
+      );
+    } else {
+      setClavesSAE([]); // 🔹 Limpia las claves si no hay línea seleccionada
+    }
+  };
+  const obtenerClaveDesdeFirestore = async (lineaSeleccionada) => {
+    try {
+      console.log("🔎 Buscando clave SAE para la línea:", lineaSeleccionada);
+
+      const refInventario = collection(db, "INVENTARIO"); // Colección en Firestore
+      const q = query(
+        refInventario,
+        where("LIN_PROD", "==", lineaSeleccionada)
+      );
+      const snapshot = await getDocs(q);
+
+      console.log(
+        "🔹 Documentos obtenidos desde Firestore:",
+        snapshot.docs.map((doc) => doc.data())
+      );
+
+      if (snapshot.empty) {
+        console.warn(
+          "⚠️ No se encontró clave SAE en Firestore para esta línea."
         );
-        setClavesSAE(
-          Array.isArray(clavesDesdeFirestore) ? clavesDesdeFirestore : []
-        );
-      } else {
-        setClavesSAE([]); // 🔹 Limpia las claves si no hay línea seleccionada
+        return []; // 🔹 Ahora retorna un array vacío en lugar de null
       }
-    };
-    const obtenerClaveDesdeFirestore = async (lineaSeleccionada) => {
+
+      // 🔹 Retornamos un array de objetos con CVE_ART y DESCR
+      const clavesSaeEncontradas = snapshot.docs.map((doc) => ({
+        clave: doc.data().CVE_ART || "Clave no encontrada",
+        descripcion: doc.data().DESCR || "Descripción no encontrada",
+      }));
+
+      console.log("🔹 Claves SAE obtenidas:", clavesSaeEncontradas);
+      return clavesSaeEncontradas;
+    } catch (error) {
+      console.error("❌ Error al obtener clave SAE desde Firestore:", error);
+      return []; // 🔹 Retornar array vacío en caso de error
+    }
+  };
+  const handleCategoriaChange = async (e) => {
+    const categoriaSeleccionada = e.target.value;
+    setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
+
+    if (categoriaSeleccionada) {
+      const familiasDesdeFirestore = await obtenerFamiliaDesdeFirestore(
+        categoriaSeleccionada
+      );
+      setFamilias(familiasDesdeFirestore);
+      //obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
+    } else {
+      setFamilia([]); // Limpia la familia si no hay categoría seleccionada
+    }
+  };
+  const obtenerLineasDesdeFirestore = async (familiaSeleccionada) => {
       try {
-        console.log("🔎 Buscando clave SAE para la línea:", lineaSeleccionada);
+        console.log("🔎 Buscando líneas para la familia:", familiaSeleccionada);
   
-        const refInventario = collection(db, "INVENTARIO"); // Colección en Firestore
+        const refLineas = collection(db, "LINEA"); // Colección en Firestore
         const q = query(
-          refInventario,
-          where("LIN_PROD", "==", lineaSeleccionada)
+          refLineas,
+          where("CUENTA_COI", ">=", familiaSeleccionada),
+          where("CUENTA_COI", "<", familiaSeleccionada + "Z")
         );
         const snapshot = await getDocs(q);
   
@@ -385,115 +436,95 @@ const EditarPreCotizacion = () => {
   
         if (snapshot.empty) {
           console.warn(
-            "⚠️ No se encontró clave SAE en Firestore para esta línea."
+            "⚠️ No se encontraron líneas en Firestore para esta familia."
           );
-          return []; // 🔹 Ahora retorna un array vacío en lugar de null
+          return [];
         }
   
-        // 🔹 Retornamos un array de objetos con CVE_ART y DESCR
-        const clavesSaeEncontradas = snapshot.docs.map((doc) => ({
-          clave: doc.data().CVE_ART || "Clave no encontrada",
-          descripcion: doc.data().DESCR || "Descripción no encontrada",
-        }));
-  
-        console.log("🔹 Claves SAE obtenidas:", clavesSaeEncontradas);
-        return clavesSaeEncontradas;
-      } catch (error) {
-        console.error("❌ Error al obtener clave SAE desde Firestore:", error);
-        return []; // 🔹 Retornar array vacío en caso de error
-      }
-    };  
-      const handleCategoriaChange = async (e) => {
-        const categoriaSeleccionada = e.target.value;
-        setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
-    
-        if (categoriaSeleccionada) {
-          const familiasDesdeFirestore = await obtenerFamiliaDesdeFirestore(
-            categoriaSeleccionada
-          );
-          setFamilias(familiasDesdeFirestore);
-          //obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
-        } else {
-          setFamilia([]); // Limpia la familia si no hay categoría seleccionada
-        }
-      };
-  const obtenerLineasDesdeFirestore = async (familiaSeleccionada) => {
-      try {
-        const refLineas = collection(db, "lineas"); // Colección en Firestore
-        const q = query(refLineas, where("LINEA", "==", familiaSeleccionada));
-        const snapshot = await getDocs(q);
-    
         const lineasFiltradas = snapshot.docs
-          .map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-          .filter(linea => {
-            // Simular la lógica SQL: la cuenta debe tener exactamente 2 puntos (.)
-            const cuentaCoi = linea.CUENTA_COI || "";
-            return cuentaCoi.split(".").length - 1 === 2; // Debe tener exactamente 2 puntos
-          });
-    
-        console.log("🔹 Líneas filtradas desde Firestore:", lineasFiltradas);
+          .map((doc) => {
+            const data = doc.data();
+            const cuentaCoi = data.CUENTA_COI || "";
+  
+            return {
+              id: doc.id,
+              cuenta: cuentaCoi, // La clave de la línea
+              descripcion: data.DESC_LIN || "Sin descripción", // Descripción
+              puntos: cuentaCoi.split(".").length - 1, // Contamos los puntos en CUENTA_COI
+            };
+          })
+          .filter((linea) => linea.puntos === 2); // Debe tener exactamente 2 puntos (.)
+  
+        console.log(
+          "🔹 Líneas filtradas (después del filtrado):",
+          lineasFiltradas
+        );
+  
         return lineasFiltradas;
       } catch (error) {
         console.error("❌ Error al obtener líneas desde Firestore:", error);
         return [];
       }
-    };  
-    const handleFamiliaChange = async (e) => {
-      const familiaSeleccionada = e.target.value;
-      setFamilia(familiaSeleccionada); // Guarda la familia seleccionada
-  
-      if (familiaSeleccionada) {
-        //obtenerLineas(familiaSeleccionada); // Llama a la API para obtener líneas
-        const lineasDesdeFirestore = await obtenerLineasDesdeFirestore(
-          familiaSeleccionada
-        );
-        setLineas(lineasDesdeFirestore);
-      } else {
-        setLineas([]); // Limpia las líneas si no hay familia seleccionada
-      }
     };
+  const handleFamiliaChange = async (e) => {
+    const familiaSeleccionada = e.target.value;
+    setFamilia(familiaSeleccionada); // Guarda la familia seleccionada
+
+    if (familiaSeleccionada) {
+      //obtenerLineas(familiaSeleccionada); // Llama a la API para obtener líneas
+      const lineasDesdeFirestore = await obtenerLineasDesdeFirestore(
+        familiaSeleccionada
+      );
+      setLineas(lineasDesdeFirestore);
+    } else {
+      setLineas([]); // Limpia las líneas si no hay familia seleccionada
+    }
+  };
   const cargarCategoriasDesdeFirestore = async () => {
-        try {
-          const refCategorias = collection(db, "LINEA"); // Colección en Firestore
-          const snapshot = await getDocs(refCategorias);
-      
-          // Transformamos los datos para extraer solo la primera parte de CUENTA_COI
-          const categoriasProcesadas = snapshot.docs
-            .map(doc => {
-              const data = doc.data();
-              return {
-                cuenta: data.CUENTA_COI ? data.CUENTA_COI.split(".")[0] : "", // Extraer la primera parte
-                descripcion: data.DESC_LIN || "Sin descripción", // Descripción de la línea
-              };
-            })
-            .filter(categoria => categoria.cuenta !== ""); // Filtrar cuentas vacías o nulas
-      
-          // 🔹 Eliminar duplicados basados en "cuenta"
-          const categoriasUnicas = Array.from(
-            new Map(categoriasProcesadas.map(cat => [cat.cuenta, cat])).values()
-          );
-      
-          console.log("🔹 Categorías obtenidas desde Firestore:", categoriasUnicas);
-          return categoriasUnicas;
-        } catch (error) {
-          console.error("❌ Error al obtener las categorías desde Firestore:", error);
-          return [];
-        }
-      };  
-      // 🔹 Función para obtener la lista de proveedores desde Firestore
-      const cargarProveedoresDesdeFirestore = async () => {
-        try {
-          const refProveedores = collection(db, "PROVEEDORES"); // Cambiado a "listaProveedores"
-          const snapshot = await getDocs(refProveedores);
-          return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        } catch (error) {
-          console.error("❌ Error al obtener los proveedores:", error);
-          return [];
-        }
-      };
+    try {
+      const refCategorias = collection(db, "LINEA"); // Colección en Firestore
+      const snapshot = await getDocs(refCategorias);
+
+      // 🔹 Filtramos solo las categorías padres (CUENTA_COI sin puntos)
+      const categoriasProcesadas = snapshot.docs
+        .map((doc) => {
+          const data = doc.data();
+          const cuentaCoi = data.CUENTA_COI || "";
+
+          return {
+            cuenta: cuentaCoi, // Ahora tomamos CUENTA_COI completo, pero solo si no tiene puntos
+            descripcion: data.DESC_LIN || "Sin descripción", // Descripción de la línea
+            puntos: cuentaCoi.split(".").length - 1, // Contamos los puntos en CUENTA_COI
+          };
+        })
+        .filter((categoria) => categoria.cuenta && categoria.puntos === 0); // Solo categorías sin puntos y válidas
+
+      // 🔹 Eliminar duplicados basados en "cuenta"
+      const categoriasUnicas = Array.from(
+        new Map(categoriasProcesadas.map((cat) => [cat.cuenta, cat])).values()
+      );
+
+      console.log("🔹 Categorías obtenidas desde Firestore:", categoriasUnicas);
+      return categoriasUnicas;
+    } catch (error) {
+      console.error(
+        "❌ Error al obtener las categorías desde Firestore:",
+        error
+      );
+      return [];
+    }
+  };
+  // 🔹 Función para obtener la lista de proveedores desde Firestore
+  const cargarProveedoresDesdeFirestore = async () => {
+    try {
+      const refProveedores = collection(db, "PROVEEDORES"); // Cambiado a "listaProveedores"
+      const snapshot = await getDocs(refProveedores);
+      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error("❌ Error al obtener los proveedores:", error);
+      return [];
+    }
+  };
   const handleOpenModal = async (noPartida) => {
     try {
       console.log("🔄 Abriendo modal para Insumos. No. Partida:", noPartida);
@@ -506,7 +537,7 @@ const EditarPreCotizacion = () => {
       setCostoCotizado(0);
 
       // 🟢 Cargar unidades (categorías)
-     /* const responseUnidades = await axios.get(
+      /* const responseUnidades = await axios.get(
         "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineasMaster"
       );
       setCategorias(responseUnidades.data);
@@ -517,10 +548,10 @@ const EditarPreCotizacion = () => {
       );
       setProveedores(responseProvedores.data);*/
       const categorias = await cargarCategoriasDesdeFirestore();
-    setCategorias(categorias);
+      setCategorias(categorias);
 
-    const proveedores = await cargarProveedoresDesdeFirestore();
-    setProveedores(proveedores);
+      const proveedores = await cargarProveedoresDesdeFirestore();
+      setProveedores(proveedores);
 
       // 🟢 Esperar un breve momento para que el estado se actualice antes de mostrar el modal
       setTimeout(() => {
@@ -781,91 +812,121 @@ const EditarPreCotizacion = () => {
   /* --------------------- JALAR INFORMACIÓN DE PARTIDAS ANTERIORES ------------------------------------- */
   const getParPreCot = (cve_precot, setPar_preCot, setNoPartida) => {
     if (!cve_precot) return; // Evita ejecutar la consulta si cve_precot es null o undefined
-  
-    console.log(`🛠️ Suscribiéndose a cambios en PAR_PRECOTIZACION con cve_precot: ${cve_precot}`);
-  
+
+    console.log(
+      `🛠️ Suscribiéndose a cambios en PAR_PRECOTIZACION con cve_precot: ${cve_precot}`
+    );
+
     const q = query(
       collection(db, "PAR_PRECOTIZACION"),
       where("cve_precot", "==", cve_precot)
     );
-  
+
     // Usamos `onSnapshot` para recibir actualizaciones en tiempo real
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const par_preCotList = snapshot.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
-  
+
       // Ordenar por número de partida
       par_preCotList.sort((a, b) => a.noPartida - b.noPartida);
       setPar_preCot(par_preCotList);
-  
+
       // Obtener el número máximo de partida
-      const maxPartida = Math.max(...par_preCotList.map((item) => item.noPartida), 0);
+      const maxPartida = Math.max(
+        ...par_preCotList.map((item) => item.noPartida),
+        0
+      );
       setNoPartida(maxPartida + 1);
-  
-      console.log("📌 Datos de PAR_PRECOTIZACION actualizados:", par_preCotList);
+
+      console.log(
+        "📌 Datos de PAR_PRECOTIZACION actualizados:",
+        par_preCotList
+      );
     });
-  
+
     // Cleanup: Nos desuscribimos si cve_precot cambia o el componente se desmonta
     return unsubscribe;
   };
-  
+
   useEffect(() => {
     if (!cve_precot) return;
-  
+
     console.log(`🛠️ useEffect ejecutado con cve_precot: ${cve_precot}`);
     const unsubscribe = getParPreCot(cve_precot, setPar_preCot, setNoPartida);
-  
+
     return () => {
-      console.log("❌ Desuscribiendo de Firestore para cve_precot:", cve_precot);
+      console.log(
+        "❌ Desuscribiendo de Firestore para cve_precot:",
+        cve_precot
+      );
       unsubscribe && unsubscribe();
     };
   }, [cve_precot]);
   /* ----------------------------------------- OBTENER PARTDIAS DE INSUMOS PARA LA PRECOTIZACIÓN -------------------------*/
 
-  const getParPreCotizacion = (cve_precot, setPar_PreCoti_insu, setNoParatidaMO) => {
+  const getParPreCotizacion = (
+    cve_precot,
+    setPar_PreCoti_insu,
+    setNoParatidaMO
+  ) => {
     if (!cve_precot) return; // Evita ejecutar la consulta si cve_precot es null o undefined
-  
-    console.log(`🛠️ Suscribiéndose a cambios en PAR_PRECOTIZACION_INSU con cve_precot: ${cve_precot}`);
-  
+
+    console.log(
+      `🛠️ Suscribiéndose a cambios en PAR_PRECOTIZACION_INSU con cve_precot: ${cve_precot}`
+    );
+
     const q = query(
       collection(db, "PAR_PRECOTIZACION_INSU"),
       where("cve_precot", "==", cve_precot)
     );
-  
+
     // Usamos `onSnapshot` para recibir actualizaciones en tiempo real
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const par_levDigList1 = snapshot.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
-  
-      console.log("📌 Datos de PAR_PRECOTIZACION_INSU actualizados:", par_levDigList1);
-  
+
+      console.log(
+        "📌 Datos de PAR_PRECOTIZACION_INSU actualizados:",
+        par_levDigList1
+      );
+
       // Ordenar por número de partida
       par_levDigList1.sort((a, b) => a.noPartidaPC - b.noPartidaPC);
       setPar_PreCoti_insu(par_levDigList1);
-  
+
       // Obtener el número máximo de partida
-      const maxPartida = Math.max(...par_levDigList1.map((item) => item.noPartidaPC), 0);
+      const maxPartida = Math.max(
+        ...par_levDigList1.map((item) => item.noPartidaPC),
+        0
+      );
       setNoParatidaMO(maxPartida + 1);
-  
+
       console.log("📌 Número máximo de partida actualizado:", maxPartida + 1);
     });
-  
+
     // Cleanup: Nos desuscribimos si cve_precot cambia o el componente se desmonta
     return unsubscribe;
   };
-  
+
   useEffect(() => {
     if (!cve_precot) return;
-  
+
     console.log(`🛠️ useEffect ejecutado con cve_precot: ${cve_precot}`);
-    const unsubscribe = getParPreCotizacion(cve_precot, setPar_PreCoti_insu, setNoParatidaMO);
-  
+    const unsubscribe = getParPreCotizacion(
+      cve_precot,
+      setPar_PreCoti_insu,
+      setNoParatidaMO
+    );
+
     return () => {
-      console.log("❌ Desuscribiendo de Firestore para cve_precot:", cve_precot);
+      console.log(
+        "❌ Desuscribiendo de Firestore para cve_precot:",
+        cve_precot
+      );
       unsubscribe && unsubscribe();
     };
   }, [cve_precot]);
@@ -874,30 +935,30 @@ const EditarPreCotizacion = () => {
   const obtenerFactores = (setFactores, hasSubscribedRef) => {
     if (hasSubscribedRef.current) return; // Evita ejecutar más de una vez
     hasSubscribedRef.current = true;
-  
+
     console.log("🛠️ Suscribiéndose a cambios en FACTORES...");
-  
+
     const unsubscribe = onSnapshot(collection(db, "FACTORES"), (snapshot) => {
       const factoresList = snapshot.docs.map((doc) => {
         const data = doc.data();
         console.log("📌 Documento recuperado:", data); // Depuración
-  
+
         return data.nombre !== undefined ? data.nombre : "Sin nombre"; // Evita undefined
       });
-  
+
       setFactores(factoresList);
       console.log("📌 Datos de FACTORES actualizados:", factoresList);
     });
-  
+
     // Cleanup: Nos desuscribimos si el componente se desmonta
     return unsubscribe;
   };
-  
+
   const hasSubscribedRef = useRef(false);
   useEffect(() => {
     console.log("🛠️ useEffect ejecutado para FACTORES");
     const unsubscribe = obtenerFactores(setFactores, hasSubscribedRef);
-  
+
     return () => {
       console.log("❌ Desuscribiendo de FACTORES");
       unsubscribe && unsubscribe();
@@ -906,46 +967,61 @@ const EditarPreCotizacion = () => {
   /* ------------------------------------ OBTENER TABLA DE TRABAJADORES -------------------------------*/
   const obtenerPartidasMO = (cve_precot, setListMO, setNoParatidaMO) => {
     if (!cve_precot) return; // Evita ejecutar la consulta si cve_precot es null o undefined
-  
-    console.log(`🛠️ Suscribiéndose a cambios en PAR_PRECOTIZACION_MO con cve_precot: ${cve_precot}`);
-  
+
+    console.log(
+      `🛠️ Suscribiéndose a cambios en PAR_PRECOTIZACION_MO con cve_precot: ${cve_precot}`
+    );
+
     const q = query(
       collection(db, "PAR_PRECOTIZACION_MO"),
       where("cve_precot", "==", cve_precot)
     );
-  
+
     // Usamos `onSnapshot` para recibir actualizaciones en tiempo real
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const par_levDigList1 = snapshot.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
-  
-      console.log("📌 Datos de PAR_PRECOTIZACION_MO actualizados:", par_levDigList1);
-  
+
+      console.log(
+        "📌 Datos de PAR_PRECOTIZACION_MO actualizados:",
+        par_levDigList1
+      );
+
       // Ordenar por número de partida
       par_levDigList1.sort((a, b) => a.noPartidaMO - b.noPartidaMO);
       setListMO(par_levDigList1);
-  
+
       // Obtener el número máximo de partida
-      const maxPartida = Math.max(...par_levDigList1.map((item) => item.noPartidaMO), 0);
+      const maxPartida = Math.max(
+        ...par_levDigList1.map((item) => item.noPartidaMO),
+        0
+      );
       setNoParatidaMO(maxPartida + 1);
-  
+
       console.log("📌 Número máximo de partida actualizado:", maxPartida + 1);
     });
-  
+
     // Cleanup: Nos desuscribimos si cve_precot cambia o el componente se desmonta
     return unsubscribe;
   };
-  
+
   useEffect(() => {
     if (!cve_precot) return;
-  
+
     console.log(`🛠️ useEffect ejecutado con cve_precot: ${cve_precot}`);
-    const unsubscribe = obtenerPartidasMO(cve_precot, setListMO, setNoParatidaMO);
-  
+    const unsubscribe = obtenerPartidasMO(
+      cve_precot,
+      setListMO,
+      setNoParatidaMO
+    );
+
     return () => {
-      console.log("❌ Desuscribiendo de Firestore para cve_precot:", cve_precot);
+      console.log(
+        "❌ Desuscribiendo de Firestore para cve_precot:",
+        cve_precot
+      );
       unsubscribe && unsubscribe();
     };
   }, [cve_precot]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
@@ -953,22 +1029,22 @@ const EditarPreCotizacion = () => {
 
   const obtenerTrabajadores = (setManoObra) => {
     console.log("🛠️ Suscribiéndose a cambios en PERSONAL...");
-  
+
     const unsubscribe = onSnapshot(collection(db, "PERSONAL"), (snapshot) => {
       const manoObraList = snapshot.docs.map((doc) => doc.data().personal);
       setManoObra(manoObraList);
-  
+
       console.log("📌 Datos de PERSONAL actualizados:", manoObraList);
     });
-  
+
     // Cleanup: Nos desuscribimos si el componente se desmonta
     return unsubscribe;
   };
-  
+
   useEffect(() => {
     console.log("🛠️ useEffect ejecutado para PERSONAL");
     const unsubscribe = obtenerTrabajadores(setManoObra);
-  
+
     return () => {
       console.log("❌ Desuscribiendo de PERSONAL");
       unsubscribe && unsubscribe();
