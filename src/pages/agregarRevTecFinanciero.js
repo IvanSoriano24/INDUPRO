@@ -803,6 +803,17 @@ const AgregarRevTecFinanciero = () => {
   /* ----------------------------------------------------------- - AGREGAR NUEVO DOCUMENTO -------------------------------------------------*/
   const addPreCotizacion = async (e) => {
     e.preventDefault();
+
+    // Validación de fechas antes de continuar
+    if (!fechaInicio || !fechaFin) {
+      swal.fire({
+          icon: "warning",
+          title: "Fechas incompletas",
+          text: "Debes seleccionar tanto la fecha de inicio como la fecha de fin antes de continuar.",
+      });
+      return;
+  }
+
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))

@@ -1,24 +1,34 @@
-import React, { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { collection, addDoc, query, orderBy, limit, getDocs, where, getDoc, doc, updateDoc } from "firebase/firestore"
-import { db } from "../firebaseConfig/firebase"
-import { TabContent, TabPane, Nav, NavItem, NavLink, Label } from "reactstrap"
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  where,
+  getDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "../firebaseConfig/firebase";
+import { TabContent, TabPane, Nav, NavItem, NavLink, Label } from "reactstrap";
 import { FaCircleQuestion, FaCirclePlus } from "react-icons/fa6";
 import { HiDocumentPlus } from "react-icons/hi2";
 import { IoSearchSharp } from "react-icons/io5";
-import swal from "sweetalert";
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
+import swal from "sweetalert2";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 
 import { CiCirclePlus } from "react-icons/ci";
 import { MdDelete } from "react-icons/md";
 import { FaPencilAlt } from "react-icons/fa";
-import { red } from "@mui/material/colors"
+import { red } from "@mui/material/colors";
 import * as XLSX from "xlsx";
 import { ModalTitle, Modal, Button } from "react-bootstrap";
 
 const AgregarLevDigital = () => {
-
   /*----------------------------------------------------------*/
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -47,26 +57,28 @@ const AgregarLevDigital = () => {
       // Asegúrate de que las primeras filas son las que contienen los encabezados
       const headers = jsonData[0]; // Primera fila como encabezados
 
-      let isValid = true;  // Bandera para verificar la validez de los datos
+      let isValid = true; // Bandera para verificar la validez de los datos
       let prevPartida = 0; // Variable para almacenar el último número de partida
       const filteredData = jsonData.slice(1).map((row, index) => {
-        const noPartida = String(row[0] || '').trim();
-        const cantidad = String(row[1] || '').trim();
-        const descripcion = String(row[2] || '').trim();
-        const observaciones = String(row[3] || '').trim();
+        const noPartida = String(row[0] || "").trim();
+        const cantidad = String(row[1] || "").trim();
+        const descripcion = String(row[2] || "").trim();
+        const observaciones = String(row[3] || "").trim();
 
         // Validación de secuencialidad del número de partida
         if (parseInt(noPartida) !== prevPartida + 1) {
           isValid = false;
           swal({
-            text: `El número de partida no es secuencial en la fila ${index + 2}.`,
+            text: `El número de partida no es secuencial en la fila ${
+              index + 2
+            }.`,
             icon: "error",
           });
           //alert(`El número de partida no es secuencial en la fila ${index + 2}.`);
         }
 
         // Validación de cantidad (debe ser un número entero)
-        if (!Number.isInteger(Number(cantidad)) || cantidad === '') {
+        if (!Number.isInteger(Number(cantidad)) || cantidad === "") {
           isValid = false;
           swal({
             text: `La cantidad no es un número entero en la fila ${index + 2}.`,
@@ -81,15 +93,18 @@ const AgregarLevDigital = () => {
           noPartida,
           cantidad,
           descripcion,
-          observaciones
+          observaciones,
         };
       });
       if (!isValid) {
         return; // Detener el procesamiento si alguna validación falla
       }
-      swal("Los datos del archivo Excel son válidos y se han procesado correctamente.", {
-        icon: "success",
-      });
+      swal(
+        "Los datos del archivo Excel son válidos y se han procesado correctamente.",
+        {
+          icon: "success",
+        }
+      );
       // Si todos los datos son correctos
       //alert("Los datos del archivo Excel son válidos y se han procesado correctamente.");
 
@@ -132,10 +147,11 @@ const AgregarLevDigital = () => {
     handleShow(item);
   };
 
-
   const guardarEdicion = () => {
     const updatedList = list.map((item) =>
-      item.noPartida === noPartida ? { ...item, cantidad, descripcion, observaciones: observacion } : item
+      item.noPartida === noPartida
+        ? { ...item, cantidad, descripcion, observaciones: observacion }
+        : item
     );
     setList(updatedList);
     handleClose();
@@ -156,17 +172,15 @@ const AgregarLevDigital = () => {
   const [docSig, setDocSig] = useState("");
   const [estatus, setEstatus] = useState("Activo");
   const [fechaRegistro, setFechaRegistro] = useState("");
-  const [horaActual, setHoraActual] = useState('');
+  const [horaActual, setHoraActual] = useState("");
   const [clientes, setClientes] = useState([]);
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const encabezadoCollection = collection(db, "LEVDIGITAL");
   const parLevDigCollection = collection(db, "PAR_LEVDIGITAL");
 
-
   /* --------------------   Obtener los folios correspondiente  -------------------------- */
   useEffect(() => {
-
     const obtenerFolios = async () => {
       const foliosCollection = collection(db, "FOLIOS");
       const q = query(foliosCollection, where("documento", "==", "LD"));
@@ -180,17 +194,25 @@ const AgregarLevDigital = () => {
           folioSiguiente: data.folioSiguiente,
         };
       });
+
       setFolios(listaFolios);
+
+      // Si hay folios y no se ha seleccionado ninguno, tomar el primero por defecto
+      if (listaFolios.length > 0 && !selectedFolio) {
+        setSelectedFolio(listaFolios[0].folio);
+      }
     };
 
-
     obtenerFolios();
-  }, []); // Se ejecutará solo una vez al cargar el componente
+}, [selectedFolio]);
+ // Se ejecutará solo una vez al cargar el componente
 
   useEffect(() => {
     // Actualiza el secuencial cuando se selecciona un nuevo folio
     if (selectedFolio) {
-      const folioSeleccionado = folios.find((folio) => folio.folio === selectedFolio);
+      const folioSeleccionado = folios.find(
+        (folio) => folio.folio === selectedFolio
+      );
       if (folioSeleccionado) {
         setFolioSiguiente(folioSeleccionado.folioSiguiente);
       }
@@ -199,7 +221,12 @@ const AgregarLevDigital = () => {
 
   /* --------------------  fin de Obtener los folios correspondiente  -------------------------- */
   const obtenerClientePorNombre = async (nombreCliete) => {
-    const querySnapshot = await getDocs(query(collection(db, "CLIENTES"), where("razonSocial", "==", nombreCliete)));
+    const querySnapshot = await getDocs(
+      query(
+        collection(db, "CLIENTES"),
+        where("razonSocial", "==", nombreCliete)
+      )
+    );
 
     if (!querySnapshot.empty) {
       // Si hay resultados, devolver el primer documento encontrado
@@ -215,19 +242,30 @@ const AgregarLevDigital = () => {
     e.preventDefault();
 
 
+    if (!fechaInicio || !fechaFin) {
+      swal.fire({
+          icon: "warning",
+          title: "Fechas incompletas",
+          text: "Debes seleccionar tanto la fecha de inicio como la fecha de fin antes de continuar.",
+      });
+      return;
+  }
 
     // Obtener el documento de la colección FOLIOS con el nombre del folio
-    const folioSnapshot = await getDocs(query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio)));
+    const folioSnapshot = await getDocs(
+      query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
+    );
     if (!folioSnapshot.empty) {
       if (!clienteSeleccionado) {
-        alert("No se seleccionó ningún cliente.")
+        alert("No se seleccionó ningún cliente.");
         console.error("No se seleccionó ningún cliente.");
         return;
       }
       if (list.length === 0) {
-        alert("La lista está vacía. Por favor, agregue elementos antes de continuar.");
-      }
-      else {
+        alert(
+          "La lista está vacía. Por favor, agregue elementos antes de continuar."
+        );
+      } else {
         if (folioSiguiente != 0) {
           // Tomar el primer documento encontrado (suponiendo que hay uno)
           const folioDoc = folioSnapshot.docs[0];
@@ -241,11 +279,9 @@ const AgregarLevDigital = () => {
           // Actualizar el documento en la colección FOLIOS
           await updateDoc(doc(db, "FOLIOS", folioId), {
             folioSiguiente: nuevoFolioSiguiente,
-
-
           });
           const bitacora = collection(db, "BITACORA");
-          const today = new Date()
+          const today = new Date();
           const ahora = new Date();
           const hora = ahora.getHours();
           const minuto = ahora.getMinutes();
@@ -257,7 +293,7 @@ const AgregarLevDigital = () => {
             tiempo: horaFormateada,
             fechaRegistro: formattedDate,
             tipoDocumento: "Registro",
-            noPartida: "N/A"
+            noPartida: "N/A",
           });
 
           await addDoc(encabezadoCollection, {
@@ -270,7 +306,7 @@ const AgregarLevDigital = () => {
             docAnt: docAnt,
             docSig: docSig,
             fechaRegistro: formattedDate,
-            fechaModificacion: formattedDate
+            fechaModificacion: formattedDate,
           });
           list.forEach(async (item) => {
             await addDoc(bitacora, {
@@ -288,56 +324,56 @@ const AgregarLevDigital = () => {
               observacion: item.observacion,
               fechaRegistro: formattedDate,
               fechaModificacion: formattedDate,
-              estatusPartida: "Activa"
+              estatusPartida: "Activa",
             });
           });
           navigate("/levantamientoDigital");
         } else {
-          alert("Selecciona un folio valido")
+          alert("Selecciona un folio valido");
         }
       }
       // Resto del código...
     } else {
-      alert("No se seleccionó ningún folio.")
+      alert("No se seleccionó ningún folio.");
       console.log("No se encontró el documento en la colección FOLIOS.");
     }
-
   };
   const infoCliente = () => {
     swal({
       title: "Ayuda del sistema",
       text: " El campo cliente te permite ingresar la razón social del cliente. A medida que escribes, el sistema sugiere opciones basadas en clientes existentes. Al seleccionar uno, se asigna automáticamente a los documentos futuros, simplificando el proceso y garantizando consistencia en la información. ",
       icon: "info",
-      buttons: "Aceptar"
-    })
-  }
+      buttons: "Aceptar",
+    });
+  };
   const infoFechaElaboracion = () => {
     swal({
       title: "Ayuda del sistema",
       text: " La fecha de elaboración es la fecha en la que se creó el documento y por defecto muestra la fecha de hoy. Sin embargo, es posible modificarla según sea necesario. ",
       icon: "info",
-      buttons: "Aceptar"
-    })
-  }
+      buttons: "Aceptar",
+    });
+  };
   const infoFechaInicio = () => {
     swal({
       title: "Ayuda del sistema",
       text: " La fecha de inicio representa el día planificado para comenzar el proyecto. Es importante destacar que esta fecha debe ser igual o posterior a la fecha de elaboración del documento. ",
       icon: "info",
-      buttons: "Aceptar"
-    })
-  }
+      buttons: "Aceptar",
+    });
+  };
   const infoFechaFin = () => {
     swal({
       title: "Ayuda del sistema",
       text: " La fecha de fin indica el día previsto para concluir el proyecto. Es esencial tener en cuenta que esta fecha debe ser igual o posterior a la fecha de elaboración del documento y también mayor que la fecha de inicio programada.",
       icon: "info",
-      buttons: "Aceptar"
-    })
-  }
+      buttons: "Aceptar",
+    });
+  };
   /* ----------------------------------------- AGREGAR PARTIDAS -------------------------------- */
   /* ---------------------PARTIDAS DE DOCUMENTO ------------------------------------- */
-  const [cve_levDig_par, setLevDigital_par] = useState("LEV_DIG1"); /* Este es el campo que agregue */
+  const [cve_levDig_par, setLevDigital_par] =
+    useState("LEV_DIG1"); /* Este es el campo que agregue */
   const [noPartida, setNoPartida] = useState(1);
   const [descripcion, setDescripcion] = useState("");
   const [observacion, setObservacion] = useState("");
@@ -352,7 +388,7 @@ const AgregarLevDigital = () => {
       noPartida: noPartida,
       cantidad: cantidad,
       descripcion: descripcion,
-      observacion: observacion
+      observacion: observacion,
     };
     if (descripcion) {
       if (editIndex !== null) {
@@ -385,11 +421,16 @@ const AgregarLevDigital = () => {
   useEffect(() => {
     const obtenerClientes = async () => {
       try {
-        const querySnapshot = await getDocs(query(collection(db, 'CLIENTES'), where('estatus', '==', 'Activo')));
-        const clientesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const querySnapshot = await getDocs(
+          query(collection(db, "CLIENTES"), where("estatus", "==", "Activo"))
+        );
+        const clientesData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         setClientes(clientesData);
       } catch (error) {
-        console.error('Error al obtener clientes:', error);
+        console.error("Error al obtener clientes:", error);
       }
     };
 
@@ -398,7 +439,7 @@ const AgregarLevDigital = () => {
 
   useEffect(() => {
     // Obtenemos la fecha actual en formato local (YYYY-MM-DD)
-    const fechaHoy = new Date().toLocaleDateString('en-CA');
+    const fechaHoy = new Date().toLocaleDateString("en-CA");
     // Establecemos la fecha de hoy como valor inicial del input
     setFechaElaboracion(fechaHoy);
   }, []);
@@ -414,10 +455,12 @@ const AgregarLevDigital = () => {
                 <select
                   id="selectFolio"
                   className="form-control"
-                  value={selectedFolio}
+                  value={selectedFolio || ""}
                   onChange={(e) => setSelectedFolio(e.target.value)}
                 >
-                  <option value="" disabled>Folio: </option>
+                  <option value="" disabled>
+                    Folio
+                  </option>
                   {folios.map((folio) => (
                     <option key={folio.id} value={folio.folio}>
                       {folio.folio}
@@ -444,17 +487,28 @@ const AgregarLevDigital = () => {
               <div className="mb-3">
                 <div class="input-group-append">
                   <label className="form-label">Cliente: </label>
-                  &nbsp;
-                  &nbsp;
-                  <button class="btn btn-outline-secondary" onClick={infoCliente} type="button"><FaCircleQuestion /></button>
+                  &nbsp; &nbsp;
+                  <button
+                    class="btn btn-outline-secondary"
+                    onClick={infoCliente}
+                    type="button"
+                  >
+                    <FaCircleQuestion />
+                  </button>
                 </div>
                 <Autocomplete
                   className="form-control"
                   options={clientes}
-                  getOptionLabel={cliente => cliente.razonSocial}
-
+                  getOptionLabel={(cliente) => cliente.razonSocial}
                   onChange={(event, value) => setClienteSeleccionado(value)}
-                  renderInput={params => <TextField {...params} label="Cliente" variant="outlined" fullWidth />}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Cliente"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
                   required
                 />
               </div>
@@ -463,7 +517,9 @@ const AgregarLevDigital = () => {
               <label className="form-label">Fecha de elaboración: </label>
               <div class="input-group mb-3">
                 <input
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
                   type="date"
                   value={fechaElaboracion}
                   onChange={(e) => setFechaElaboracion(e.target.value)}
@@ -471,7 +527,13 @@ const AgregarLevDigital = () => {
                   required
                 />
                 <div class="input-group-append">
-                  <button class="btn btn-outline-secondary" type="button" onClick={infoFechaElaboracion}><FaCircleQuestion /></button>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    onClick={infoFechaElaboracion}
+                  >
+                    <FaCircleQuestion />
+                  </button>
                 </div>
               </div>
             </div>
@@ -480,7 +542,9 @@ const AgregarLevDigital = () => {
               <label className="form-label">Fecha de inicio: </label>
               <div class="input-group mb-3">
                 <input
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
                   type="date"
                   value={fechaInicio}
                   onChange={(e) => setFechaInicio(e.target.value)}
@@ -488,7 +552,13 @@ const AgregarLevDigital = () => {
                   required
                 />
                 <div class="input-group-append">
-                  <button class="btn btn-outline-secondary" type="button" onClick={infoFechaInicio}><FaCircleQuestion /></button>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    onClick={infoFechaInicio}
+                  >
+                    <FaCircleQuestion />
+                  </button>
                 </div>
               </div>
             </div>
@@ -497,7 +567,9 @@ const AgregarLevDigital = () => {
               <label className="form-label">Fecha de fin: </label>
               <div class="input-group mb-3">
                 <input
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
                   type="date"
                   value={fechaFin}
                   onChange={(e) => setFechaFin(e.target.value)}
@@ -505,14 +577,27 @@ const AgregarLevDigital = () => {
                   required
                 />
                 <div class="input-group-append">
-                  <button class="btn btn-outline-secondary" type="button" onClick={infoFechaFin}><FaCircleQuestion /></button>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    onClick={infoFechaFin}
+                  >
+                    <FaCircleQuestion />
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-          <div className="row" style={{ border: '1px solid #000', marginBottom: '20px' }}>
+          <div
+            className="row"
+            style={{ border: "1px solid #000", marginBottom: "20px" }}
+          >
             <div className="col-12">
-              <label style={{ color: "red", fontSize: "18px", fontWeight: "bold" }}>Lista de partidas</label>
+              <label
+                style={{ color: "red", fontSize: "18px", fontWeight: "bold" }}
+              >
+                Lista de partidas
+              </label>
             </div>
             <div className="col-md-4 offset-md-8 mt-3 text-end">
               <div className="mb-3">
@@ -522,10 +607,16 @@ const AgregarLevDigital = () => {
                   onChange={handleFileUpload}
                   className="form-control"
                 />
-                <button className="btn btn-primary mt-2" onClick={processExcelFile}>
+                <button
+                  className="btn btn-primary mt-2"
+                  onClick={processExcelFile}
+                >
                   Procesar Archivo
                 </button>
-                <button className="btn btn-success mt-2 ms-2" onClick={handleAddFromExcel}>
+                <button
+                  className="btn btn-success mt-2 ms-2"
+                  onClick={handleAddFromExcel}
+                >
                   Agregar Partidas
                 </button>
               </div>
@@ -548,7 +639,10 @@ const AgregarLevDigital = () => {
 
             <div className="col-md-3">
               <label className="form-label">Cantidad:</label>
-              <label className="form-label" style={{ color: "red" }}> *</label>
+              <label className="form-label" style={{ color: "red" }}>
+                {" "}
+                *
+              </label>
               <div className="input-group mb-3">
                 <input
                   placeholder=""
@@ -564,7 +658,10 @@ const AgregarLevDigital = () => {
 
             <div className="col-md-5">
               <label className="form-label">Descripción:</label>
-              <label className="form-label" style={{ color: "red" }}> *</label>
+              <label className="form-label" style={{ color: "red" }}>
+                {" "}
+                *
+              </label>
               <div className="input-group mb-3">
                 <textarea
                   placeholder=""
@@ -593,7 +690,10 @@ const AgregarLevDigital = () => {
             </div>
 
             <div className="col-md-6">
-              <button className="btn btn-success" onClick={handleSubmit}><CiCirclePlus />Agregar tarea</button>
+              <button className="btn btn-success" onClick={handleSubmit}>
+                <CiCirclePlus />
+                Agregar tarea
+              </button>
             </div>
 
             <div className="col-12">
@@ -616,8 +716,22 @@ const AgregarLevDigital = () => {
                       <td>{item.cantidad}</td>
                       <td>{item.descripcion}</td>
                       <td>{item.observaciones}</td>
-                      <td><button onClick={() => handleEdit(index)} className="btn btn-primary"><FaPencilAlt /></button></td>
-                      <td><button onClick={() => handleDelete(index)} className="btn btn-danger"><MdDelete /></button></td>
+                      <td>
+                        <button
+                          onClick={() => handleEdit(index)}
+                          className="btn btn-primary"
+                        >
+                          <FaPencilAlt />
+                        </button>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => handleDelete(index)}
+                          className="btn btn-danger"
+                        >
+                          <MdDelete />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -625,17 +739,30 @@ const AgregarLevDigital = () => {
             </div>
           </div>
           <p></p>
-          <button className="btn btn-success" onClick={addEncabezado}><HiDocumentPlus /> GUARDAR DOCUMENTO</button>
+          <button className="btn btn-success" onClick={addEncabezado}>
+            <HiDocumentPlus /> GUARDAR DOCUMENTO
+          </button>
         </div>
       </div>
-      <Modal show={show} onHide={handleClose} dialogClassName="lg" centered scrollable >
+      <Modal
+        show={show}
+        onHide={handleClose}
+        dialogClassName="lg"
+        centered
+        scrollable
+      >
         <Modal.Header closeButton>
           <Modal.Title>Editar Partida</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="mb-3">
             <label>No. Partida</label>
-            <input type="text" className="form-control" value={modalNoPartida} readOnly />
+            <input
+              type="text"
+              className="form-control"
+              value={modalNoPartida}
+              readOnly
+            />
           </div>
           <div className="mb-3">
             <label>Cantidad</label>
@@ -651,7 +778,7 @@ const AgregarLevDigital = () => {
             <textarea
               className="form-control"
               value={modalDescripcion}
-              onChange={(e) => setModalDescripcion (e.target.value)}
+              onChange={(e) => setModalDescripcion(e.target.value)}
             />
           </div>
           <div className="mb-3">

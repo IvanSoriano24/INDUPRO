@@ -23,20 +23,22 @@ const PersonalProyectos = () => {
 
   const getPersonal = async () => {
     try {
-      const data = await getDocs(collection(db, "PERSONAL"));
+      const q = query(collection(db, "PERSONAL"), orderBy("CVE_PEPR", "asc")); // Orden ascendente
+      const data = await getDocs(q);
       const personalList = data.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
-
+  
       console.log("Datos obtenidos de Firestore:", personalList); // Para depuración
-
+  
       setPersonal(personalList);
     } catch (error) {
       console.error("Error al obtener personal:", error);
       setPersonal([]); // Asegurar que siempre sea un array
     }
   };
+  
 
   /***************************************************************************************************************/
   const [showAddModal, setShowAddModal] = useState(false);
@@ -420,8 +422,13 @@ const PersonalProyectos = () => {
                   type="number"
                   className="form-control"
                   value={salarioDiario}
-                  onChange={(e) => setSalarioDiario(e.target.value)}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    setSalarioDiario(value >= 0 ? value : 0); // Si es negativo, lo establece en 0
+                  }}
+                  min="1"
                   readOnly={isDetailMode}
+                  
                 />
               </div>
               <div className="col-md-4">
@@ -430,7 +437,11 @@ const PersonalProyectos = () => {
                   type="number"
                   className="form-control"
                   value={factor}
-                  onChange={(e) => setFactor(e.target.value)}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    setFactor(value >= 0 ? value : 0); // Si es negativo, lo establece en 0
+                  }}
+                  min="1"
                   readOnly={isDetailMode}
                 />
               </div>

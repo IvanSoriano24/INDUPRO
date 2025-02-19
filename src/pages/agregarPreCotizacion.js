@@ -19,7 +19,7 @@ import { TabContent, TabPane, Nav, NavItem, NavLink, Alert } from "reactstrap";
 import { FaCircleQuestion, FaCirclePlus } from "react-icons/fa6";
 import { HiDocumentPlus } from "react-icons/hi2";
 import { IoSearchSharp } from "react-icons/io5";
-import swal from "sweetalert";
+import swal from "sweetalert2";
 import { CiCirclePlus } from "react-icons/ci";
 import { MdDelete } from "react-icons/md";
 import { FaPencilAlt } from "react-icons/fa";
@@ -1228,6 +1228,16 @@ const AgregarPreCotizacion = () => {
   /* --------------------------------------------------- - AGREGAR NUEVO DOCUMENTO --------------------------------------------------*/
   const addPreCotizacion = async (e) => {
     e.preventDefault();
+
+    // Validación de fechas antes de continuar
+        if (!fechaInicio || !fechaFin) {
+          swal.fire({
+              icon: "warning",
+              title: "Fechas incompletas",
+              text: "Debes seleccionar tanto la fecha de inicio como la fecha de fin antes de continuar.",
+          });
+          return;
+      }
 
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
