@@ -368,40 +368,50 @@ const EditarPreCotizacion = () => {
     }
   };
   const obtenerClaveDesdeFirestore = async (lineaSeleccionada) => {
-    try {
-      console.log("🔎 Buscando clave SAE para la línea:", lineaSeleccionada);
-
-      const refInventario = collection(db, "INVENTARIO"); // Colección en Firestore
-      const q = query(
-        refInventario,
-        where("LIN_PROD", "==", lineaSeleccionada)
-      );
-      const snapshot = await getDocs(q);
-
-      console.log(
-        "🔹 Documentos obtenidos desde Firestore:",
-        snapshot.docs.map((doc) => doc.data())
-      );
-
-      if (snapshot.empty) {
-        console.warn(
-          "⚠️ No se encontró clave SAE en Firestore para esta línea."
-        );
-        return []; // 🔹 Ahora retorna un array vacío en lugar de null
+      try {
+          console.log("🔎 Buscando CVE_LIN para la línea (CUENTA_COI):", lineaSeleccionada);
+  
+          // 📌 Paso 1: Buscar `CVE_LIN` en la colección LÍNEAS usando `CUENTA_COI`
+          const refLineas = collection(db, "LINEA"); // Colección donde está CUENTA_COI
+          const qLinea = query(refLineas, where("CUENTA_COI", "==", lineaSeleccionada));
+          const snapshotLinea = await getDocs(qLinea);
+  
+          if (snapshotLinea.empty) {
+              console.warn("⚠️ No se encontró CVE_LIN para la línea seleccionada.");
+              return []; // Retornamos array vacío si no encontramos nada
+          }
+  
+          // 🔹 Extraer `CVE_LIN` (tomamos el primero encontrado)
+          const cveLin = snapshotLinea.docs[0].data().CVE_LIN;
+          console.log("🔹 CVE_LIN encontrado:", cveLin);
+  
+          // 📌 Paso 2: Usar `CVE_LIN` para buscar en la colección INVENTARIO
+          const refInventario = collection(db, "INVENTARIO"); // Colección en Firestore
+          const qInventario = query(refInventario, where("LIN_PROD", "==", cveLin));
+          const snapshotInventario = await getDocs(qInventario);
+  
+          console.log(
+              "🔹 Documentos obtenidos desde Firestore (INVENTARIO):",
+              snapshotInventario.docs.map((doc) => doc.data())
+          );
+  
+          if (snapshotInventario.empty) {
+              console.warn("⚠️ No se encontró clave SAE en INVENTARIO para esta línea.");
+              return []; // Retornamos array vacío si no hay coincidencias
+          }
+  
+          // 🔹 Retornar un array de objetos con `CVE_ART` y `DESCR`
+          const clavesSaeEncontradas = snapshotInventario.docs.map((doc) => ({
+              clave: doc.data().CVE_ART || "Clave no encontrada",
+              descripcion: doc.data().DESCR || "Descripción no encontrada",
+          }));
+  
+          console.log("🔹 Claves SAE obtenidas:", clavesSaeEncontradas);
+          return clavesSaeEncontradas;
+      } catch (error) {
+          console.error("❌ Error al obtener clave SAE desde Firestore:", error);
+          return []; // Retornar array vacío en caso de error
       }
-
-      // 🔹 Retornamos un array de objetos con CVE_ART y DESCR
-      const clavesSaeEncontradas = snapshot.docs.map((doc) => ({
-        clave: doc.data().CVE_ART || "Clave no encontrada",
-        descripcion: doc.data().DESCR || "Descripción no encontrada",
-      }));
-
-      console.log("🔹 Claves SAE obtenidas:", clavesSaeEncontradas);
-      return clavesSaeEncontradas;
-    } catch (error) {
-      console.error("❌ Error al obtener clave SAE desde Firestore:", error);
-      return []; // 🔹 Retornar array vacío en caso de error
-    }
   };
   const handleCategoriaChange = async (e) => {
     const categoriaSeleccionada = e.target.value;
