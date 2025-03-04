@@ -59,7 +59,7 @@ const CancelarATF = () => {
 
     /* ---------------------JALAR INFORMACIÓN DE DOCUMENTO ANTERIOR ------------------------------------- */
     const getFactoresById = async (id) => {
-        const factoresDOC = await getDoc(doc(db, "COTIZACION", id));
+        const factoresDOC = await getDoc(doc(db, "TECNICOFINANCIERO", id));
         if (factoresDOC.exists()) {
             setCve_tecFin(factoresDOC.data().cve_tecFin);
             setCve_clie(factoresDOC.data().cve_clie);
@@ -79,7 +79,7 @@ const CancelarATF = () => {
     const getParPreCot = async () => {
         try {
             const data = await getDocs(
-            query(collection(db, "PAR_COTIZACION"), where("cve_tecFin", "==", cve_tecFin)) 
+            query(collection(db, "PAR_TECFINANCIERO"), where("cve_tecFin", "==", cve_tecFin)) 
             );
             //par_preCotList
             const par_preCotList = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
@@ -99,12 +99,42 @@ const CancelarATF = () => {
 
         /* ----------------------------------------- OBTENER PARTDIAS DE INSUMOS PARA LA PRECOTIZACIÓN -------------------------*/
 
+            const getParPreCotizacion = async () => {
+                try {
+                  const data = await getDocs(
+                    query(
+                      collection(db, "PAR_TECFINANCIERO_INSU"),
+                      where("cve_tecFin", "==", cve_tecFin)
+                    )
+                  );
             
+                  const par_levDigList1 = data.docs.map((doc) => ({
+                    ...doc.data(),
+                    id: doc.id,
+                  }));
+                  console.log("Datos de PAR_PRECOTIZACION:", par_levDigList1);
+                  par_levDigList1.sort((a, b) => a.noPartidaPC - b.noPartidaPC);
+                  setPar_PreCoti_insu(par_levDigList1);
+                  const maxPartida = Math.max(
+                    ...par_levDigList1.map((item) => item.noPartidaPC),
+                    0
+                  );
+                  setNoParatidaMO(maxPartida + 1);
+                  //(maxPartida + 1);
+                  //console.log("max Partida: " + maxPartida)
+                } catch (error) {
+                  console.error("Error fetching PAR_LEVDIGITAL data:", error);
+                }
+              };
+            
+              useEffect(() => {
+                getParPreCotizacion();
+              }, [cve_tecFin]); 
             
             /* ------------------------------------------------------------------CANCELAR DOCUMENTO ---------------------------- */
             const handleDelete = async (cve_tecFin) => {
               try {
-                const q = query(collection(db, "COTIZACION"), where("cve_tecFin", "==", cve_tecFin));
+                const q = query(collection(db, "TECNICOFINANCIERO"), where("cve_tecFin", "==", cve_tecFin));
                 const querySnapshot = await getDocs(q);
                 const bitacora = collection(db, "BITACORA");
                 const today = new Date()
@@ -125,22 +155,22 @@ const CancelarATF = () => {
                   // Si se encuentra un documento que coincide con los identificadores proporcionados, actualiza su estatus
                     if (!querySnapshot.empty) {
                       const docSnap = querySnapshot.docs[0]; // Suponiendo que solo hay un documento que coincide con los criterios de consulta
-                      const factoresRef = doc(db, "COTIZACION", docSnap.id);
+                      const factoresRef = doc(db, "TECNICOFINANCIERO", docSnap.id);
                       
                       // Actualiza el estatus del documento
                       const datos = {
-                        estatus: "CANCELADO"
+                        estatus: "Bloqueado"
                       };  
                       await updateDoc(factoresRef, datos);
-                      // Obtener el documento LEVDIGITAL por cve_precot
-                      const levDigQuery = query(collection(db, 'TECNICOFINANCIERO'), where('docSig', '==', cve_tecFin));
+                      // Obtener el documento COTIZACION por cve_tecFin
+                      const levDigQuery = query(collection(db, 'PRECOTIZACION'), where('docSig', '==', cve_tecFin));
                       const levDigSnapshot = await getDocs(levDigQuery);
                       levDigSnapshot.forEach(async (doc) => {
                           // Actualizar el estatus del documento LEVDIGITAL anterior a 'Activo'
                           await updateDoc(doc.ref, { estatus: 'Activo' });
                       });
                       // No se recomienda recargar la página; en su lugar, puedes manejar la actualización del estado localmente
-                      navigate("/cotizacion")
+                      navigate("/revTecnicoFinanciero")
                   } else {
                       console.log("No se encontró ningún documento que coincida con los identificadores proporcionados.");
                   }
@@ -259,7 +289,7 @@ const CancelarATF = () => {
                     <tbody>
                         {par_preCot.map((item, index) => (
                         <tr key={index}>
-                        <td>{item.noPartidaATF}</td>
+                        <td>{item.noPartida}</td>
                         <td>{item.descripcion}</td>
                         <td>{item.observacion}</td>
                         </tr>

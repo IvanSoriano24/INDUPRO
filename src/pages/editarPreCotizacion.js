@@ -535,7 +535,25 @@ const EditarPreCotizacion = () => {
       return [];
     }
   };
+  const limpiarCampos = () => {
+    setInsumo("");
+    setCantidad(0);
+    setUnidad("");
+    setCategoria("");
+    setFamilia("");
+    setLinea("");
+    setClaveSae("");
+    setCostoCotizado(0);
+    setComentariosAdi("");
+    setDescripcionInsumo("");
+  };
+  const limpiarCamposMO = () => {
+    setSelectedTrabajador("");
+    setCantidadTrabajadores(0);
+    setDiasTrabajados(0);
+  };
   const handleOpenModal = async (noPartida) => {
+    limpiarCampos();
     try {
       console.log("🔄 Abriendo modal para Insumos. No. Partida:", noPartida);
 
@@ -572,6 +590,7 @@ const EditarPreCotizacion = () => {
     }
   };
   const handleOpenModalMO = (noPartida) => {
+    limpiarCamposMO();
     setNoParatidaMO(noPartida); // Establece el noPartida seleccionado
     setShowAddModalMO(true); // Muestra el modal de Mano de Obra
   };

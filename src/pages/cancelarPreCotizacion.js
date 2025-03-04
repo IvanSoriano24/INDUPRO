@@ -64,6 +64,7 @@ const CancelarPreCotizacion = () => {
     /* ---------------------JALAR INFORMACIÓN DE DOCUMENTO ANTERIOR ------------------------------------- */
     const getFactoresById = async (id) => {
         const factoresDOC = await getDoc(doc(db, "PRECOTIZACION", id));
+        console.log(factoresDOC.data());
         if (factoresDOC.exists()) {
             setPrecot(factoresDOC.data().cve_precot);
             setCve_clie(factoresDOC.data().cve_clie);
@@ -183,7 +184,7 @@ const CancelarPreCotizacion = () => {
                       
                       // Actualiza el estatus del documento
                       const datos = {
-                        estatus: "CANCELADO"
+                        estatus: "Bloqueado"
                       };
                       await updateDoc(factoresRef, datos);
                       // Actualizar el estatus en la colección par_PreCoti_insu

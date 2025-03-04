@@ -13,7 +13,7 @@ const Login = () => {
   const [password, setPassword] = useState('');  // Para el campo "Contraseña"
   const [error, setError] = useState(null);
   const navigate = useNavigate();  // Hook para redirigir
-
+  
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -32,7 +32,6 @@ const Login = () => {
           swal("Inicio Correcto", {
             icon: "success",
           });
-          console.log("Redirigiendo a home...");
           navigate('/');  // Redirige al home
           window.location.reload();
         } else {

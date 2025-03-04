@@ -7,7 +7,8 @@ const app = express();
 
 // 🔴 CONFIGURACIÓN CORS MEJORADA
 const corsOptions = {
-    origin: ["https://gscotiza-cd748.web.app"], // ✅ SOLO permite peticiones desde Firebase Hosting
+    //origin: ["https://gscotiza-cd748.web.app"], // ✅ SOLO permite peticiones desde Firebase Hosting
+    origin: ["*"],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
@@ -17,7 +18,8 @@ app.use(cors(corsOptions));
 
 // Middleware CORS en cada respuesta (FORZADO)
 app.use((req, res, next) => {
-    res.set("Access-Control-Allow-Origin", "https://gscotiza-cd748.web.app");  // ✅ ORIGEN PERMITIDO
+    //res.set("Access-Control-Allow-Origin", "https://gscotiza-cd748.web.app");  // ✅ ORIGEN PERMITIDO
+    res.set("Access-Control-Allow-Origin", "*");
     res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
     res.set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 

@@ -522,14 +522,21 @@ const AgregarPreCotizacion = () => {
     }
   };
   const limpiarCampos = () => {
-    setNoPartidaPC("");
     setInsumo("");
-    setProveedor("");
-    setDescripcionInsumo("");
-    setComentariosAdi("");
+    setCantidad(0);
     setUnidad("");
-    setCostoCotizado("");
-    setCantidad("");
+    setCategoria("");
+    setFamilia("");
+    setLinea("");
+    setClaveSae("");
+    setCostoCotizado(0);
+    setComentariosAdi("");
+    setDescripcionInsumo("");
+  };
+  const limpiarCamposMO = () => {
+    setSelectedTrabajador("");
+    setCantidadTrabajadores(0);
+    setDiasTrabajados(0);
   };
   const editarPartida = (index) => {
     // Establecer los valores de los campos de acuerdo a la partida seleccionada para editar
@@ -608,6 +615,7 @@ const AgregarPreCotizacion = () => {
     setListMano(updatedList);
   };
   const handleOpenModal = async (noPartida) => {
+    limpiarCampos();
     setShowAddModal(true);
     try {
       const partidaSeleccionada = par_levDigital.find(
@@ -618,13 +626,13 @@ const AgregarPreCotizacion = () => {
       setCantidad(0);
       setCostoCotizado(0);
       // Llamar a la API para obtener las unidades
-      /*const responseUnidades = await axios.get(
-        "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineasMaster"
+      /*const responseUnidades = await axios.get( 
+        //"https://us-central1-gscotiza-cd748.cloudfunctions.net/api/lineasMaster"
         //"https://api-afud53jq7q-uc.a.run.app/api/lineasMaster",
+        //"http://localhost:5000/api/lineasMaster"
       );
       setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
-      //console.log("Unidades obtenidas:", responseUnidades.data);
-
+      console.log("Unidades obtenidas:", responseUnidades.data);
       const responseProvedores = await axios.get(
         "https://us-central1-gscotiza-cd748.cloudfunctions.net/api/proveedores"
         //"https://api-afud53jq7q-uc.a.run.app/api/proveedores",
@@ -651,6 +659,7 @@ const AgregarPreCotizacion = () => {
   };
 
   const handleOpenModalMO = (noPartida) => {
+    limpiarCamposMO();
     setNoParatidaMO(noPartida); // Establece el noPartida seleccionado
     setShowAddModalMO(true); // Muestra el modal de Mano de Obra
   };
