@@ -1889,9 +1889,12 @@ const EditarPreCotizacion = () => {
                   onChange={(e) => setUnidad(e.target.value)}
                 >
                   <option value="">Seleccionar...</option>
-                  <option value="Kg">Kg</option>
-                  <option value="Toneladas">Toneladas</option>
-                  <option value="Servicios">Servicios</option>
+                  <option value="Pza">Pieza</option>
+                  <option value="Kit">Kit</option>
+                  <option value="L">Litro</option>
+                  <option value="m">Metro</option>
+                  <option value="kg">Kilo</option>
+                  <option value="Serv">Servicio</option>
                 </select>
               </div>
             </div>
