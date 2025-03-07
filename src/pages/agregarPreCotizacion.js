@@ -1365,6 +1365,10 @@ const AgregarPreCotizacion = () => {
             cantidad: insumo.cantidad,
             total: insumo.costoCotizado * insumo.cantidad,
             estatus: "Activo",
+            categoria: insumo.categoria,
+            familia: insumo.familia,
+            linea: insumo.linea,
+            claveSae: insumo.claveSae,
           });
         }
       }
