@@ -357,14 +357,36 @@ const EditarPreCotizacion = () => {
     setLinea(lineaSeleccionada); // Guarda la línea seleccionada
 
     if (lineaSeleccionada) {
-      const clavesDesdeFirestore = await obtenerClaveDesdeFirestore(
+      const clavesSae = await obtenerClaveSae(
         lineaSeleccionada
       );
       setClavesSAE(
-        Array.isArray(clavesDesdeFirestore) ? clavesDesdeFirestore : []
+        Array.isArray(clavesSae) ? clavesSae : []
       );
     } else {
       setClavesSAE([]); // 🔹 Limpia las claves si no hay línea seleccionada
+    }
+  };
+  const obtenerClaveSae = async (cveLin) => {
+    try {
+      console.log("🔎 Buscando Clave SAE para la línea (CVE_LIN):", cveLin);
+  
+      const response = await axios.get(`http://localhost:5000/api/clave-sae/${cveLin}`);
+  
+      console.log("🔹 Claves SAE obtenidas desde SQL:", response.data);
+  
+      if (response.data.length === 0) {
+        console.warn("⚠️ No se encontraron claves SAE.");
+        return [];
+      }
+  
+      return response.data.map((item) => ({
+        clave: item.CVE_ART || "Clave no encontrada",
+        descripcion: item.DESCR || "Descripción no encontrada",
+      }));
+    } catch (error) {
+      console.error("❌ Error al obtener Clave SAE desde SQL:", error);
+      return [];
     }
   };
   const obtenerClaveDesdeFirestore = async (lineaSeleccionada) => {
@@ -2011,7 +2033,7 @@ const EditarPreCotizacion = () => {
                     className="form-control"
                     value={claveSae}
                     onChange={(e) => setClaveSae(e.target.value)}
-                    disabled={!linea || clavesSAE.length === 0} // Deshabilita si no hay claves disponibles
+                    disabled={!linea} // Deshabilita si no hay claves disponibles
                   >
                     <option value="">Seleccionar...</option>
                     {Array.isArray(clavesSAE) && clavesSAE.length > 0 ? (

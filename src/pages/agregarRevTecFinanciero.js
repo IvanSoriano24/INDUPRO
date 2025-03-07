@@ -1402,16 +1402,38 @@ const AgregarRevTecFinanciero = () => {
     setLinea(lineaSeleccionada); // Guarda la línea seleccionada
 
     if (lineaSeleccionada) {
-      const clavesDesdeFirestore = await obtenerClaveDesdeFirestore(
+      const clavesSae = await obtenerClaveSae(
         lineaSeleccionada
       );
       setClavesSAE(
-        Array.isArray(clavesDesdeFirestore) ? clavesDesdeFirestore : []
+        Array.isArray(clavesSae) ? clavesSae : []
       );
     } else {
       setClavesSAE([]); // 🔹 Limpia las claves si no hay línea seleccionada
     }
   };
+  const obtenerClaveSae = async (cveLin) => {
+    try {
+      console.log("🔎 Buscando Clave SAE para la línea (CVE_LIN):", cveLin); // 🔍 Verifica qué valor se envía
+  
+      const response = await axios.get(`http://localhost:5000/api/clave-sae/${cveLin}`);
+  
+      console.log("🔹 Claves SAE obtenidas desde SQL:", response.data);
+  
+      if (response.data.length === 0) {
+        console.warn("⚠️ No se encontraron claves SAE.");
+        return [];
+      }
+  
+      return response.data.map((item) => ({
+        clave: item.CVE_ART || "Clave no encontrada",
+        descripcion: item.DESCR || "Descripción no encontrada",
+      }));
+    } catch (error) {
+      console.error("❌ Error al obtener Clave SAE desde SQL:", error);
+      return [];
+    }
+  };  
   const obtenerClaveDesdeFirestore = async (lineaSeleccionada) => {
     try {
       console.log(
@@ -2364,7 +2386,8 @@ const AgregarRevTecFinanciero = () => {
                 <select
                   className="form-control"
                   value={linea}
-                  onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
+                  //onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
+                  onChange={handleLineaChange}
                   disabled={!familia} // Solo habilita si hay una familia seleccionada
                 >
                   <option value="">Seleccionar...</option>

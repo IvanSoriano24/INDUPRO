@@ -150,6 +150,38 @@ app.get("/api/lineas/:categoria", async (req, res) => {
       .json({ error: "Error al obtener las líneas", details: err });
   }
 });
+app.get("/api/clave-sae/:cveLin", async (req, res) => {
+    try {
+      const { cveLin } = req.params;
+      console.log("🔎 Recibido en la API (cveLin):", cveLin); // 🔍 Verifica qué está recibiendo la API
+  
+      const pool = await sql.connect(config);
+  
+      const result = await pool
+        .request()
+        .input("cveLin", sql.VarChar, cveLin) // 📌 Asegurar que coincida con el tipo de dato
+        .query(`
+          SELECT CVE_ART, DESCR 
+          FROM INVE01 
+          WHERE LIN_PROD = @cveLin
+        `);
+  
+      console.log("🔹 Claves SAE obtenidas desde SQL:", result.recordset);
+  
+      if (result.recordset.length === 0) {
+        console.warn("⚠️ No se encontraron claves SAE.");
+        return res.status(404).json({ message: "No se encontraron claves SAE." });
+      }
+  
+      res.json(result.recordset);
+    } catch (err) {
+      console.error("❌ Error al obtener la Clave SAE:", err);
+      res.status(500).json({
+        error: "Error al obtener la Clave SAE",
+        details: err.message,
+      });
+    }
+  });  
 // Iniciar el servidor en el puerto 5000
 app.listen(5000, () => {
   console.log("Servidor corriendo en el puerto 5000");

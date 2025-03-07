@@ -148,6 +148,38 @@ app.get("/api/lineas/:categoria", async (req, res) => {
     res.status(500).json({ error: "Error al obtener las líneas", details: err });
   }
 });
+// Ruta para obtener la Clave SAE desde SQL Server basado en CVE_LIN
+app.get("/api/clave-sae/:cveLin", async (req, res) => {
+  try {
+    const { cveLin } = req.params;
+    const pool = await sql.connect(config);
+
+    // Consulta SQL para obtener CVE_ART y DESCR en base al CVE_LIN
+    const result = await pool
+      .request()
+      .input("cveLin", sql.VarChar, cveLin)
+      .query(`
+        SELECT CVE_ART, DESCR 
+        FROM INVE01 
+        WHERE LIN_PROD = @cveLin
+      `);
+
+    console.log("🔹 Claves SAE obtenidas desde SQL:", result.recordset);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No se encontraron claves SAE." });
+    }
+
+    // Retornar los resultados en formato JSON
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("❌ Error al obtener la Clave SAE:", err);
+    res.status(500).json({
+      error: "Error al obtener la Clave SAE",
+      details: err.message,
+    });
+  }
+});
 
 // Exportar la API para Firebase Functions
 exports.api = functions.https.onRequest(app);
