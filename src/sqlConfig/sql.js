@@ -182,6 +182,7 @@ app.get("/api/clave-sae/:cveLin", async (req, res) => {
       });
     }
   });  
+  
 // Iniciar el servidor en el puerto 5000
 app.listen(5000, () => {
   console.log("Servidor corriendo en el puerto 5000");

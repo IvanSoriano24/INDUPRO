@@ -139,7 +139,7 @@ const AgregarLevDigital = () => {
     setModalNoPartida(item.noPartida);
     setModalCantidad(item.cantidad);
     setModalDescripcion(item.descripcion);
-    setModalObservacion(item.observaciones);
+    setModalObservacion(item.observacion);
     setShow(true);
   };
   const handleEdit = (index) => {
@@ -148,14 +148,21 @@ const AgregarLevDigital = () => {
   };
 
   const guardarEdicion = () => {
-    const updatedList = list.map((item) =>
-      item.noPartida === noPartida
-        ? { ...item, cantidad, descripcion, observaciones: observacion }
-        : item
+    setList((prevList) =>
+      prevList.map((item) =>
+        item.noPartida === modalNoPartida // Asegúrate de que modalNoPartida tiene el valor correcto
+          ? { 
+              ...item, 
+              cantidad: modalCantidad, 
+              descripcion: modalDescripcion, 
+              observacion: modalObservacion 
+            }
+          : item
+      )
     );
-    setList(updatedList);
     handleClose();
   };
+  
   /*----------------------------------------------------------*/
   /* ---------------------ENCABEZADO DE DOCUMENTO ------------------------------------- */
   const [cve_levDig, setCve_levDig] = useState("");
@@ -257,7 +264,11 @@ const AgregarLevDigital = () => {
     );
     if (!folioSnapshot.empty) {
       if (!clienteSeleccionado) {
-        alert("No se seleccionó ningún cliente.");
+        swal.fire({
+          icon: "warning",
+          title: "Sin Cliente",
+          text: "No se seleccionó ningún cliente.",
+        });
         console.error("No se seleccionó ningún cliente.");
         return;
       }
@@ -715,7 +726,7 @@ const AgregarLevDigital = () => {
                       <td>{item.noPartida}</td>
                       <td>{item.cantidad}</td>
                       <td>{item.descripcion}</td>
-                      <td>{item.observaciones}</td>
+                      <td>{item.observacion}</td>
                       <td>
                         <button
                           onClick={() => handleEdit(index)}
