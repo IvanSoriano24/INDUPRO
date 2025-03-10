@@ -48,7 +48,9 @@ app.get("/api/test", (req, res) => {
 app.get("/api/claves", async (req, res) => {
   try {
     const pool = await sql.connect(config);
-    const result = await pool.request().query("SELECT CVE_ART, DESCR FROM INVE01");
+    const result = await pool
+      .request()
+      .query("SELECT CVE_ART, DESCR FROM INVE01");
     res.json(result.recordset);
   } catch (err) {
     console.error("Error al ejecutar la consulta:", err);
@@ -85,7 +87,9 @@ app.get("/api/lineasMaster", async (req, res) => {
     const pool = await sql.connect(config);
     const result = await pool
       .request()
-      .query("SELECT CVE_LIN, DESC_LIN, CUENTA_COI FROM CLIN01 WHERE CUENTA_COI IS NOT NULL");
+      .query(
+        "SELECT CVE_LIN, DESC_LIN, CUENTA_COI FROM CLIN01 WHERE CUENTA_COI IS NOT NULL"
+      );
 
     // Crear lista única de unidades con descripción
     const unidades = result.recordset.reduce((acc, linea) => {
@@ -124,7 +128,9 @@ app.get("/api/categorias/:unidad", async (req, res) => {
     res.json(result.recordset);
   } catch (err) {
     console.error("Error al obtener las categorías:", err);
-    res.status(500).json({ error: "Error al obtener las categorías", details: err });
+    res
+      .status(500)
+      .json({ error: "Error al obtener las categorías", details: err });
   }
 });
 
@@ -145,7 +151,9 @@ app.get("/api/lineas/:categoria", async (req, res) => {
     res.json(result.recordset);
   } catch (err) {
     console.error("Error al obtener las líneas:", err);
-    res.status(500).json({ error: "Error al obtener las líneas", details: err });
+    res
+      .status(500)
+      .json({ error: "Error al obtener las líneas", details: err });
   }
 });
 // Ruta para obtener la Clave SAE desde SQL Server basado en CVE_LIN
@@ -155,9 +163,7 @@ app.get("/api/clave-sae/:cveLin", async (req, res) => {
     const pool = await sql.connect(config);
 
     // Consulta SQL para obtener CVE_ART y DESCR en base al CVE_LIN
-    const result = await pool
-      .request()
-      .input("cveLin", sql.VarChar, cveLin)
+    const result = await pool.request().input("cveLin", sql.VarChar, cveLin)
       .query(`
         SELECT CVE_ART, DESCR 
         FROM INVE01 
