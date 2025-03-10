@@ -626,14 +626,14 @@ const AgregarPreCotizacion = () => {
       setCostoCotizado(0);
       // Llamar a la API para obtener las unidades
       const responseUnidades = await axios.get(
-        //"/api/lineasMaster",
-        "http://localhost:5000/api/lineasMaster"
+        "/api/lineasMaster",
+        //"http://localhost:5000/api/lineasMaster"
       );
       setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
       console.log("Unidades obtenidas:", responseUnidades.data);
       const responseProvedores = await axios.get(
-        "http://localhost:5000/api/proveedores"
-        //"/api/proveedores"
+        //"http://localhost:5000/api/proveedores"
+        "/api/proveedores"
 
       );
       setProveedores(responseProvedores.data);
@@ -870,8 +870,8 @@ const AgregarPreCotizacion = () => {
   const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
       const response = await axios.get(
-        //`/api/categorias/${categoriaSeleccionada}`
-        `http://localhost:5000/api/categorias/${categoriaSeleccionada}`
+        `/api/categorias/${categoriaSeleccionada}`
+        //`http://localhost:5000/api/categorias/${categoriaSeleccionada}`
       );
       setFamilias(response.data); // Guarda las familias filtradas en el estado
       console.log("Familias filtradas obtenidas:", response.data);
@@ -899,8 +899,8 @@ const AgregarPreCotizacion = () => {
       console.log("🔎 Buscando Clave SAE para la línea (CVE_LIN):", cveLin); // 🔍 Verifica qué valor se envía
   
       const response = await axios.get(
-        `http://localhost:5000/api/clave-sae/${cveLin}`
-        //`/api/clave-sae/${cveLin}`
+        //`http://localhost:5000/api/clave-sae/${cveLin}`
+        `/api/clave-sae/${cveLin}`
          );
   
       console.log("🔹 Claves SAE obtenidas desde SQL:", response.data);
@@ -944,8 +944,8 @@ const AgregarPreCotizacion = () => {
     try {
       //console.log(familiaSeleccionada);
       const response = await axios.get(
-        //`/api/categorias/${familiaSeleccionada}`
-        `http://localhost:5000/api/lineas/${familiaSeleccionada}`
+        `/api/categorias/${familiaSeleccionada}`
+        //`http://localhost:5000/api/lineas/${familiaSeleccionada}`
       );
       setLineas(response.data); // Guardar las líneas en el estado
       console.log("Líneas filtradas obtenidas:", response.data); // Verifica la respuesta

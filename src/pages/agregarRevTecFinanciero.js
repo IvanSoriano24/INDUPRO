@@ -1123,8 +1123,8 @@ const AgregarRevTecFinanciero = () => {
   const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
       const response = await axios.get(
-        //`/api/categorias/${categoriaSeleccionada}`
-        `http://localhost:5000/api/categorias/${categoriaSeleccionada}`
+        `/api/categorias/${categoriaSeleccionada}`
+        //`http://localhost:5000/api/categorias/${categoriaSeleccionada}`
       );
       setFamilias(response.data); // Guarda las familias filtradas en el estado
       console.log("Familias filtradas obtenidas:", response.data);
@@ -1137,8 +1137,8 @@ const AgregarRevTecFinanciero = () => {
     try {
       //console.log(familiaSeleccionada);
       const response = await axios.get(
-        //`/api/categorias/${familiaSeleccionada}`
-        `http://localhost:5000/api/lineas/${familiaSeleccionada}`
+        `/api/categorias/${familiaSeleccionada}`
+        //`http://localhost:5000/api/lineas/${familiaSeleccionada}`
       );
       setLineas(response.data); // Guardar las líneas en el estado
       console.log("Líneas filtradas obtenidas:", response.data); // Verifica la respuesta
@@ -1371,8 +1371,8 @@ const AgregarRevTecFinanciero = () => {
       console.log("🔎 Buscando Clave SAE para la línea (CVE_LIN):", cveLin); // 🔍 Verifica qué valor se envía
   
       const response = await axios.get(
-        `http://localhost:5000/api/clave-sae/${cveLin}`
-        //`/api/clave-sae/${cveLin}`
+        //`http://localhost:5000/api/clave-sae/${cveLin}`
+        `/api/clave-sae/${cveLin}`
          );
   
       console.log("🔹 Claves SAE obtenidas desde SQL:", response.data);
@@ -1453,8 +1453,8 @@ const AgregarRevTecFinanciero = () => {
       // 🟢 Cargar Categoría antes de continuar
       console.log("🔄 Cargando categorías...");
       const responseCategorias = await axios.get(
-        "http://localhost:5000/api/lineasMaster"
-        //"/api/lineasMaster"
+        //"http://localhost:5000/api/lineasMaster"
+        "/api/lineasMaster"
       );
       setCategorias(responseCategorias.data);
 
@@ -1492,8 +1492,8 @@ const AgregarRevTecFinanciero = () => {
       if (proveedores.length === 0) {
         console.log("🔄 Cargando proveedores antes de editar...");
         const responseProvedores = await axios.get(
-          "http://localhost:5000/api/proveedores"
-          //"/api/proveedores"
+          //"http://localhost:5000/api/proveedores"
+          "/api/proveedores"
         );
         listaProveedores = responseProvedores.data;
         setProveedores(listaProveedores);
@@ -1607,15 +1607,15 @@ const AgregarRevTecFinanciero = () => {
       setCostoCotizado(0);
       // Llamar a la API para obtener las unidades
       const responseUnidades = await axios.get(
-        "http://localhost:5000/api/lineasMaster"
-        //"/api/lineasMaster"
+        //"http://localhost:5000/api/lineasMaster"
+        "/api/lineasMaster"
       );
       setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
       //console.log("Unidades obtenidas:", responseUnidades.data);
 
       const responseProvedores = await axios.get(
-        "http://localhost:5000/api/proveedores"
-        //"/api/proveedores"
+        //"http://localhost:5000/api/proveedores"
+        "/api/proveedores"
 
       );
       setProveedores(responseProvedores.data);

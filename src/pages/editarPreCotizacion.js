@@ -163,8 +163,8 @@ const EditarPreCotizacion = () => {
   const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
       const response = await axios.get(
-        //`/api/categorias/${categoriaSeleccionada}`
-        `http://localhost:5000/api/categorias/${categoriaSeleccionada}`
+        `/api/categorias/${categoriaSeleccionada}`
+        //`http://localhost:5000/api/categorias/${categoriaSeleccionada}`
       );
       setFamilias(response.data); // Guarda las familias filtradas en el estado
       console.log("Familias filtradas obtenidas:", response.data);
@@ -323,8 +323,8 @@ const EditarPreCotizacion = () => {
       console.log("🔎 Buscando Clave SAE para la línea (CVE_LIN):", cveLin); // 🔍 Verifica qué valor se envía
 
       const response = await axios.get(
-        `http://localhost:5000/api/clave-sae/${cveLin}`
-        //`/api/clave-sae/${cveLin}`
+        //`http://localhost:5000/api/clave-sae/${cveLin}`
+        `/api/clave-sae/${cveLin}`
       );
 
       console.log("🔹 Claves SAE obtenidas desde SQL:", response.data);
@@ -428,14 +428,14 @@ const EditarPreCotizacion = () => {
 
       // 🟢 Cargar unidades (categorías)
       const responseUnidades = await axios.get(
-        //"/api/lineasMaster",
-        "http://localhost:5000/api/lineasMaster"
+        "/api/lineasMaster",
+        //"http://localhost:5000/api/lineasMaster"
       );
       setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
       console.log("Unidades obtenidas:", responseUnidades.data);
       const responseProvedores = await axios.get(
-        "http://localhost:5000/api/proveedores"
-        //"/api/proveedores"
+        //"http://localhost:5000/api/proveedores"
+        "/api/proveedores"
       );
       setProveedores(responseProvedores.data);
 
@@ -467,8 +467,8 @@ const EditarPreCotizacion = () => {
     try {
       //console.log(familiaSeleccionada);
       const response = await axios.get(
-        //`https://us-central1-gscotiza-cd748.cloudfunctions.net/api/categorias/${familiaSeleccionada}`
-        `http://localhost:5000/api/lineas/${familiaSeleccionada}`
+        `/api/lineas/${familiaSeleccionada}`
+        //`http://localhost:5000/api/lineas/${familiaSeleccionada}`
       );
       setLineas(response.data); // Guardar las líneas en el estado
       console.log("Líneas filtradas obtenidas:", response.data); // Verifica la respuesta
@@ -571,8 +571,8 @@ const EditarPreCotizacion = () => {
       // 🟢 Cargar Categoría antes de continuar
       console.log("🔄 Cargando categorías...");
       const responseCategorias = await axios.get(
-        "http://localhost:5000/api/lineasMaster"
-        //"/api/lineasMaster"
+        //"http://localhost:5000/api/lineasMaster"
+        "/api/lineasMaster"
       );
       setCategorias(responseCategorias.data);
 
@@ -610,8 +610,8 @@ const EditarPreCotizacion = () => {
       if (proveedores.length === 0) {
         console.log("🔄 Cargando proveedores antes de editar...");
         const responseProvedores = await axios.get(
-          "http://localhost:5000/api/proveedores"
-          //"/api/proveedores"
+          //"http://localhost:5000/api/proveedores"
+          "/api/proveedores"
         );
         listaProveedores = responseProvedores.data;
         setProveedores(listaProveedores);
