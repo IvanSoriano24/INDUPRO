@@ -17,7 +17,7 @@ import { TabContent, TabPane, Nav, NavItem, NavLink, Label } from "reactstrap";
 import { FaCircleQuestion, FaCirclePlus } from "react-icons/fa6";
 import { HiDocumentPlus } from "react-icons/hi2";
 import { IoSearchSharp } from "react-icons/io5";
-import swal from "sweetalert2";
+import Swal from "sweetalert2";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 
@@ -68,7 +68,7 @@ const AgregarLevDigital = () => {
         // Validación de secuencialidad del número de partida
         if (parseInt(noPartida) !== prevPartida + 1) {
           isValid = false;
-          swal({
+          Swal.fire({
             text: `El número de partida no es secuencial en la fila ${
               index + 2
             }.`,
@@ -80,7 +80,7 @@ const AgregarLevDigital = () => {
         // Validación de cantidad (debe ser un número entero)
         if (!Number.isInteger(Number(cantidad)) || cantidad === "") {
           isValid = false;
-          swal({
+          Swal.fire({
             text: `La cantidad no es un número entero en la fila ${index + 2}.`,
             icon: "error",
           });
@@ -99,7 +99,7 @@ const AgregarLevDigital = () => {
       if (!isValid) {
         return; // Detener el procesamiento si alguna validación falla
       }
-      swal(
+      Swal.fire(
         "Los datos del archivo Excel son válidos y se han procesado correctamente.",
         {
           icon: "success",
@@ -151,18 +151,18 @@ const AgregarLevDigital = () => {
     setList((prevList) =>
       prevList.map((item) =>
         item.noPartida === modalNoPartida // Asegúrate de que modalNoPartida tiene el valor correcto
-          ? { 
-              ...item, 
-              cantidad: modalCantidad, 
-              descripcion: modalDescripcion, 
-              observacion: modalObservacion 
+          ? {
+              ...item,
+              cantidad: modalCantidad,
+              descripcion: modalDescripcion,
+              observacion: modalObservacion,
             }
           : item
       )
     );
     handleClose();
   };
-  
+
   /*----------------------------------------------------------*/
   /* ---------------------ENCABEZADO DE DOCUMENTO ------------------------------------- */
   const [cve_levDig, setCve_levDig] = useState("");
@@ -211,8 +211,8 @@ const AgregarLevDigital = () => {
     };
 
     obtenerFolios();
-}, [selectedFolio]);
- // Se ejecutará solo una vez al cargar el componente
+  }, [selectedFolio]);
+  // Se ejecutará solo una vez al cargar el componente
 
   useEffect(() => {
     // Actualiza el secuencial cuando se selecciona un nuevo folio
@@ -248,15 +248,14 @@ const AgregarLevDigital = () => {
   const addEncabezado = async (e) => {
     e.preventDefault();
 
-
     if (!fechaInicio || !fechaFin) {
-      swal.fire({
-          icon: "warning",
-          title: "Fechas incompletas",
-          text: "Debes seleccionar tanto la fecha de inicio como la fecha de fin antes de continuar.",
+      Swal.fire({
+        icon: "warning",
+        title: "Fechas incompletas",
+        text: "Debes seleccionar tanto la fecha de inicio como la fecha de fin antes de continuar.",
       });
       return;
-  }
+    }
 
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
@@ -264,7 +263,7 @@ const AgregarLevDigital = () => {
     );
     if (!folioSnapshot.empty) {
       if (!clienteSeleccionado) {
-        swal.fire({
+        Swal.fire({
           icon: "warning",
           title: "Sin Cliente",
           text: "No se seleccionó ningún cliente.",
@@ -350,7 +349,7 @@ const AgregarLevDigital = () => {
     }
   };
   const infoCliente = () => {
-    swal({
+    Swal({
       title: "Ayuda del sistema",
       text: " El campo cliente te permite ingresar la razón social del cliente. A medida que escribes, el sistema sugiere opciones basadas en clientes existentes. Al seleccionar uno, se asigna automáticamente a los documentos futuros, simplificando el proceso y garantizando consistencia en la información. ",
       icon: "info",
@@ -358,7 +357,7 @@ const AgregarLevDigital = () => {
     });
   };
   const infoFechaElaboracion = () => {
-    swal({
+    Swal({
       title: "Ayuda del sistema",
       text: " La fecha de elaboración es la fecha en la que se creó el documento y por defecto muestra la fecha de hoy. Sin embargo, es posible modificarla según sea necesario. ",
       icon: "info",
@@ -366,7 +365,7 @@ const AgregarLevDigital = () => {
     });
   };
   const infoFechaInicio = () => {
-    swal({
+    Swal({
       title: "Ayuda del sistema",
       text: " La fecha de inicio representa el día planificado para comenzar el proyecto. Es importante destacar que esta fecha debe ser igual o posterior a la fecha de elaboración del documento. ",
       icon: "info",
@@ -374,7 +373,7 @@ const AgregarLevDigital = () => {
     });
   };
   const infoFechaFin = () => {
-    swal({
+    Swal({
       title: "Ayuda del sistema",
       text: " La fecha de fin indica el día previsto para concluir el proyecto. Es esencial tener en cuenta que esta fecha debe ser igual o posterior a la fecha de elaboración del documento y también mayor que la fecha de inicio programada.",
       icon: "info",

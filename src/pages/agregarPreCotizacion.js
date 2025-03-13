@@ -626,7 +626,7 @@ const AgregarPreCotizacion = () => {
       setCostoCotizado(0);
       // Llamar a la API para obtener las unidades
       const responseUnidades = await axios.get(
-        "/api/lineasMaster",
+        "/api/lineasMaster"
         //"http://localhost:5000/api/lineasMaster"
       );
       setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
@@ -634,7 +634,6 @@ const AgregarPreCotizacion = () => {
       const responseProvedores = await axios.get(
         //"http://localhost:5000/api/proveedores"
         "/api/proveedores"
-
       );
       setProveedores(responseProvedores.data);
 
@@ -776,21 +775,21 @@ const AgregarPreCotizacion = () => {
           insumos: insumoYaExiste
             ? insumosActualizados
             : [
-              ...item.insumos,
-              {
-                insumo,
-                cantidad,
-                unidad,
-                claveSae,
-                descripcionInsumo,
-                comentariosAdi,
-                costoCotizado,
-                proveedor: proveedorClave, // 🟢 Guarda sin espacios
-                categoria,
-                familia,
-                linea,
-              },
-            ],
+                ...item.insumos,
+                {
+                  insumo,
+                  cantidad,
+                  unidad,
+                  claveSae,
+                  descripcionInsumo,
+                  comentariosAdi,
+                  costoCotizado,
+                  proveedor: proveedorClave, // 🟢 Guarda sin espacios
+                  categoria,
+                  familia,
+                  linea,
+                },
+              ],
         };
       }
       return item;
@@ -884,12 +883,8 @@ const AgregarPreCotizacion = () => {
     setLinea(lineaSeleccionada); // Guarda la línea seleccionada
 
     if (lineaSeleccionada) {
-      const clavesSae = await obtenerClaveSae(
-        lineaSeleccionada
-      );
-      setClavesSAE(
-        Array.isArray(clavesSae) ? clavesSae : []
-      );
+      const clavesSae = await obtenerClaveSae(lineaSeleccionada);
+      setClavesSAE(Array.isArray(clavesSae) ? clavesSae : []);
     } else {
       setClavesSAE([]); // 🔹 Limpia las claves si no hay línea seleccionada
     }
@@ -897,19 +892,19 @@ const AgregarPreCotizacion = () => {
   const obtenerClaveSae = async (cveLin) => {
     try {
       console.log("🔎 Buscando Clave SAE para la línea (CVE_LIN):", cveLin); // 🔍 Verifica qué valor se envía
-  
+
       const response = await axios.get(
         //`http://localhost:5000/api/clave-sae/${cveLin}`
         `/api/clave-sae/${cveLin}`
-         );
-  
+      );
+
       console.log("🔹 Claves SAE obtenidas desde SQL:", response.data);
-  
+
       if (response.data.length === 0) {
         console.warn("⚠️ No se encontraron claves SAE.");
         return [];
       }
-  
+
       return response.data.map((item) => ({
         clave: item.CVE_ART || "Clave no encontrada",
         descripcion: item.DESCR || "Descripción no encontrada",
@@ -918,7 +913,7 @@ const AgregarPreCotizacion = () => {
       console.error("❌ Error al obtener Clave SAE desde SQL:", error);
       return [];
     }
-  };  
+  };
   const handleCategoriaChange = async (e) => {
     const categoriaSeleccionada = e.target.value;
     setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
@@ -944,7 +939,7 @@ const AgregarPreCotizacion = () => {
     try {
       //console.log(familiaSeleccionada);
       const response = await axios.get(
-        `/api/categorias/${familiaSeleccionada}`
+        `/api/lineas/${familiaSeleccionada}`
         //`http://localhost:5000/api/lineas/${familiaSeleccionada}`
       );
       setLineas(response.data); // Guardar las líneas en el estado
@@ -1083,7 +1078,20 @@ const AgregarPreCotizacion = () => {
       });
       return;
     }
-
+    // Si listPartidas o listMano están vacíos, mostrar alerta y detener ejecución
+    if (
+      !listPartidas ||
+      listPartidas.length === 0 ||
+      !listMano ||
+      listMano.length === 0
+    ) {
+      swal.fire({
+        icon: "warning",
+        title: "Faltan Datos",
+        text: "Debes seleccionar datos de insumos y/o mano de obra para continuar.",
+      });
+      return; // 🚨 DETIENE la ejecución aquí si faltan datos
+    }
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
@@ -1837,7 +1845,7 @@ const AgregarPreCotizacion = () => {
                   value={linea}
                   //onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
                   onChange={handleLineaChange}
-                  disabled={!familia} // Solo habilita si hay una familia seleccionada
+                  disabled={!familia || !categoria} // Solo habilita si hay una familia seleccionada
                 >
                   <option value="">Seleccionar...</option>
                   {lineas.map((linea, index) => (
@@ -1905,12 +1913,12 @@ const AgregarPreCotizacion = () => {
                     value={
                       proveedor
                         ? {
-                          value: proveedor,
-                          label:
-                            proveedores.find(
-                              (prov) => prov.CLAVE === proveedor
-                            )?.NOMBRE || "",
-                        }
+                            value: proveedor,
+                            label:
+                              proveedores.find(
+                                (prov) => prov.CLAVE === proveedor
+                              )?.NOMBRE || "",
+                          }
                         : null
                     }
                     onChange={(selectedOption) => {

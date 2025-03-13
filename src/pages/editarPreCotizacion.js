@@ -1839,7 +1839,7 @@ const EditarPreCotizacion = () => {
                   value={linea}
                   //onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
                   onChange={handleLineaChange}
-                  disabled={!familia} // Solo habilita si hay una familia seleccionada
+                  disabled={!familia || !categoria} // Solo habilita si hay una familia seleccionada
                 >
                   <option value="">Seleccionar...</option>
                   {lineas.map((linea, index) => (

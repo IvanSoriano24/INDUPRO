@@ -813,7 +813,20 @@ const AgregarRevTecFinanciero = () => {
       });
       return;
     }
-
+    // Si listPartidas o listMano están vacíos, mostrar alerta y detener ejecución
+    if (
+      !listPartidas ||
+      listPartidas.length === 0 ||
+      !listMano ||
+      listMano.length === 0
+    ) {
+      swal.fire({
+        icon: "warning",
+        title: "Faltan Datos",
+        text: "Debes seleccionar datos de insumos y/o mano de obra para continuar.",
+      });
+      return; // 🚨 DETIENE la ejecución aquí si faltan datos
+    }
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
@@ -1122,6 +1135,7 @@ const AgregarRevTecFinanciero = () => {
   };
   const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
+      console.log("Categoria:", categoriaSeleccionada);
       const response = await axios.get(
         `/api/categorias/${categoriaSeleccionada}`
         //`http://localhost:5000/api/categorias/${categoriaSeleccionada}`
@@ -1137,7 +1151,7 @@ const AgregarRevTecFinanciero = () => {
     try {
       //console.log(familiaSeleccionada);
       const response = await axios.get(
-        `/api/categorias/${familiaSeleccionada}`
+        `/api/lineas/${familiaSeleccionada}`
         //`http://localhost:5000/api/lineas/${familiaSeleccionada}`
       );
       setLineas(response.data); // Guardar las líneas en el estado
@@ -1356,12 +1370,8 @@ const AgregarRevTecFinanciero = () => {
     setLinea(lineaSeleccionada); // Guarda la línea seleccionada
 
     if (lineaSeleccionada) {
-      const clavesSae = await obtenerClaveSae(
-        lineaSeleccionada
-      );
-      setClavesSAE(
-        Array.isArray(clavesSae) ? clavesSae : []
-      );
+      const clavesSae = await obtenerClaveSae(lineaSeleccionada);
+      setClavesSAE(Array.isArray(clavesSae) ? clavesSae : []);
     } else {
       setClavesSAE([]); // 🔹 Limpia las claves si no hay línea seleccionada
     }
@@ -1369,19 +1379,19 @@ const AgregarRevTecFinanciero = () => {
   const obtenerClaveSae = async (cveLin) => {
     try {
       console.log("🔎 Buscando Clave SAE para la línea (CVE_LIN):", cveLin); // 🔍 Verifica qué valor se envía
-  
+
       const response = await axios.get(
         //`http://localhost:5000/api/clave-sae/${cveLin}`
         `/api/clave-sae/${cveLin}`
-         );
-  
+      );
+
       console.log("🔹 Claves SAE obtenidas desde SQL:", response.data);
-  
+
       if (response.data.length === 0) {
         console.warn("⚠️ No se encontraron claves SAE.");
         return [];
       }
-  
+
       return response.data.map((item) => ({
         clave: item.CVE_ART || "Clave no encontrada",
         descripcion: item.DESCR || "Descripción no encontrada",
@@ -1390,7 +1400,7 @@ const AgregarRevTecFinanciero = () => {
       console.error("❌ Error al obtener Clave SAE desde SQL:", error);
       return [];
     }
-  };  
+  };
   const handleCategoriaChange = async (e) => {
     const categoriaSeleccionada = e.target.value;
     setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
@@ -1428,18 +1438,20 @@ const AgregarRevTecFinanciero = () => {
       limpiarCampos();
       console.log("🟢 Editando partida:", partida);
       console.log("🟢 ID del insumo a editar:", insumoId);
-  
+
       // 🟢 Obtener el insumo desde Firestore
-      const insumoDoc = await getDoc(doc(db, "PAR_PRECOTIZACION_INSU", insumoId));
-  
+      const insumoDoc = await getDoc(
+        doc(db, "PAR_PRECOTIZACION_INSU", insumoId)
+      );
+
       if (!insumoDoc.exists()) {
         console.error("⚠️ Error: No se encontró el insumo en Firestore.");
         return;
       }
-  
+
       const insumo = insumoDoc.data();
       console.log("🟢 Insumo obtenido desde Firestore:", insumo);
-  
+
       // 🔄 Asignar valores al estado para mostrar en el modal
       setSelectedPartida({ noPartida: insumo.noPartidaPC });
       setInsumo(insumo.insumo);
@@ -1516,7 +1528,7 @@ const AgregarRevTecFinanciero = () => {
     } catch (error) {
       console.error("⚠️ Error al obtener el insumo:", error);
     }
-  };  
+  };
   const recolectarDatos = (
     id,
     cve_levDig,
@@ -1616,7 +1628,6 @@ const AgregarRevTecFinanciero = () => {
       const responseProvedores = await axios.get(
         //"http://localhost:5000/api/proveedores"
         "/api/proveedores"
-
       );
       setProveedores(responseProvedores.data);
 
@@ -2227,7 +2238,7 @@ const AgregarRevTecFinanciero = () => {
                   value={linea}
                   //onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
                   onChange={handleLineaChange}
-                  disabled={!familia} // Solo habilita si hay una familia seleccionada
+                  disabled={!familia || !categoria} // Solo habilita si hay una familia seleccionada
                 >
                   <option value="">Seleccionar...</option>
                   {lineas.map((linea, index) => (

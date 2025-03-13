@@ -83,10 +83,7 @@ app.get("/api/lineasMaster", async (req, res) => {
     // Crear lista única de unidades con descripción
     const unidades = result.recordset.reduce((acc, linea) => {
       if (linea.CUENTA_COI) {
-        // Extraer los primeros dos segmentos de CUENTA_COI (Ejemplo: "12" de "12.01.01")
         const cuenta = linea.CUENTA_COI.split(".")[0];
-
-        // Agregar solo si no existe en la lista
         if (!acc.some((item) => item.cuenta === cuenta)) {
           acc.push({ cuenta, descripcion: linea.DESC_LIN });
         }
@@ -94,33 +91,28 @@ app.get("/api/lineasMaster", async (req, res) => {
       return acc;
     }, []);
 
-    res.json(unidades); // Enviar unidades con descripciones
+    res.json(unidades);
   } catch (err) {
     console.error("Error al ejecutar la consulta de líneas:", err);
-    res
-      .status(500)
-      .json({
-        error: "Error al obtener las líneas de la base de datos",
-        details: err.message,
-      });
+    res.status(500).json({
+      error: "Error al obtener las líneas de la base de datos",
+      details: err.message,
+    });
   }
 });
 app.get("/api/categorias/:unidad", async (req, res) => {
   try {
-    const { unidad } = req.params; // Obtener el primer par (unidad) de los parámetros
+    const { unidad } = req.params;
     const pool = await sql.connect(config);
-
-    // Query para obtener solo el segundo nivel (00.00) de la estructura CUENTA_COI (00.00.00)
     const result = await pool
       .request()
-      .input("unidad", sql.VarChar, unidad + ".%") // Filtra con LIKE basado en unidad
+      .input("unidad", sql.VarChar, unidad + ".%")
       .query(`SELECT CVE_LIN, DESC_LIN, CUENTA_COI 
-                    FROM CLIN01 
-                    WHERE CUENTA_COI LIKE @unidad 
-                    AND CHARINDEX('.', CUENTA_COI) > 0 
-                    AND LEN(CUENTA_COI) - LEN(REPLACE(CUENTA_COI, '.', '')) = 1`); // Solo incluir 1 punto (nivel 2)
-
-    res.json(result.recordset); // Enviar las categorías filtradas
+              FROM CLIN01 
+              WHERE CUENTA_COI LIKE @unidad 
+                AND CHARINDEX('.', CUENTA_COI) > 0 
+                AND LEN(CUENTA_COI) - LEN(REPLACE(CUENTA_COI, '.', '')) = 1`);
+    res.json(result.recordset);
   } catch (err) {
     console.error("Error al obtener las categorías:", err);
     res
