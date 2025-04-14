@@ -186,6 +186,29 @@ app.get("/api/clave-sae/:cveLin", async (req, res) => {
     });
   }
 });
+app.get("/api/obtenerFolio", async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+    const result = await pool
+      .request()
+      .query(`
+        SELECT (ULT_DOC + 1) AS FolioSiguiente 
+        FROM FOLIOSF01 
+        WHERE TIP_DOC = 'C' AND SERIE = 'STAND'
+      `);
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No se encontró el folio." });
+    }
+    const folioSiguiente = result.recordset[0].FolioSiguiente;
+    res.json({ folioSiguiente }); // Retornar el folio en un objeto
+  } catch (err) {
+    console.error("Error al ejecutar la consulta de folio:", err);
+    res.status(500).json({
+      error: "Error al obtener el folio de la base de datos",
+      details: err.message,
+    });
+  }
+});
 
 // Exportar la API para Firebase Functions
 exports.api = functions.https.onRequest(app);

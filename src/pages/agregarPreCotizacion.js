@@ -26,6 +26,7 @@ import { FaPencilAlt } from "react-icons/fa";
 import { ModalTitle, Modal, Button } from "react-bootstrap";
 import axios from "axios";
 import Select from "react-select";
+import * as XLSX from "xlsx";
 
 const AgregarPreCotizacion = () => {
   const [partida_levDi, setPartida_levDig] = useState("");
@@ -126,6 +127,102 @@ const AgregarPreCotizacion = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  /*----------------------------------------------------------*/
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file); // Guardar el archivo en el estado
+    } else {
+      alert("Por favor, selecciona un archivo.");
+    }
+  };
+  const validarCantidad = (cantidad) => {
+    // Aquí puedes meter tu lógica más adelante
+    return Number.isInteger(Number(cantidad)) && cantidad !== "";
+  };
+  const processExcelFile = () => {
+    if (!selectedFile) {
+      alert("Por favor, selecciona un archivo válido.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+      const headers = jsonData[0];
+      let isValid = true;
+      let prevPartida = 0;
+      let partidasConError = [];
+
+      const filteredData = jsonData.slice(1).map((row, index) => {
+        const noPartida = String(row[0] || "").trim();
+        const cantidad = String(row[1] || "").trim();
+        const descripcion = String(row[2] || "").trim();
+        const observaciones = String(row[3] || "").trim();
+
+        // Validación de secuencialidad
+        if (parseInt(noPartida) !== prevPartida + 1) {
+          isValid = false;
+          partidasConError.push(noPartida || `Fila ${index + 2}`);
+        }
+
+        // Validación personalizada de cantidad
+        if (!validarCantidad(cantidad)) {
+          isValid = false;
+          partidasConError.push(noPartida || `Fila ${index + 2}`);
+        }
+
+        prevPartida = parseInt(noPartida);
+
+        return {
+          noPartida,
+          cantidad,
+          descripcion,
+          observaciones,
+        };
+      });
+
+      if (!isValid) {
+        swal.fire({
+          title: "Error en validación",
+          text: `Las siguientes partidas tienen errores: ${partidasConError.join(
+            ", "
+          )}`,
+          icon: "error",
+        });
+        return;
+      }
+
+      swal.fire({
+        title: "Éxito",
+        text: "Los datos del archivo Excel son válidos y se han procesado correctamente.",
+        icon: "success",
+      });
+
+      setExcelData(filteredData);
+    };
+
+    reader.readAsArrayBuffer(selectedFile);
+  };
+
+  const handleAddFromExcel = () => {
+    if (excelData.length === 0) {
+      alert("No hay datos procesados del archivo.");
+      return;
+    }
+
+    // Agregar las filas procesadas del archivo a la lista
+    setList([...list, ...excelData]);
+    setExcelData([]); // Limpiar los datos procesados una vez que se han agregado
+  };
+  const [excelData, setExcelData] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  /*----------------------------------------------------------*/
   /* --------------------   Obtener los folios correspondiente  -------------------------- */
   useEffect(() => {
     const obtenerFolios = async () => {
@@ -625,17 +722,17 @@ const AgregarPreCotizacion = () => {
       setCantidad(0);
       setCostoCotizado(0);
       // Llamar a la API para obtener las unidades
-      const responseUnidades = await axios.get(
-        "/api/lineasMaster"
-        //"http://localhost:5000/api/lineasMaster"
+      /*const responseUnidades = await axios.get(
+        //"/api/lineasMaster"
+        "http://localhost:5000/api/lineasMaster"
       );
       setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
       console.log("Unidades obtenidas:", responseUnidades.data);
       const responseProvedores = await axios.get(
-        //"http://localhost:5000/api/proveedores"
-        "/api/proveedores"
+        "http://localhost:5000/api/proveedores"
+        //"/api/proveedores"
       );
-      setProveedores(responseProvedores.data);
+      setProveedores(responseProvedores.data);*/
 
       setShowAddModal(true);
     } catch (error) {
@@ -1782,7 +1879,7 @@ const AgregarPreCotizacion = () => {
           {/* Columna para Línea en la misma fila */}
           <div className="row mb-6">
             {/* Columna para Línea en la misma fila */}
-            <div className="col-md-4">
+            {/*<div className="col-md-4">
               <div className="mb-3">
                 <label>Categoría</label>
                 <select
@@ -1816,26 +1913,6 @@ const AgregarPreCotizacion = () => {
                   ))}
                 </select>
               </div>
-              {/*<div className="mb-3">
-                <label>Familia</label>
-                <select
-                  className="form-control"
-                  value={familia} // Asegura que este estado también se actualiza correctamente
-                  onChange={handleFamiliaChange}
-                  disabled={!categoria || familias.length === 0} // Se desactiva si no hay familias
-                >
-                  <option value="">Seleccionar...</option>
-                  {familias.length > 0 ? (
-                    familias.map((familia, index) => (
-                      <option key={index} value={familia.cuenta}>
-                        {familia.cuenta} - {familia.descripcion}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Cargando familias...</option>
-                  )}
-                </select>
-              </div>*/}
             </div>
             <div className="col-md-4">
               <div className="mb-3">
@@ -1855,28 +1932,28 @@ const AgregarPreCotizacion = () => {
                   ))}
                 </select>
               </div>
-              {/*<div className="mb-3">
-                <label>Línea</label>
-                <select
+            </div>*/}
+            <div className="col-md-10">
+              <div className="mb-3">
+                <input
+                  type="file"
+                  accept=".xlsx, .xls"
+                  onChange={handleFileUpload}
                   className="form-control"
-                  value={linea}
-                  //onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
-                  onChange={handleLineaChange}
-                  disabled={!familia} // Asegurar que se habilite correctamente
+                />
+                <button
+                  className="btn btn-primary mt-2"
+                  onClick={processExcelFile}
                 >
-                  <option value="">Seleccionar...</option>
-                  {lineas.length > 0 ? (
-                    lineas.map((linea, index) => (
-                      <option key={index} value={linea.cuenta}>
-                        {" "}
-                        {linea.cuenta} - {linea.descripcion}{" "}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Cargando líneas...</option> // Mensaje si aún no hay datos
-                  )}
-                </select>
-              </div>*/}
+                  Procesar Archivo
+                </button>
+                <button
+                  className="btn btn-success mt-2 ms-2"
+                  onClick={handleAddFromExcel}
+                >
+                  Agregar Partidas
+                </button>
+              </div>
             </div>
             {/* Fila 2: Proveedor, Descripcion */}
             <div className="row mb-6">
