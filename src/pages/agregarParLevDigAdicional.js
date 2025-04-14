@@ -1,8 +1,20 @@
-import React, { useState, useEffect } from "react"
-import { useNavigate, useParams, Link } from "react-router-dom"
-import { collection, addDoc, query, orderBy, limit, getDocs, where, getDoc, doc, updateDoc, and } from "firebase/firestore"
-import { db } from "../firebaseConfig/firebase"
-import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap"
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import {
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  where,
+  getDoc,
+  doc,
+  updateDoc,
+  and,
+} from "firebase/firestore";
+import { db } from "../firebaseConfig/firebase";
+import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { FaCircleQuestion, FaCirclePlus } from "react-icons/fa6";
 import { HiDocumentPlus } from "react-icons/hi2";
 import { IoSearchSharp } from "react-icons/io5";
@@ -10,11 +22,10 @@ import swal from "sweetalert";
 import { CiCirclePlus } from "react-icons/ci";
 import { MdDelete } from "react-icons/md";
 import { FaPencilAlt } from "react-icons/fa";
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import Modal from 'react-bootstrap/Modal';
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
+import Modal from "react-bootstrap/Modal";
 import { useHistory } from "react-router-dom";
-
 
 const AgregarParLevDiGAdicional = () => {
   /* ---------------------ENCABEZADO DE DOCUMENTO ------------------------------------- */
@@ -31,8 +42,8 @@ const AgregarParLevDiGAdicional = () => {
   const [docAnt, setDocAnt] = useState("N/A");
   const [docSig, setDocSig] = useState("");
   const [estatus, setEstatus] = useState("Activo");
-  const navigate = useNavigate()
-
+  const navigate = useNavigate();
+  const [idMonday, setIdMonday] = useState("");
 
   const handleShowAgregar = () => setShowAgregar(true);
   const handleCloseAgregar = () => {
@@ -41,12 +52,8 @@ const AgregarParLevDiGAdicional = () => {
     setObservacion("");
     setShowAgregar(false);
   };
-  
+
   const { id } = useParams();
-
-
-
-
 
   const getFactoresById = async (id) => {
     const factoresDOC = await getDoc(doc(db, "LEVDIGITAL", id));
@@ -56,6 +63,7 @@ const AgregarParLevDiGAdicional = () => {
       setFechaElaboracion(factoresDOC.data().fechaElaboracion);
       setFechaInicio(factoresDOC.data().fechaInicio);
       setFechaFin(factoresDOC.data().fechaFin);
+      setIdMonday(factoresDOC.data().idMonday);
     } else {
       console.log("El personals no existe");
     }
@@ -66,17 +74,17 @@ const AgregarParLevDiGAdicional = () => {
   }, [id]);
   /* ----------------------------------------- AGREGAR PARTIDAS -------------------------------- */
   /* ---------------------PARTIDAS DE DOCUMENTO ------------------------------------- */
-  const [cve_levDig_par, setLevDigital_par] = useState("LEV_DIG1"); /* Este es el campo que agregue */
+  const [cve_levDig_par, setLevDigital_par] =
+    useState("LEV_DIG1"); /* Este es el campo que agregue */
   const [descripcion, setDescripcion] = useState("");
   const [observacion, setObservacion] = useState("");
   const [list, setList] = useState([]);
-  const [par_levDigital, setPar_levDigital] = useState([])
+  const [par_levDigital, setPar_levDigital] = useState([]);
   const [idCounter, setIdCounter] = useState(1); // Inicializamos el contador en 1
   const [editIndex, setEditIndex] = useState(null);
   const [noPartida, setNoPartida] = useState("");
   const [idPartida, setIdPartida] = useState("");
   const partidaAdicional = collection(db, "PAR_LEVDIGITAL");
-
 
   const [show, setShow] = useState(false);
 
@@ -87,46 +95,55 @@ const AgregarParLevDiGAdicional = () => {
       title: "Ayuda del sistema",
       text: " El campo cliente te permite ingresar la razón social del cliente. A medida que escribes, el sistema sugiere opciones basadas en clientes existentes. Este campo no se puede modificar ya que con ello se garantiza el seguimiento del documento. ",
       icon: "info",
-      buttons: "Aceptar"
-    })
-  }
+      buttons: "Aceptar",
+    });
+  };
   const infoFechaElaboracion = () => {
     swal({
       title: "Ayuda del sistema",
       text: " La fecha de elaboración es la fecha en la que se creó el documento y por defecto muestra la fecha de hoy. Sin embargo, es posible modificarla según sea necesario. ",
       icon: "info",
-      buttons: "Aceptar"
-    })
-  }
+      buttons: "Aceptar",
+    });
+  };
   const infoFechaInicio = () => {
     swal({
       title: "Ayuda del sistema",
       text: " La fecha de inicio representa el día planificado para comenzar el proyecto. Es importante destacar que esta fecha debe ser igual o posterior a la fecha de elaboración del documento. ",
       icon: "info",
-      buttons: "Aceptar"
-    })
-  }
+      buttons: "Aceptar",
+    });
+  };
   const infoFechaFin = () => {
     swal({
       title: "Ayuda del sistema",
       text: " La fecha de fin indica el día previsto para concluir el proyecto. Es esencial tener en cuenta que esta fecha debe ser igual o posterior a la fecha de elaboración del documento y también mayor que la fecha de inicio programada.",
       icon: "info",
-      buttons: "Aceptar"
-    })
-  }
+      buttons: "Aceptar",
+    });
+  };
 
   const getParLevDigital = async () => {
     try {
       const data = await getDocs(
-        query(collection(db, "PAR_LEVDIGITAL"), where("cve_levDig", "==", cve_levDig), where("estatusPartida", "==", "Activa"))
+        query(
+          collection(db, "PAR_LEVDIGITAL"),
+          where("cve_levDig", "==", cve_levDig),
+          where("estatusPartida", "==", "Activa")
+        )
       );
 
-      const par_levDigList = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+      const par_levDigList = data.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
       par_levDigList.sort((a, b) => a.noPartida - b.noPartida);
       setPar_levDigital(par_levDigList);
-      const maxPartida = Math.max(...par_levDigList.map((item) => item.noPartida), 0);
+      const maxPartida = Math.max(
+        ...par_levDigList.map((item) => item.noPartida),
+        0
+      );
       setNoPartida(maxPartida + 1);
-
     } catch (error) {
       console.error("Error fetching PAR_LEVDIGITAL data:", error);
     }
@@ -135,8 +152,6 @@ const AgregarParLevDiGAdicional = () => {
   useEffect(() => {
     getParLevDigital();
   }, [cve_levDig]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
-
-
 
   /* ------------------------------------ - Editar Documento -------------------------------*/
   const updateContacto = async (e) => {
@@ -147,19 +162,18 @@ const AgregarParLevDiGAdicional = () => {
       fechaElaboracion: fechaElaboracion,
       fechaInicio: fechaInicio,
       fechaFin: fechaFin,
-
+      idMonday: idMonday,
     };
     await updateDoc(factoresRef, datos);
 
-    navigate("/levantamientoDigital")
-  }
-
+    navigate("/levantamientoDigital");
+  };
 
   const agregarPartidaAdicional = async (e) => {
     e.preventDefault();
     try {
       const bitacora = collection(db, "BITACORA");
-      const today = new Date()
+      const today = new Date();
       const ahora = new Date();
       const hora = ahora.getHours();
       const minuto = ahora.getMinutes();
@@ -171,7 +185,7 @@ const AgregarParLevDiGAdicional = () => {
         tiempo: horaFormateada,
         fechaRegistro: formattedDate,
         tipoDocumento: "Registro de partida",
-        noPartida: noPartida
+        noPartida: noPartida,
       });
       await addDoc(partidaAdicional, {
         cve_levDig: cve_levDig,
@@ -179,28 +193,30 @@ const AgregarParLevDiGAdicional = () => {
         noPartida: noPartida,
         descripcion: descripcion,
         observacion: observacion,
-        estatusPartida: "Activa"
+        estatusPartida: "Activa",
       });
       // Cierra el modal y limpia los campos
-      
+
       setCantidad("");
-    setDescripcion("");
-    setObservacion("");
-    setShowAgregar(false);
-    getParLevDigital(); // Actualiza la tabla
-  } catch (error) {
-    console.error("Error agregando partida:", error);
-  }
-
-
+      setDescripcion("");
+      setObservacion("");
+      setShowAgregar(false);
+      getParLevDigital(); // Actualiza la tabla
+    } catch (error) {
+      console.error("Error agregando partida:", error);
+    }
   };
 
   const handleDelete = async (noPartida, cve_levDig) => {
     // Realiza una consulta para encontrar el documento que coincida con los identificadores proporcionados
-    const q = query(collection(db, "PAR_LEVDIGITAL"), where("noPartida", "==", noPartida), where("cve_levDig", "==", cve_levDig));
+    const q = query(
+      collection(db, "PAR_LEVDIGITAL"),
+      where("noPartida", "==", noPartida),
+      where("cve_levDig", "==", cve_levDig)
+    );
     const querySnapshot = await getDocs(q);
     const bitacora = collection(db, "BITACORA");
-    const today = new Date()
+    const today = new Date();
     const ahora = new Date();
     const hora = ahora.getHours();
     const minuto = ahora.getMinutes();
@@ -212,7 +228,7 @@ const AgregarParLevDiGAdicional = () => {
       tiempo: horaFormateada,
       fechaRegistro: formattedDate,
       tipoDocumento: "Baja de partida",
-      noPartida: noPartida
+      noPartida: noPartida,
     });
     // Si se encuentra un documento que coincide con los identificadores proporcionados, actualiza su estatus
     if (!querySnapshot.empty) {
@@ -221,28 +237,37 @@ const AgregarParLevDiGAdicional = () => {
 
       // Actualiza el estatus del documento
       const datos = {
-        estatusPartida: "Baja"
+        estatusPartida: "Baja",
       };
       await updateDoc(factoresRef, datos);
 
       // No se recomienda recargar la página; en su lugar, puedes manejar la actualización del estado localmente
       window.location.reload();
     } else {
-      console.log("No se encontró ningún documento que coincida con los identificadores proporcionados.");
+      console.log(
+        "No se encontró ningún documento que coincida con los identificadores proporcionados."
+      );
     }
     // }
   };
-  const recolectarDatos = async (idPartida, cve_tecFin, cantidad, noPartida, descripcion, observacion) => {
+  const recolectarDatos = async (
+    idPartida,
+    cve_tecFin,
+    cantidad,
+    noPartida,
+    descripcion,
+    observacion
+  ) => {
     //alert("CLAVE: " + cve_tecFin + "Y TAMBIEN NO PARTIDA: " + noPartida)
     //alert("ID: " + idPartida);
-    setIdPartida(idPartida)
-    setCve_levDig(cve_tecFin)
-    setCantidad(cantidad)
-    setNoPartida(noPartida)
-    setDescripcion(descripcion)
-    setObservacion(observacion)
+    setIdPartida(idPartida);
+    setCve_levDig(cve_tecFin);
+    setCantidad(cantidad);
+    setNoPartida(noPartida);
+    setDescripcion(descripcion);
+    setObservacion(observacion);
     handleShow(); // Muestra el modal
-  }
+  };
   const guardarEdicion = async () => {
     if (idPartida) {
       const partidaRef = doc(db, "PAR_LEVDIGITAL", idPartida);
@@ -256,7 +281,6 @@ const AgregarParLevDiGAdicional = () => {
     }
   };
 
-
   return (
     <div className="container">
       <div className="row">
@@ -267,7 +291,9 @@ const AgregarParLevDiGAdicional = () => {
               <label className="form-label">CLIENTE</label>
               <div class="input-group mb-3">
                 <input
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
                   type="text"
                   className="form-control"
                   value={cve_clie}
@@ -275,22 +301,60 @@ const AgregarParLevDiGAdicional = () => {
                   readOnly
                 />
                 <div class="input-group-append">
-                  <button class="btn btn-outline-secondary" type="button" onClick={infoCliente}><FaCircleQuestion /></button>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    onClick={infoCliente}
+                  >
+                    <FaCircleQuestion />
+                  </button>
                 </div>
+              </div>
+            </div>
+            <div className="col-md-2">
+              <label className="form-label">Folio Monday: </label>
+              <div className="input-group mb-3">
+                <input
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="number"
+                  value={idMonday}
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    // Validar: solo números positivos y máximo 10 dígitos
+                    if (/^\d{0,10}$/.test(value)) {
+                      setIdMonday(value);
+                    }
+                  }}
+                  className="form-control"
+                  readOnly
+                  min="0"
+                  max="9999999999"
+                />
               </div>
             </div>
             <div className="col-md-4 ">
               <label className="form-label">FECHA DE ELABORACIÓN</label>
               <div class="input-group mb-3">
                 <input
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
                   type="date"
                   value={fechaElaboracion}
                   onChange={(e) => setFechaElaboracion(e.target.value)}
                   className="form-control"
                 />
                 <div class="input-group-append">
-                  <button class="btn btn-outline-secondary" type="button" onClick={infoFechaElaboracion}><FaCircleQuestion /></button>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    onClick={infoFechaElaboracion}
+                  >
+                    <FaCircleQuestion />
+                  </button>
                 </div>
               </div>
             </div>
@@ -298,14 +362,22 @@ const AgregarParLevDiGAdicional = () => {
               <label className="form-label">FECHA DE INICIO</label>
               <div class="input-group mb-3">
                 <input
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
                   type="date"
                   value={fechaInicio}
                   onChange={(e) => setFechaInicio(e.target.value)}
                   className="form-control"
                 />
                 <div class="input-group-append">
-                  <button class="btn btn-outline-secondary" type="button" onClick={infoFechaInicio} ><FaCircleQuestion /></button>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    onClick={infoFechaInicio}
+                  >
+                    <FaCircleQuestion />
+                  </button>
                 </div>
               </div>
             </div>
@@ -313,21 +385,31 @@ const AgregarParLevDiGAdicional = () => {
               <label className="form-label">FECHA FIN</label>
               <div class="input-group mb-3">
                 <input
-                  placeholder="" aria-label="" aria-describedby="basic-addon1"
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
                   type="date"
                   value={fechaFin}
                   onChange={(e) => setFechaFin(e.target.value)}
                   className="form-control"
                 />
                 <div class="input-group-append">
-                  <button class="btn btn-outline-secondary" type="button" onClick={infoFechaFin}><FaCircleQuestion /></button>
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    onClick={infoFechaFin}
+                  >
+                    <FaCircleQuestion />
+                  </button>
                 </div>
               </div>
             </div>
           </div>
           {/* Aqui iba contenido anterior */}
           <div className="col-md-6 ">
-            <button className="btn btn-success" onClick={handleShowAgregar}>Agregar Partida</button>
+            <button className="btn btn-success" onClick={handleShowAgregar}>
+              Agregar Partida
+            </button>
           </div>
           <div>
             <br></br>
@@ -350,9 +432,32 @@ const AgregarParLevDiGAdicional = () => {
                     <td>{item.descripcion}</td>
                     <td>{item.observacion}</td>
                     <td>
-                      <button className="btn btn-primary" onClick={() => recolectarDatos(item.id, item.cve_levDig, item.noPartida, item.cantidad, item.descripcion, item.observacion)}><FaPencilAlt /> </button>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() =>
+                          recolectarDatos(
+                            item.id,
+                            item.cve_levDig,
+                            item.noPartida,
+                            item.cantidad,
+                            item.descripcion,
+                            item.observacion
+                          )
+                        }
+                      >
+                        <FaPencilAlt />{" "}
+                      </button>
                     </td>
-                    <td><button className="btn btn-danger" onClick={() => handleDelete(item.noPartida, item.cve_levDig)}><MdDelete /></button></td>
+                    <td>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() =>
+                          handleDelete(item.noPartida, item.cve_levDig)
+                        }
+                      >
+                        <MdDelete />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -360,17 +465,30 @@ const AgregarParLevDiGAdicional = () => {
           </div>
         </div>
         <p></p>
-        <button className="btn btn-success" onClick={updateContacto}><HiDocumentPlus /> GUARDAR DOCUMENTO</button>
+        <button className="btn btn-success" onClick={updateContacto}>
+          <HiDocumentPlus /> GUARDAR DOCUMENTO
+        </button>
       </div>
       {/* Modal para agregar partida */}
-      <Modal show={showAgregar} onHide={handleShowAgregar} dialogClassName="lg" centered scrollable>
+      <Modal
+        show={showAgregar}
+        onHide={handleShowAgregar}
+        dialogClassName="lg"
+        centered
+        scrollable
+      >
         <Modal.Header closeButton>
           <Modal.Title>Agregar Partida</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="mb-3">
             <label>No. Partida</label>
-            <input type="text" className="form-control" value={noPartida} readOnly />
+            <input
+              type="text"
+              className="form-control"
+              value={noPartida}
+              readOnly
+            />
           </div>
           <div className="mb-3">
             <label>Cantidad</label>
@@ -402,21 +520,32 @@ const AgregarParLevDiGAdicional = () => {
           <Button variant="secondary" onClick={handleCloseAgregar}>
             Cancelar
           </Button>
-          <Button variant="primary"  onClick={agregarPartidaAdicional}>
+          <Button variant="primary" onClick={agregarPartidaAdicional}>
             Guardar Partida
           </Button>
         </Modal.Footer>
       </Modal>
 
       {/* Modal EDITAR  */}
-      <Modal show={show} onHide={handleClose} dialogClassName="lg" centered scrollable >
+      <Modal
+        show={show}
+        onHide={handleClose}
+        dialogClassName="lg"
+        centered
+        scrollable
+      >
         <Modal.Header closeButton>
           <Modal.Title>Editar Partida</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="mb-3">
             <label>No. Partida</label>
-            <input type="text" className="form-control" value={noPartida} readOnly />
+            <input
+              type="text"
+              className="form-control"
+              value={noPartida}
+              readOnly
+            />
           </div>
           <div className="mb-3">
             <label>Cantidad</label>
@@ -454,7 +583,6 @@ const AgregarParLevDiGAdicional = () => {
         </Modal.Footer>
       </Modal>
     </div>
-
   );
 };
 export default AgregarParLevDiGAdicional;

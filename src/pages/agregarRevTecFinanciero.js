@@ -117,6 +117,7 @@ const AgregarRevTecFinanciero = () => {
   const parTecFinMO = collection(db, "PAR_TECFIN_MO");
   const navigate = useNavigate();
   const { id } = useParams();
+  const [idMonday, setIdMonday] = useState("");
   /* --------------------   Obtener los folios correspondiente  -------------------------- */
   /*useEffect(() => {
     const obtenerFolios = async () => {
@@ -255,6 +256,7 @@ const AgregarRevTecFinanciero = () => {
       setFechaElaboracion(factoresDOC.data().fechaElaboracion);
       setFechaInicio(factoresDOC.data().fechaInicio);
       setFechaFin(factoresDOC.data().fechaFin);
+      setIdMonday(factoresDOC.data().idMonday);
     } else {
       console.log("El personals no existe");
     }
@@ -873,6 +875,7 @@ const AgregarRevTecFinanciero = () => {
         fechaElaboracion: fechaElaboracion,
         fechaInicio: fechaInicio,
         fechaFin: fechaFin,
+        idMonday: idMonday,
       });
       await addDoc(bitacora, {
         cve_Docu: cve_precot,
@@ -1715,6 +1718,31 @@ const AgregarRevTecFinanciero = () => {
                   </div>
                 </div>
               </div>
+
+              <div className="col-md-2">
+              <label className="form-label">Folio Monday: </label>
+              <div className="input-group mb-3">
+                <input
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="number"
+                  value={idMonday}
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    // Validar: solo números positivos y máximo 10 dígitos
+                    if (/^\d{0,10}$/.test(value)) {
+                      setIdMonday(value);
+                    }
+                  }}
+                  className="form-control"
+                  readOnly
+                  min="0"
+                  max="9999999999"
+                />
+              </div>
+            </div>
 
               <div className="col-md-4 ">
                 <label className="form-label">FECHA DE ELABORACIÓN</label>

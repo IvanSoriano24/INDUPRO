@@ -92,7 +92,7 @@ const EditarRecTecFinanciero = () => {
   /* ---------------------------------------- LLAMADA A COLECCIONES ---------------------------------------- */
   const navigate = useNavigate();
   const { id } = useParams();
-
+const [idMonday, setIdMonday] = useState("");
   /* ---------------------JALAR INFORMACIÓN DE DOCUMENTO ANTERIOR ------------------------------------- */
   const getFactoresById = async (id) => {
     const factoresDOC = await getDoc(doc(db, "TECNICOFINANCIERO", id));
@@ -102,6 +102,7 @@ const EditarRecTecFinanciero = () => {
       setFechaElaboracion(factoresDOC.data().fechaElaboracion);
       setFechaInicio(factoresDOC.data().fechaInicio);
       setFechaFin(factoresDOC.data().fechaFin);
+      setIdMonday(factoresDOC.data().idMonday);
     } else {
       console.log("El personals no existe");
     }
@@ -388,6 +389,31 @@ const EditarRecTecFinanciero = () => {
                   value={cve_clie}
                   onChange={(e) => setCve_clie(e.target.value)}
                   readOnly
+                />
+              </div>
+            </div>
+
+            <div className="col-md-2">
+              <label className="form-label">Folio Monday: </label>
+              <div className="input-group mb-3">
+                <input
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="number"
+                  value={idMonday}
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    // Validar: solo números positivos y máximo 10 dígitos
+                    if (/^\d{0,10}$/.test(value)) {
+                      setIdMonday(value);
+                    }
+                  }}
+                  className="form-control"
+                  readOnly
+                  min="0"
+                  max="9999999999"
                 />
               </div>
             </div>

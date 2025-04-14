@@ -66,6 +66,7 @@ const VisualizarPDF = () => {
   /* --------------------------------PARTIDAS PARA MANO DE OBRA -----------------*/
   const [manoDeObraTotal, setManoDeObraTotal] = useState();
   const [manoDeObraTotalCostL, setManoDeObraTotalCostL] = useState();
+  const [idMonday, setIdMonday] = useState("");
   /* ---------------------------------------- LLAMADA A COLECCIONES ---------------------------------------- */
   const navigate = useNavigate();
   const { id } = useParams();
@@ -78,6 +79,7 @@ const VisualizarPDF = () => {
       setFechaElaboracion(factoresDOC.data().fechaElaboracion);
       setFechaInicio(factoresDOC.data().fechaInicio);
       setFechaFin(factoresDOC.data().fechaFin);
+      setIdMonday(factoresDOC.data().idMonday);
     } else {
       console.log("El personals no existe");
     }
@@ -448,6 +450,7 @@ const calcularCotizacion = async () => {
       IVA: sumaValorLider * 0.16,
       total: sumaValorLider * 0.16 + sumaValorLider,
       acuedoComercial: nombreComercial,
+      idMonday: idMonday,
     });
     const cotTotal = collection(db, "PAR_COTIZACION");
     totalesDoc.forEach(async (item) => {
@@ -515,6 +518,8 @@ const calcularCotizacion = async () => {
           <br></br>
           <h1 style={{ textAlign: "center" }}>Analisis Técnico Financiero </h1>
           <label> Documento: {cve_tecFin}</label>
+          <br />
+          <label> id Monday: {idMonday}</label>
           <br />
           <label> Cliente: {razonSocial} </label>
           <br />

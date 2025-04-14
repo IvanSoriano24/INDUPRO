@@ -118,6 +118,8 @@ const EditarPreCotizacion = () => {
     setObservacion("");
   };
   const handleShow = () => setShow(true);
+
+  const [idMonday, setIdMonday] = useState("");
   /* ---------------------JALAR INFORMACIÓN DE DOCUMENTO ANTERIOR ------------------------------------- */
   const getFactoresById = async (id) => {
     const factoresDOC = await getDoc(doc(db, "PRECOTIZACION", id));
@@ -127,6 +129,7 @@ const EditarPreCotizacion = () => {
       setFechaElaboracion(factoresDOC.data().fechaElaboracion);
       setFechaInicio(factoresDOC.data().fechaInicio);
       setFechaFin(factoresDOC.data().fechaFin);
+      setIdMonday(factoresDOC.data().idMonday);
     } else {
       console.log("El personals no existe");
     }
@@ -972,6 +975,7 @@ const EditarPreCotizacion = () => {
       fechaElaboracion: fechaElaboracion,
       fechaFin: fechaFin,
       fechaInicio,
+      idMonday: idMonday,
     };
     await updateDoc(preCotRef, datos);
     navigate("/precotizacion");
@@ -1343,6 +1347,31 @@ const EditarPreCotizacion = () => {
               </div>
             </div>
 
+            <div className="col-md-2">
+              <label className="form-label">Folio Monday: </label>
+              <div className="input-group mb-3">
+                <input
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="number"
+                  value={idMonday}
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    // Validar: solo números positivos y máximo 10 dígitos
+                    if (/^\d{0,10}$/.test(value)) {
+                      setIdMonday(value);
+                    }
+                  }}
+                  className="form-control"
+                  readOnly
+                  min="0"
+                  max="9999999999"
+                />
+              </div>
+            </div>
+
             <div className="col-md-4 ">
               <label className="form-label">FECHA DE ELABORACIÓN</label>
               <div class="input-group mb-3">
@@ -1362,6 +1391,7 @@ const EditarPreCotizacion = () => {
                 </div>
               </div>
             </div>
+
 
             <div className="col-md-4 ">
               <label className="form-label">FECHA DE INICIO</label>
