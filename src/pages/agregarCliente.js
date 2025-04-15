@@ -254,7 +254,7 @@ const AgregarCliente = () => {
                                             value={cve_int}
                                             onChange={(e) => setCve_int(e.target.value)}
                                             type="text"
-                                            className="form-control" readOnly 
+                                            className="form-control" 
                                         />
                                         <div class="input-group-append">
                                             <button class="btn btn-outline-secondary" type="button" onClick={infoCveCliente}><FaCircleQuestion /></button>

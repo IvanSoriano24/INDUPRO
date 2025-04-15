@@ -217,7 +217,8 @@ const EditarPartidasInsumosATF = () => {
                                 </div>
                                 <p/>
                                 <div className="col-md-2 ">
-                                    <label>COSTO FIJO ($)</label>
+                                    {/*<label>COSTO FIJO ($)</label>*/}
+                                    <label>COSTO INDIRECTO ($)</label>
                                     <div class="input-group mb-3">
                                         <input
                                         placeholder="" aria-label="" aria-describedby="basic-addon1"
@@ -285,7 +286,8 @@ const EditarPartidasInsumosATF = () => {
 
                             <div className="row" style={{ border: '1px solid #000' }}>
                                 <div className="col-md-2 ">
-                                    <label>COSTO FIJO (%)</label>
+                                    {/*<label>COSTO FIJO (%)</label>*/}
+                                    <label>COSTO INDIRECTO (%)</label>
                                     <div class="input-group mb-3">
                                         <input
                                         placeholder="" aria-label="" aria-describedby="basic-addon1"

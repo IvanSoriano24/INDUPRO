@@ -63,7 +63,7 @@ const AgregarFactores  = () => {
       const infoCostoFijo=()=>{
         swal({
           title: "Ayuda del sistema",
-          text: " El campo de costo fijo representa un gasto constante asociado a la operación del insumo. Este costo se multiplica por el subtotal de la partida en el proyecto, proporcionando una estimación adicional que contribuye a la determinación total de los costos asociados con ese insumo específico." + "\n"+ "\n" + "Agrega la cantidad en número entero sin el signo de porcentaje (%) " +  "\n" + "\n" + "EJEMPLO: 9% = 9", 
+          text: " El campo de costo indirecto representa un gasto constante asociado a la operación del insumo. Este costo se multiplica por el subtotal de la partida en el proyecto, proporcionando una estimación adicional que contribuye a la determinación total de los costos asociados con ese insumo específico." + "\n"+ "\n" + "Agrega la cantidad en número entero sin el signo de porcentaje (%) " +  "\n" + "\n" + "EJEMPLO: 9% = 9", 
           icon: "info",
           
           buttons: "Aceptar"
@@ -105,7 +105,8 @@ const AgregarFactores  = () => {
                     <form onSubmit={addFactores}>
                         <div className="row">
                             <div className="col-md-3">
-                                <label className="form-label">COSTO FIJO (%)</label>
+                                {/*<label className="form-label">COSTO FIJO (%)</label>*/}
+                                <label className="form-label">COSTO INDIRECTO (%)</label>
                                 <div className="input-group mb-3">
                                     <input
                                     value={costoFijo}

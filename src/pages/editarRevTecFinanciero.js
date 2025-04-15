@@ -588,7 +588,7 @@ const openModal = async (noPartida) => {
           <br></br>
           <div className="row" style={{ border: "1px solid #000" }}>
             <label style={{ color: "red" }}>TOTALES </label>
-            <div className="col-md-3 ">
+            {/*<div className="col-md-3 ">
               <label className="form-label">Cantidad</label>
               <div class="input-group mb-3">
                 <input
@@ -643,7 +643,7 @@ const openModal = async (noPartida) => {
                   className="form-control"
                 />
               </div>
-            </div>
+            </div>*/}
             <div className="col-md-6 ">
               <button
                 className="btn btn-success"

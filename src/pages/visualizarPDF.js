@@ -276,10 +276,10 @@ const VisualizarPDF = () => {
           sumaValorProyecto - valorDidirecto - valorIndirecto;
         setUtilidadEsperada(utilidadEsperada);
 
-        let factor = sumaValorProyecto * (factoraje/100);
+        /*let factor = sumaValorProyecto * (factoraje/100);
         setFactoraje(factor);
         let utilidaNet = utilidadEsperada - factor;
-        setUtilidadNeta(utilidaNet);
+        setUtilidadNeta(utilidaNet);*/
 
         console.log("Datos Pre-Cotizados");
         console.log(sumaValorInsumos);
@@ -777,13 +777,13 @@ const calcularCotizacion = async () => {
                     <th scope="row">Factoraje</th>
                     <td></td>
                     <td>
-                      {factoraje.toLocaleString("en-US", {
+                      {(sumaValorProyecto*(factorajeManual/100)).toLocaleString("en-US", {
                         style: "currency",
                         currency: "USD",
                       })}
                     </td>
                     <td>
-                      {((valorIndirecto * 100) / sumaValorProyecto).toFixed(2)}{" "}
+                      {(((sumaValorProyecto*(factorajeManual/100)) * 100) / sumaValorProyecto).toFixed(2)}{" "}
                       %
                     </td>
                   </tr>
@@ -794,13 +794,13 @@ const calcularCotizacion = async () => {
                     </th>
                     <td></td>
                     <td>
-                      {utilidadNeta.toLocaleString("en-US", {
+                      {(utilidadEsperada-((sumaValorProyecto*(factorajeManual/100)))).toLocaleString("en-US", {
                         style: "currency",
                         currency: "USD",
                       })}
                     </td>
                     <td>
-                      {((valorIndirecto * 100) / sumaValorProyecto).toFixed(2)}{" "}
+                      {(((utilidadEsperada-((sumaValorProyecto*(factorajeManual/100)))) * 100) / sumaValorProyecto).toFixed(2)}{" "}
                       %
                     </td>
                   </tr>
