@@ -1309,7 +1309,24 @@ const AgregarRevTecFinanciero = () => {
         "🔍 Guardando partida con proveedor:",
         `"${proveedorConEspacios}"`
       );
+      const factorSeleccionado = await obtenerFactorPorNombre(insumo);
 
+      const { costoFijo, factoraje, fianzas, utilidad } = factorSeleccionado;
+      const bitacora = collection(db, "BITACORA");
+      const today = new Date();
+      const ahora = new Date();
+      const hora = ahora.getHours();
+      const minuto = ahora.getMinutes();
+      const segundo = ahora.getSeconds();
+      const formattedDate = today.toLocaleDateString(); // Opcional: Puedes pasar opciones de formato
+      const horaFormateada = `${hora}:${minuto}:${segundo}`;
+      await addDoc(bitacora, {
+        cve_Docu: selectedFolio + folioSiguiente.toString(),
+        tiempo: horaFormateada,
+        fechaRegistro: formattedDate,
+        tipoDocumento: "Registro de partidas",
+        noPartida: parseInt(selectedPartida.noPartida, 10),
+      });
       // 🟢 Construye el objeto con los datos a guardar
       const insumoData = {
         cve_precot: cve_precot, // Asegurar que el folio de la precotización se guarde
@@ -1329,6 +1346,10 @@ const AgregarRevTecFinanciero = () => {
         estatus: "Activo",
         fechaRegistro: new Date().toLocaleDateString(),
         fechaModificacion: new Date().toLocaleDateString(),
+        costoFijo: (costoFijo / 100) * (costoCotizado * cantidad),
+        factoraje: (factoraje / 100) * (costoCotizado * cantidad),
+        fianzas: (fianzas / 100) * (costoCotizado * cantidad),
+        utilidad: (utilidad / 100) * (costoCotizado * cantidad),
       };
 
       if (editIndex) {
@@ -1720,29 +1741,29 @@ const AgregarRevTecFinanciero = () => {
               </div>
 
               <div className="col-md-2">
-              <label className="form-label">Folio Monday: </label>
-              <div className="input-group mb-3">
-                <input
-                  placeholder=""
-                  aria-label=""
-                  aria-describedby="basic-addon1"
-                  type="number"
-                  value={idMonday}
-                  onChange={(e) => {
-                    const value = e.target.value;
+                <label className="form-label">Folio Monday: </label>
+                <div className="input-group mb-3">
+                  <input
+                    placeholder=""
+                    aria-label=""
+                    aria-describedby="basic-addon1"
+                    type="number"
+                    value={idMonday}
+                    onChange={(e) => {
+                      const value = e.target.value;
 
-                    // Validar: solo números positivos y máximo 10 dígitos
-                    if (/^\d{0,10}$/.test(value)) {
-                      setIdMonday(value);
-                    }
-                  }}
-                  className="form-control"
-                  readOnly
-                  min="0"
-                  max="9999999999"
-                />
+                      // Validar: solo números positivos y máximo 10 dígitos
+                      if (/^\d{0,10}$/.test(value)) {
+                        setIdMonday(value);
+                      }
+                    }}
+                    className="form-control"
+                    readOnly
+                    min="0"
+                    max="9999999999"
+                  />
+                </div>
               </div>
-            </div>
 
               <div className="col-md-4 ">
                 <label className="form-label">FECHA DE ELABORACIÓN</label>

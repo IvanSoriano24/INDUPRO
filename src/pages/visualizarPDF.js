@@ -56,7 +56,8 @@ const VisualizarPDF = () => {
   const [costoCotizado, setCostoCotizado] = useState();
   const [cantidad, setCantidad] = useState();
   const total = costoCotizado * cantidad;
-  const [sumaValorLider, setSumaValorLider] = useState(0);
+  const [sumaValorProyecto, setSumaValorProyecto] = useState(0);
+  const [sumaValorInsumos, setSumaValorInsumos] = useState(0);
   const [par_PreCoti_insu, setPar_PreCoti_insu] = useState([]);
   const [totalMateria, setTotalMateria] = useState();
   const [totalSubContrado, setTotalSubContrado] = useState();
@@ -67,6 +68,17 @@ const VisualizarPDF = () => {
   const [manoDeObraTotal, setManoDeObraTotal] = useState();
   const [manoDeObraTotalCostL, setManoDeObraTotalCostL] = useState();
   const [idMonday, setIdMonday] = useState("");
+  const [totalMO, setTotalMO] = useState(0); // Total de Mano de Obra
+  const [totalInsumo, setTotalInsumo] = useState(0); // Total de Insumos
+  const [costoFijoPorcentaje, setCostoFijoPorcentaje] = useState(0); // Porcentaje de Costos Fijos
+  const [factorajePorcentaje, setFactorajePorcentaje] = useState(0); // Porcentaje de Factoraje
+  const [valorProyecto, setValorProyecto] = useState(0); // Utilidad
+  const [valorIndirecto, setValorIndirecto] = useState(0);
+  const [valorDidirecto, setValorDidirecto] = useState(0);
+  const [utilidadEsperada, setUtilidadEsperada] = useState(0);
+  const [factorajeManual, setFactorajeManual] = useState("");
+  const [factoraje, setFactoraje] = useState(0);
+  const [utilidadNeta, setUtilidadNeta] = useState(0);
   /* ---------------------------------------- LLAMADA A COLECCIONES ---------------------------------------- */
   const navigate = useNavigate();
   const { id } = useParams();
@@ -111,6 +123,7 @@ const VisualizarPDF = () => {
   useEffect(() => {
     getCliente();
   }, [cve_clie]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
+
   const razonSocial =
     clientesList.length > 0
       ? clientesList[0].razonSocial
@@ -131,36 +144,6 @@ const VisualizarPDF = () => {
     clientesList.length > 0
       ? clientesList[0].condicionComercial
       : "No hay documentos de precotización";
-
-  useEffect(() => {
-    const sumarValorTotales = async () => {
-      try {
-        const moSnapshot = await getDocs(
-          query(
-            collection(db, "ANALISIS_TOTALES"),
-            where("cve_tecFin", "==", cve_tecFin)
-          )
-        );
-        let sumaValorLider = 0;
-        let sumaCostoFactorizado = 0;
-        let sumaCostoXpartida = 0;
-        moSnapshot.forEach((moDoc) => {
-          const moData = moDoc.data();
-          sumaValorLider += moData.precioXpartida;
-          sumaCostoFactorizado += moData.costoFactorizado;
-          sumaCostoXpartida += moData.costoXpartida;
-        });
-        console.log(sumaValorLider);
-        setSumaValorLider(sumaValorLider);
-        setSumaCostoFactorizadoT(sumaCostoFactorizado);
-        setSumaCostoXpartidaT(sumaCostoXpartida);
-      } catch (error) {
-        console.error("Error al sumar valores:", error);
-      }
-    };
-
-    sumarValorTotales();
-  }, [cve_tecFin]);
 
   const getTotalMateriales = async () => {
     try {
@@ -190,7 +173,6 @@ const VisualizarPDF = () => {
       console.error("Error fetching PAR_LEVDIGITAL data:", error);
     }
   };
-
   useEffect(() => {
     getTotalMateriales();
   }, [cve_tecFin]); // Asegúrate de incluir cve_tecFin en las dependencias del useEffect
@@ -221,7 +203,6 @@ const VisualizarPDF = () => {
       console.error("Error fetching PAR_LEVDIGITAL data:", error);
     }
   };
-
   useEffect(() => {
     getTotalSubcontrato();
   }, [cve_tecFin]); // Asegúrate de incluir cve_tecFin en las dependencias del useEffect
@@ -253,10 +234,123 @@ const VisualizarPDF = () => {
       console.error("Error fetching PAR_LEVDIGITAL data:", error);
     }
   };
-
   useEffect(() => {
     getTotalViaticos();
   }, [cve_tecFin]); // Asegúrate de incluir cve_tecFin en las dependencias del useEffect
+
+  useEffect(() => {
+    const sumarValorTotales = async () => {
+      try {
+        const moSnapshot = await getDocs(
+          query(
+            collection(db, "ANALISIS_TOTALES"),
+            where("cve_tecFin", "==", cve_tecFin)
+          )
+        );
+        /*getTotalViaticos();
+        getTotalMateriales();
+        getTotalSubcontrato();*/
+        let sumaValorInsumos = 0;
+        const { costoFijo, factoraje, utilidad, fianzas } =
+          await getPorcentajes();
+
+        moSnapshot.forEach((moDoc) => {
+          const moData = moDoc.data();
+
+          //sumaValorLider += precioXpartida; //Factoraje
+          sumaValorInsumos += moData.totalInsumo; //Factoraje
+          console.log("Valor: ", sumaValorInsumos);
+          //sumaCostoFactorizado += costoFactorizado; //Factoraje
+        });
+
+        setSumaValorInsumos(sumaValorInsumos);
+        let valorIndirecto = sumaValorInsumos * (costoFijo / 100);
+        setValorIndirecto(valorIndirecto);
+        let valorDidirecto = sumaValorInsumos;
+        setValorDidirecto(valorDidirecto);
+        let sumaValorProyecto =
+          (sumaValorInsumos + valorIndirecto) / (1 - utilidad / 100);
+        setSumaValorProyecto(sumaValorProyecto);
+
+        let utilidadEsperada =
+          sumaValorProyecto - valorDidirecto - valorIndirecto;
+        setUtilidadEsperada(utilidadEsperada);
+
+        let factor = sumaValorProyecto * (factoraje/100);
+        setFactoraje(factor);
+        let utilidaNet = utilidadEsperada - factor;
+        setUtilidadNeta(utilidaNet);
+
+        console.log("Datos Pre-Cotizados");
+        console.log(sumaValorInsumos);
+        console.log(totalMateria + totalSubContrado + totalViatico);
+
+        console.log("Datos Cotizados");
+        console.log(sumaValorProyecto);
+        console.log(valorDidirecto);
+        console.log(valorIndirecto);
+        console.log(utilidadEsperada);
+      } catch (error) {
+        console.error("Error al sumar valores:", error);
+      }
+    };
+
+    sumarValorTotales();
+  }, [cve_tecFin]);
+
+  const getPorcentajes = async () => {
+    try {
+      // Obtener el documento de la colección "PORCENTAJES"
+      const porcentajesDocRef = doc(db, "PORCENTAJES", "NTtgoYURKvkxbuq2ospC"); // Reemplaza 'ID_DEL_DOCUMENTO' con el ID real del documento
+      const porcentajesDocSnapshot = await getDoc(porcentajesDocRef);
+
+      // Verificar si el documento existe
+      if (porcentajesDocSnapshot.exists()) {
+        // Extraer los valores de los campos costoFijo, factoraje, utilidad y fianzas
+        const datosPorcentajes = porcentajesDocSnapshot.data();
+        const { costoFijo, factoraje, utilidad, fianzas } = datosPorcentajes;
+
+        // Devolver los valores extraídos
+        return { costoFijo, factoraje, utilidad, fianzas };
+      } else {
+        console.log("El documento PORCENTAJES no existe.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error al obtener los datos de PORCENTAJES:", error);
+      return null;
+    }
+  };
+
+  /*useEffect(() => {
+    const sumarValorTotales = async () => {
+      try {
+        const moSnapshot = await getDocs(
+          query(
+            collection(db, "ANALISIS_TOTALES"),
+            where("cve_tecFin", "==", cve_tecFin)
+          )
+        );
+        let sumaValorLider = 0;
+        let sumaCostoFactorizado = 0;
+        let sumaCostoXpartida = 0;
+        moSnapshot.forEach((moDoc) => {
+          const moData = moDoc.data();
+          sumaValorLider += moData.precioXpartida; //Factoraje
+          sumaCostoFactorizado += moData.costoFactorizado; //Factoraje
+          sumaCostoXpartida += moData.costoXpartida;
+        });
+        console.log(sumaValorLider);
+        setSumaValorLider(sumaValorLider);
+        setSumaCostoFactorizadoT(sumaCostoFactorizado);
+        setSumaCostoXpartidaT(sumaCostoXpartida);
+      } catch (error) {
+        console.error("Error al sumar valores:", error);
+      }
+    };
+
+    sumarValorTotales();
+  }, [cve_tecFin]);*/
 
   //----------------------------------------------------------TOTAL DE MANO DE OBRA ------------------------------------------
   const getTotalManoDeObra = async () => {
@@ -446,9 +540,9 @@ const calcularCotizacion = async () => {
       fechaElaboracion: fechaElaboracion,
       fechaInicio: fechaInicio,
       fechaFin: fechaFin,
-      subtotal: sumaValorLider,
-      IVA: sumaValorLider * 0.16,
-      total: sumaValorLider * 0.16 + sumaValorLider,
+      subtotal: sumaValorProyecto,
+      IVA: sumaValorProyecto * 0.16,
+      total: sumaValorProyecto * 0.16 + sumaValorProyecto,
       acuedoComercial: nombreComercial,
       idMonday: idMonday,
     });
@@ -526,21 +620,24 @@ const calcularCotizacion = async () => {
           <label> Nombre comercial: {nombreComercial}</label>
           {/*Mostrar Factoraje*/}
           <div className="col">
-            <FormControlLabel
-              control={
-                <Switch checked={showPercentage} onChange={handleToggle} />
-              }
-              label="Mostrar con Factoraje"
+            <label htmlFor="factoringPercentage">
+              Porcentaje de Factoraje:
+            </label>
+            <input
+              id="factoringPercentage"
+              type="number"
+              placeholder="Ingresa el porcentaje"
+              value={factorajeManual}
+              onChange={(e) => setFactorajeManual(e.target.value)}
             />
-            <ul>
-              {/*{data.map((item, index) => (
-                <li key={index}>
-                  {item.label}: {showPercentage ? `${item.value}%` : item.value}
-                </li>
-              ))}*/}
-            </ul>
+            <br />
+            <button onClick={() => setFactorajeManual("")}>
+              Valores Originales
+            </button>
+            <br />
           </div>
           {/*Fin Mostrar Factoraje*/}
+
           <table className="table table-hover">
             <thead>
               <tr>
@@ -548,7 +645,7 @@ const calcularCotizacion = async () => {
                 <th scope="col">Valor de proyecto</th>
                 <th scope="col"></th>
                 <th scope="col">
-                  {sumaValorLider.toLocaleString("en-US", {
+                  {sumaValorProyecto.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
@@ -574,7 +671,9 @@ const calcularCotizacion = async () => {
                     currency: "USD",
                   })}
                 </td>
-                <td>{((totalMateria * 100) / sumaValorLider).toFixed(2)} %</td>
+                <td>
+                  {((totalMateria * 100) / sumaValorProyecto).toFixed(2)} %
+                </td>
               </tr>
               <tr>
                 <td></td>
@@ -587,7 +686,7 @@ const calcularCotizacion = async () => {
                   })}
                 </td>
                 <td>
-                  {((totalSubContrado * 100) / sumaValorLider).toFixed(2)} %
+                  {((totalSubContrado * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
@@ -600,20 +699,8 @@ const calcularCotizacion = async () => {
                     currency: "USD",
                   })}
                 </td>
-                <td>{((totalViatico * 100) / sumaValorLider).toFixed(2)} %</td>
-              </tr>
-              <tr>
-                <th></th>
-                <th scope="row">Costo por MO</th>
-                <td></td>
                 <td>
-                  {(manoDeObraTotalCostL * 1).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })}
-                </td>
-                <td>
-                  {((manoDeObraTotalCostL * 100) / sumaValorLider).toFixed(2)} %
+                  {((totalViatico * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
@@ -628,26 +715,14 @@ const calcularCotizacion = async () => {
                 <th scope="row">Costo directo</th>
                 <td></td>
                 <td>
-                  {(
-                    totalMateria +
-                    totalSubContrado +
-                    totalViatico +
-                    manoDeObraTotalCostL
-                  ).toLocaleString("en-US", {
+                  {/*CAMBIAR FORMULA*/}
+                  {valorDidirecto.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
                 </td>
                 <td>
-                  {(
-                    ((totalMateria +
-                      totalSubContrado +
-                      totalViatico +
-                      manoDeObraTotalCostL) *
-                      100) /
-                    sumaValorLider
-                  ).toFixed(2)}{" "}
-                  %
+                  {((valorDidirecto * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
@@ -662,17 +737,13 @@ const calcularCotizacion = async () => {
                 <th scope="row">Costo indirecto</th>
                 <td></td>
                 <td>
-                  {(sumaCostoFactorizadoT - sumaCostoXpartidaT).toLocaleString(
-                    "en-US",
-                    { style: "currency", currency: "USD" }
-                  )}
+                  {valorIndirecto.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}
                 </td>
                 <td>
-                  {(
-                    ((sumaCostoFactorizadoT - sumaCostoXpartidaT) * 100) /
-                    sumaValorLider
-                  ).toFixed(2)}{" "}
-                  %
+                  {((valorIndirecto * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
@@ -689,32 +760,53 @@ const calcularCotizacion = async () => {
                 </th>
                 <td></td>
                 <td style={{ color: "green" }}>
-                  {(
-                    sumaValorLider -
-                    (totalMateria +
-                      totalSubContrado +
-                      totalViatico +
-                      manoDeObraTotalCostL) -
-                    (sumaCostoFactorizadoT - sumaCostoXpartidaT)
-                  ).toLocaleString("en-US", {
+                  {utilidadEsperada.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
                 </td>
                 <td style={{ color: "green" }}>
-                  {(
-                    ((sumaValorLider -
-                      (totalMateria +
-                        totalSubContrado +
-                        totalViatico +
-                        manoDeObraTotalCostL) -
-                      (sumaCostoFactorizadoT - sumaCostoXpartidaT)) *
-                      100) /
-                    sumaValorLider
-                  ).toFixed(2)}
-                  %
+                  {((utilidadEsperada * 100) / sumaValorProyecto).toFixed(2)}%
                 </td>
               </tr>
+              {/*************************************************************/}
+              {factorajeManual && (
+                <>
+                  <tr>
+                    <th></th>
+                    <th scope="row">Factoraje</th>
+                    <td></td>
+                    <td>
+                      {factoraje.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      })}
+                    </td>
+                    <td>
+                      {((valorIndirecto * 100) / sumaValorProyecto).toFixed(2)}{" "}
+                      %
+                    </td>
+                  </tr>
+                  <tr>
+                    <th></th>
+                    <th scope="row" style={{ color: "green" }}>
+                      Utilidad Neta
+                    </th>
+                    <td></td>
+                    <td>
+                      {utilidadNeta.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      })}
+                    </td>
+                    <td>
+                      {((valorIndirecto * 100) / sumaValorProyecto).toFixed(2)}{" "}
+                      %
+                    </td>
+                  </tr>
+                </>
+              )}
+              {/*************************************************************/}
             </tbody>
           </table>
           <button className="btn btn-success" onClick={asegurarCotizacion}>

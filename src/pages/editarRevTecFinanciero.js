@@ -45,12 +45,21 @@ const EditarRecTecFinanciero = () => {
 
   /* ----------------------------------------------------- */
   const [show, setShow] = useState(false);
+  const [tot, setTot] = useState(false);
   const handleClose = () => {
     setShow(false);
     setSelectedPartida(null);
     setCantidad("");
     setDescripcion("");
     setObservacion("");
+  };
+
+  const closeTot = () => {
+    setTot(false);
+    setSelectedPartida(null);
+    setCantidadTotalesEdit("");
+    setCostoFijoEdit("");
+    setUtilidadEdit("");
   };
 
   const [selectedPartida, setSelectedPartida] = useState(null);
@@ -328,7 +337,26 @@ const [idMonday, setIdMonday] = useState("");
     setCostoFijoEdit(costoFijo)
     setUtilidadEdit(utilidad)*/
   };
+  const limpiarCampos = () =>{
+    setTot(false);
+    setSelectedPartida(null);
+    setCantidadTotalesEdit("");
+    setCostoFijoEdit("");
+    setUtilidadEdit("");
+  }
+const openModal = async (noPartida) => {
+  limpiarCampos();
+  try {
+    console.log("🔄 Abriendo modal para Insumos. No. Partida:", noPartida);
 
+    // 🟢 Establecer el número de partida correctamente
+    //setSelectedPartida({ noPartida });
+
+    setTot(true);
+  } catch (error) {
+    console.error("⚠️ Error al obtener los datos necesarios:", error);
+  }
+};
   const editarPartidaTotales = async () => {
     const preCotizacionRef = doc(db, "ANALISIS_TOTALES", idPartidaEdit);
     const subtotalPartida = insumosEdit + manoObraEdit;
@@ -356,7 +384,7 @@ const [idMonday, setIdMonday] = useState("");
       utilidaEsperada: utilidaEsperada,
     };
     await updateDoc(preCotizacionRef, datos);
-    window.location.href = window.location.href;
+    //window.location.href = window.location.href;
   };
   return (
     <div className="container">
@@ -619,10 +647,10 @@ const [idMonday, setIdMonday] = useState("");
             <div className="col-md-6 ">
               <button
                 className="btn btn-success"
-                onClick={editarPartidaTotales}
+                onClick={openModal}
               >
                 <CiCirclePlus />
-                Calcular totales
+                Totales
               </button>
             </div>
             <br></br>
@@ -846,6 +874,63 @@ const [idMonday, setIdMonday] = useState("");
             Cancelar
           </Button>
           <Button variant="primary" onClick={guardarEdicion}>
+            Guardar Cambios
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal
+        show={tot}
+        onHide={closeTot}
+        dialogClassName="lg"
+        centered
+        scrollable
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Totales</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="mb-3">
+            <label>Cantidad</label>
+            <input
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="number"
+                  value={cantidadTotalesEdit}
+                  onChange={(e) => setCantidadTotalesEdit(e.target.value)}
+                  className="form-control"
+                />
+          </div>
+          <div className="mb-3">
+            <label>Costo Fijo</label>
+            <input
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="number"
+                  value={costoFijoEdit}
+                  onChange={(e) => setCostoFijoEdit(e.target.value)}
+                  className="form-control"
+                />
+          </div>
+          <div className="mb-3">
+            <label>Utilidad </label>
+            <input
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="number"
+                  value={utilidadEdit}
+                  onChange={(e) => setUtilidadEdit(e.target.value)}
+                  className="form-control"
+                />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeTot}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={editarPartidaTotales}>
             Guardar Cambios
           </Button>
         </Modal.Footer>
