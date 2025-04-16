@@ -724,7 +724,7 @@ const AgregarPreCotizacion = () => {
       setCantidad(0);
       setCostoCotizado(0);
       // Llamar a la API para obtener las unidades
-      /*const responseUnidades = await axios.get(
+      const responseUnidades = await axios.get(
         //"/api/lineasMaster"
         "http://localhost:5000/api/lineasMaster"
       );
@@ -734,7 +734,7 @@ const AgregarPreCotizacion = () => {
         "http://localhost:5000/api/proveedores"
         //"/api/proveedores"
       );
-      setProveedores(responseProvedores.data);*/
+      setProveedores(responseProvedores.data);
 
       setShowAddModal(true);
     } catch (error) {
@@ -968,8 +968,8 @@ const AgregarPreCotizacion = () => {
   const obtenerFamilia = async (categoriaSeleccionada) => {
     try {
       const response = await axios.get(
-        `/api/categorias/${categoriaSeleccionada}`
-        //`http://localhost:5000/api/categorias/${categoriaSeleccionada}`
+       // `/api/categorias/${categoriaSeleccionada}`
+        `http://localhost:5000/api/categorias/${categoriaSeleccionada}`
       );
       setFamilias(response.data); // Guarda las familias filtradas en el estado
       console.log("Familias filtradas obtenidas:", response.data);
@@ -993,8 +993,8 @@ const AgregarPreCotizacion = () => {
       console.log("🔎 Buscando Clave SAE para la línea (CVE_LIN):", cveLin); // 🔍 Verifica qué valor se envía
 
       const response = await axios.get(
-        //`http://localhost:5000/api/clave-sae/${cveLin}`
-        `/api/clave-sae/${cveLin}`
+        `http://localhost:5000/api/clave-sae/${cveLin}`
+        //`/api/clave-sae/${cveLin}`
       );
 
       console.log("🔹 Claves SAE obtenidas desde SQL:", response.data);
@@ -1038,8 +1038,8 @@ const AgregarPreCotizacion = () => {
     try {
       //console.log(familiaSeleccionada);
       const response = await axios.get(
-        `/api/lineas/${familiaSeleccionada}`
-        //`http://localhost:5000/api/lineas/${familiaSeleccionada}`
+        //`/api/lineas/${familiaSeleccionada}`
+        `http://localhost:5000/api/lineas/${familiaSeleccionada}`
       );
       setLineas(response.data); // Guardar las líneas en el estado
       console.log("Líneas filtradas obtenidas:", response.data); // Verifica la respuesta
@@ -1907,7 +1907,7 @@ const AgregarPreCotizacion = () => {
           {/* Columna para Línea en la misma fila */}
           <div className="row mb-6">
             {/* Columna para Línea en la misma fila */}
-            {/*<div className="col-md-4">
+            <div className="col-md-4">
               <div className="mb-3">
                 <label>Categoría</label>
                 <select
@@ -1960,8 +1960,8 @@ const AgregarPreCotizacion = () => {
                   ))}
                 </select>
               </div>
-            </div>*/}
-            <div className="col-md-10">
+            </div>
+            {/*<div className="col-md-10">
               <div className="mb-3">
                 <input
                   type="file"
@@ -1982,7 +1982,7 @@ const AgregarPreCotizacion = () => {
                   Agregar Partidas
                 </button>
               </div>
-            </div>
+            </div>*/}
             {/* Fila 2: Proveedor, Descripcion */}
             <div className="row mb-6">
               <div className="col-md-6">

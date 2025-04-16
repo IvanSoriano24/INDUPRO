@@ -817,10 +817,10 @@ const AgregarRevTecFinanciero = () => {
     }
     // Si listPartidas o listMano están vacíos, mostrar alerta y detener ejecución
     if (
-      !listPartidas ||
-      listPartidas.length === 0 ||
-      !listMano ||
-      listMano.length === 0
+      !par_PreCoti_insu ||
+      par_PreCoti_insu.length === 0 ||
+      !listMO ||
+      listMO.length === 0
     ) {
       swal.fire({
         icon: "warning",
@@ -1019,6 +1019,7 @@ const AgregarRevTecFinanciero = () => {
             factorIndirectoPorcentaje: costoFijo + factoraje,
             factorIndirectoNum: (costoFijo + factoraje) / 100,
             valorInsumos: parseInt(itemTotales.cantidad) * sumarCalculoInsumoV,
+            claveSae: claveSae,
             costoXpartida:
               parseInt(itemTotales.cantidad) *
               (sumaValorLider + sumarCalculoInsumoV),

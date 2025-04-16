@@ -79,6 +79,7 @@ const VisualizarPDF = () => {
   const [factorajeManual, setFactorajeManual] = useState("");
   const [factoraje, setFactoraje] = useState(0);
   const [utilidadNeta, setUtilidadNeta] = useState(0);
+  const [valoresArticulo, seValoresArticulo] = useState([]);
   /* ---------------------------------------- LLAMADA A COLECCIONES ---------------------------------------- */
   const navigate = useNavigate();
   const { id } = useParams();
@@ -97,7 +98,7 @@ const VisualizarPDF = () => {
     }
   };
   /******************************************** SAE  *****************************************************************/
-  const [folio, setFolio] = useState("");
+  const [folioSig, setFolioSig] = useState("");
   /******************************************** SAE  *****************************************************************/
   useEffect(() => {
     getFactoresById(id);
@@ -127,6 +128,10 @@ const VisualizarPDF = () => {
   const razonSocial =
     clientesList.length > 0
       ? clientesList[0].razonSocial
+      : "No hay documentos de precotización";
+  const cve_int =
+    clientesList.length > 0
+      ? clientesList[0].cve_int
       : "No hay documentos de precotización";
   const nombreComercial =
     clientesList.length > 0
@@ -254,15 +259,18 @@ const VisualizarPDF = () => {
         const { costoFijo, factoraje, utilidad, fianzas } =
           await getPorcentajes();
 
+        const claveArticulos = [];
         moSnapshot.forEach((moDoc) => {
           const moData = moDoc.data();
+          claveArticulos.push({
+            claveSae: moData.claveSae,
+            noPartidaATF: moData.noPartidaATF,
+            cve_tecFin: moData.cve_tecFin,
+          });
 
-          //sumaValorLider += precioXpartida; //Factoraje
           sumaValorInsumos += moData.totalInsumo; //Factoraje
-          console.log("Valor: ", sumaValorInsumos);
-          //sumaCostoFactorizado += costoFactorizado; //Factoraje
         });
-
+        seValoresArticulo(claveArticulos);
         setSumaValorInsumos(sumaValorInsumos);
         let valorIndirecto = sumaValorInsumos * (costoFijo / 100);
         setValorIndirecto(valorIndirecto);
@@ -290,6 +298,7 @@ const VisualizarPDF = () => {
         console.log(valorDidirecto);
         console.log(valorIndirecto);
         console.log(utilidadEsperada);
+        //addSae
       } catch (error) {
         console.error("Error al sumar valores:", error);
       }
@@ -536,6 +545,7 @@ const calcularCotizacion = async () => {
     await addDoc(docCotizacion, {
       cve_tecFin: docFolio + nuevoFolioSiguiente.toString(),
       cve_clie: cve_clie,
+      cve_int: cve_int,
       estatus: "Activo",
       fechaElaboracion: fechaElaboracion,
       fechaInicio: fechaInicio,
@@ -554,7 +564,7 @@ const calcularCotizacion = async () => {
         cantidad: item.cantidad,
         descripcion: item.descripcion,
         observacion: item.observacion,
-        totalPartida: item.precioXpartida,
+        totalPartida: item.sumaValorInsumos,
       });
     });
     await addDoc(bitacora, {
@@ -577,11 +587,107 @@ const calcularCotizacion = async () => {
     const { folioSiguiente } = (
       await axios.get("http://localhost:5000/api/obtenerFolio")
     ).data;
-    setFolio(folioSiguiente);
+    setFolioSig(folioSiguiente);
+    
+    let CVE = folioSig.toString().padStart(10, "0");
+    let CVE_DOC = CVE.toString().padStart(20, " ");
 
-    //obtenerDatos();
+    let clave = cve_int.toString(); // sin padStart
+    const clie = await axios.get(`http://localhost:5000/api/datosClie/${clave}`);
+    
+    const datosCliente = clie.data.datosCliente;
+
+    console.log("Cliente:", datosCliente);
+
+    const partidasEncontradas = valoresArticulo.filter(
+      (art) => art.cve_tecFin === cve_tecFin
+    );
+
+    const articulos = [];
+    const results = [];
+    for (const partida of partidasEncontradas) {
+      const q = query(
+        collection(db, "PAR_TECFIN_INSU"),
+        where("cve_precot", "==", partida.claveSae)
+      );
+
+      const querySnapshot = await getDocs(q);
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.claveSae) {
+          articulos.push(data.claveSae);
+        }
+        // Aquí podrías acumular datos en un array si necesitas
+      });
+    }
+    for (const cve_art of articulos) {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/datosInsumoe/${cve_art}`
+        );
+        const datosInsumo = response.data.datosInsumos;
+        console.log("Datos del insumo:", datosInsumo);
+        results.push(datosInsumo);
+      } catch (err) {
+        console.error(`Error consultando el insumo ${cve_art}:`, err.message);
+      }
+    }
+    
+    const dataPartidas = {
+      data: data,
+      CVE_DOC: CVE_DOC,
+      nuPartida: data.noPartidaATF,
+      CVE_ART: data.claveSae,
+      CANT: data.cantidad,
+      PREC: data.costoCotizado,
+      IMPU1: results.IMPUESTO1,
+      IMPU2: results.IMPUESTO2,
+      IMPU3: results.IMPUESTO3,
+      IMPU4: results.IMPUESTO4,
+      IMPU5: results.IMPUESTO5,
+      IMPU6: results.IMPUESTO6,
+      IMPU7: results.IMPUESTO7,
+      IMPU8: results.IMPUESTO8,
+      IMP1APLICA: results.IMP1APLICA,
+      IMP2APLICA: results.IMP2APLICA,
+      IMP3APLICA: results.IMP3APLICA,
+      IMP4APLICA: results.IMP4APLICA,
+      IMP5APLICA: results.IMP5APLICA,
+      IMP6APLICA: results.IMP6APLICA,
+      IMP7APLICA: results.IMP7APLICA,
+      IMP8APLICA: results.IMP8APLICA,
+      CVE_ESQ: results.CVE_ESQIMPU,
+      TOT_PARTIDA: data.total,
+      UNI_VENTA: results.UNI_MED,
+    };
+    /*const response = await axios.post(
+      "http://localhost:5000/api/guardarPartidas",
+      dataPartidas
+    );
+    const partidas = response.data;*/
+    console.log(dataPartidas);
+    const dataCotizacion = {
+      data: data,
+      CVE_DOC: CVE_DOC,
+      CVE_CLPV: cve_int,
+      IMPU4: results.IMPUESTO4,
+      TOT_PARTIDA: data.total,
+      RFC: datosCliente.RFC,
+      folio: folioSig,
+      METODOPAGO: datosCliente.METODODEPAGO,
+      NUMCTAPAGO: datosCliente.NUMCTAPAGO,
+      FORMAPAGOSAT: datosCliente.FORMADEPAGOSAT,
+      USO_CFDI: datosCliente.USO_CFDI,
+      REG_FISC: datosCliente.REG_FISC,
+    };
+    console.log(dataCotizacion);
+    /*const responseCotizacion = await axios.post(
+      "http://localhost:5000/api/cotizacion",
+      dataCotizacion
+    );*/
   };
-  const obtenerDatos = async () => {};
+
   /******************************************** SAE  *****************************************************************/
   const asegurarCotizacion = () => {
     swal({
@@ -592,8 +698,8 @@ const calcularCotizacion = async () => {
       dangerMode: true,
     }).then((willDelete) => {
       if (willDelete) {
-        //addCotizacion();
-        addSae();
+        addCotizacion();
+        //addSae();
         //handleOpenPDF()
         swal("¡Felicidades, ahora puedes decargar tu cotización!", {
           icon: "success",
@@ -777,13 +883,19 @@ const calcularCotizacion = async () => {
                     <th scope="row">Factoraje</th>
                     <td></td>
                     <td>
-                      {(sumaValorProyecto*(factorajeManual/100)).toLocaleString("en-US", {
+                      {(
+                        sumaValorProyecto *
+                        (factorajeManual / 100)
+                      ).toLocaleString("en-US", {
                         style: "currency",
                         currency: "USD",
                       })}
                     </td>
                     <td>
-                      {(((sumaValorProyecto*(factorajeManual/100)) * 100) / sumaValorProyecto).toFixed(2)}{" "}
+                      {(
+                        (sumaValorProyecto * (factorajeManual / 100) * 100) /
+                        sumaValorProyecto
+                      ).toFixed(2)}{" "}
                       %
                     </td>
                   </tr>
@@ -794,13 +906,21 @@ const calcularCotizacion = async () => {
                     </th>
                     <td></td>
                     <td>
-                      {(utilidadEsperada-((sumaValorProyecto*(factorajeManual/100)))).toLocaleString("en-US", {
+                      {(
+                        utilidadEsperada -
+                        sumaValorProyecto * (factorajeManual / 100)
+                      ).toLocaleString("en-US", {
                         style: "currency",
                         currency: "USD",
                       })}
                     </td>
                     <td>
-                      {(((utilidadEsperada-((sumaValorProyecto*(factorajeManual/100)))) * 100) / sumaValorProyecto).toFixed(2)}{" "}
+                      {(
+                        ((utilidadEsperada -
+                          sumaValorProyecto * (factorajeManual / 100)) *
+                          100) /
+                        sumaValorProyecto
+                      ).toFixed(2)}{" "}
                       %
                     </td>
                   </tr>
