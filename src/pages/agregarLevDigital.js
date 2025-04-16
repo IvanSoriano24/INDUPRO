@@ -185,9 +185,6 @@ const AgregarLevDigital = () => {
   const navigate = useNavigate();
   const encabezadoCollection = collection(db, "LEVDIGITAL");
   const parLevDigCollection = collection(db, "PAR_LEVDIGITAL");
-  /**************************************************************************************************************/
-  const [idMonday, setIdMonday] = useState("");
-  /**************************************************************************************************************/
 
   /* --------------------   Obtener los folios correspondiente  -------------------------- */
   useEffect(() => {
@@ -320,7 +317,6 @@ const AgregarLevDigital = () => {
             docSig: docSig,
             fechaRegistro: formattedDate,
             fechaModificacion: formattedDate,
-            idMonday: idMonday,
           });
           list.forEach(async (item) => {
             await addDoc(bitacora, {
@@ -524,31 +520,6 @@ const AgregarLevDigital = () => {
                     />
                   )}
                   required
-                />
-              </div>
-            </div>
-
-            <div className="col-md-2">
-              <label className="form-label">Folio Monday: </label>
-              <div className="input-group mb-3">
-                <input
-                  placeholder=""
-                  aria-label=""
-                  aria-describedby="basic-addon1"
-                  type="number"
-                  value={idMonday}
-                  onChange={(e) => {
-                    const value = e.target.value;
-
-                    // Validar: solo números positivos y máximo 10 dígitos
-                    if (/^\d{0,10}$/.test(value)) {
-                      setIdMonday(value);
-                    }
-                  }}
-                  className="form-control"
-                  required
-                  min="0"
-                  max="9999999999"
                 />
               </div>
             </div>

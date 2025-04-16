@@ -24,9 +24,11 @@ import { FaFileDownload } from "react-icons/fa";
 import axios from "axios";
 import swal from "sweetalert";
 import { ModalTitle, Modal, Button } from "react-bootstrap";
+import Select from "react-select";
 
 const VisualizarCotizacion = () => {
   const [cve_tecFin, setCve_tecFin] = useState("");
+  const [folioSae, setFolioSae] = useState("");
   const [cve_clie, setCve_clie] = useState("");
   const [fechaElaboracion, setFechaElaboracion] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
@@ -41,6 +43,11 @@ const VisualizarCotizacion = () => {
   const [folioSig, setFolioSig] = useState("");
   const [cve_int, setCve_int] = useState("");
   const [valoresArticulo, seValoresArticulo] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedCve_int, setSelectedCve_int] = useState("");
+  const [cliente, setCliente] = useState("");
+  const [clientes, setClientes] = useState([]);
+
   /******************************************** SAE  *****************************************************************/
   /* ---------------------------------------- LLAMADA A COLECCIONES ---------------------------------------- */
   const navigate = useNavigate();
@@ -485,6 +492,9 @@ const VisualizarCotizacion = () => {
     });
   };
   const addSae = async () => {
+
+    console.log("Cliente:", cliente);
+
     const { folioSiguiente } = (
       await axios.get("http://localhost:5000/api/obtenerFolio")
     ).data;
@@ -493,7 +503,7 @@ const VisualizarCotizacion = () => {
     let CVE = folioSiguiente.toString().padStart(10, "0");
     let CVE_DOC = CVE.toString().padStart(20, " ");
 
-    let clave = cve_int.toString(); // sin padStart
+    let clave = cliente.toString(); // sin padStart
     const clie = await axios.get(
       `http://localhost:5000/api/datosClie/${clave}`
     );
@@ -504,7 +514,6 @@ const VisualizarCotizacion = () => {
     const articulos = [];
     const results = [];
     const detallesArticulos = []; // aquí vas a guardar cada `data`
-
     const qTecFin = query(
       collection(db, "TECNICOFINANCIERO"),
       where("docSig", "==", cve_tecFin)
@@ -520,8 +529,6 @@ const VisualizarCotizacion = () => {
     }
     const docTecFin = snapshotTecFin.docs[0].data();
     const cveFinReal = docTecFin.cve_tecFin;
-
-    console.log("✅ cve_tecFin encontrado:", cveFinReal);
 
     const qPartidas = query(
       collection(db, "PAR_TECFIN_INSU"),
@@ -626,21 +633,20 @@ const VisualizarCotizacion = () => {
     const partidas = response.data;*/
     console.log("Partidas: ", dataPartidas);
 
-    
     const IMP_TOT4 = data.reduce((sum, partida, index) => {
-        const impuesto4 = results[index]?.IMPUESTO4 || 0;
-        const total = parseFloat(partida.total) || 0;
-        const impuestoAplicado = total * (impuesto4 / 100);
-        return sum + impuestoAplicado;
-      }, 0);
-      const totalPartida = data.reduce((sum, partida) => {
-        return sum + (parseFloat(partida.total) || 0);
-      }, 0);      
+      const impuesto4 = results[index]?.IMPUESTO4 || 0;
+      const total = parseFloat(partida.total) || 0;
+      const impuestoAplicado = total * (impuesto4 / 100);
+      return sum + impuestoAplicado;
+    }, 0);
+    const totalPartida = data.reduce((sum, partida) => {
+      return sum + (parseFloat(partida.total) || 0);
+    }, 0);
 
     const dataCotizacion = {
       data: data,
       CVE_DOC: CVE_DOC,
-      clie: cve_int,
+      clie: clave,
       IMP_TOT4: IMP_TOT4.toFixed(2),
       IMPORTE: totalPartida.toFixed(2),
       RFC: datosCliente.RFC,
@@ -656,8 +662,41 @@ const VisualizarCotizacion = () => {
       "http://localhost:5000/api/cotizacion",
       dataCotizacion
     );*/
+
+    /*const { nuevoFolio } = (
+      await axios.get("http://localhost:5000/api/actualizarFolio")
+    ).data;*/
   };
 
+  const handleOpenModal = async () => {
+    let listaClientes = [...clientes];
+    if (clientes.length === 0) {
+      console.log("🔄 Cargando proveedores antes de editar...");
+      const responseClientes = await axios.get(
+        "http://localhost:5000/api/cliente"
+        //"/api/proveedores"
+      );
+      listaClientes = responseClientes.data;
+      setClientes(listaClientes);
+    }
+
+    // 🟢 Buscar el proveedor en la lista de proveedores
+    const cve_clie = cve_int.toString().padStart(10, " ");
+    console.log("Clave Para Select", cve_clie);
+    const clienteEncontrado = listaClientes.find(
+      (prov) => prov.CLAVE === cve_clie
+    );
+
+    setTimeout(() => {
+      setCliente(clienteEncontrado ? clienteEncontrado.CLAVE : "");
+    }, 200);
+    const { folioSiguiente } = (
+      await axios.get("http://localhost:5000/api/obtenerFolio")
+    ).data;
+    setFolioSae(folioSiguiente);
+    setIdMonday(idMonday);
+    setShowModal(true);
+  };
   /******************************************** SAE  *****************************************************************/
   return (
     <div className="container">
@@ -814,93 +853,106 @@ const VisualizarCotizacion = () => {
             <IoArrowBackCircleOutline /> Regresar
           </button>
           &nbsp; &nbsp;
-          <button className="btn btn-success" onClick={mandarSae}>
+          <button className="btn btn-success" onClick={handleOpenModal}>
             <VscFilePdf /> Mandar a SAE
           </button>
         </div>
       </div>
       <Modal
-              show={showAddModalMO}
-              onHide={() => setShowAddModalMO(false)}
-              centered
-              scrollable
-              size="lg"
-            >
-              <Modal.Header closeButton>
-                <Modal.Title>Añadir Mano de Obra</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <form>
-                  <div className="row">
-                    <div className="col-md-2">
-                      <div className="mb-3">
-                        <label>No. Partida</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          value={noPartidaMO || ""} // Aquí el valor se establece automáticamente
-                          readOnly
-                        />
-                      </div>
-                    </div>
-                    <div className="col-md-5">
-                      <div className="mb-3">
-                        <label className="form-label">TRABAJADOR</label>
-                        <select
-                          id="selectTrabajador"
-                          className="form-control"
-                          value={selectedTrabajador}
-                          onChange={(e) => setSelectedTrabajador(e.target.value)}
-                        >
-                          <option value="" disabled>
-                            SELECCIONA UN TRABAJADOR
-                          </option>
-                          {manoObra.map((trabajador, index) => (
-                            <option key={index} value={trabajador}>
-                              {trabajador}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-md-3">
-                      <label className="form-label">CANTIDAD DE PERSONAL</label>
-                      <div className="input-group mb-3">
-                        <input
-                          type="number"
-                          value={cantidadTrabajadores}
-                          onChange={(e) => setCantidadTrabajadores(e.target.value)}
-                          className="form-control"
-                          placeholder="Cantidad"
-                        />
-                      </div>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label">DÍAS TRABAJADOS</label>
-                      <div className="input-group mb-3">
-                        <input
-                          type="number"
-                          value={diasTrabajados}
-                          onChange={(e) => setDiasTrabajados(e.target.value)}
-                          className="form-control"
-                          placeholder="Días"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </form>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="secondary" onClick={() => setShowAddModalMO(false)}>
-                  Cancelar
-                </Button>
-                <Button variant="primary" onClick={handleSaveManoObra}>
-                  Guardar
-                </Button>
-              </Modal.Footer>
-            </Modal>
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        scrollable
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Enviar a Sae</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            <div className="row">
+              <div className="col-md-4">
+                <div className="mb-4">
+                  <label>Cotizacion</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={cve_tecFin || ""} // Aquí el valor se establece automáticamente
+                    readOnly
+                  />
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="mb-4">
+                  <label>Folio SAE</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={folioSae || ""} // Aquí el valor se establece automáticamente
+                    readOnly
+                  />
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="mb-4">
+                  <label>ID Monday</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={idMonday || ""} // Aquí el valor se establece automáticamente
+                    readOnly
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label className="form-label">
+                    Selecciona el Cliente SAE
+                  </label>
+                  <Select
+                    options={clientes.map((prov) => ({
+                      value: prov.CLAVE,
+                      label: prov.NOMBRE,
+                    }))}
+                    value={
+                      cliente
+                        ? {
+                            value: cliente,
+                            label:
+                              clientes.find((prov) => prov.CLAVE === cliente)
+                                ?.NOMBRE || "",
+                          }
+                        : null
+                    }
+                    onChange={(selectedOption) => {
+                      console.log(
+                        "🔹 Nuevo cliente seleccionado:",
+                        selectedOption
+                      );
+                      setCliente(selectedOption.value);
+                    }}
+                    placeholder="Buscar cliente..."
+                    menuPortalTarget={document.body} // Renderiza fuera del modal
+                    menuPlacement="auto" // Ajusta la posición automáticamente
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={addSae}>
+            Guardar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

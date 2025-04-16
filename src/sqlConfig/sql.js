@@ -5,7 +5,7 @@ const cors = require("cors");
 // Middleware para permitir solicitudes CORS
 app.use(cors());
 // Configuración de conexión a la base de datos SQL Server
-const config = {
+/*const config = {
   user: "sa",
   password: "Green2580a.",
   server: "35.222.201.74",
@@ -14,17 +14,17 @@ const config = {
     encrypt: true, // Si estás usando SSL
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
   },
-};
-/*const config = {
-  user: "sun",
+};*/
+const config = {
+  user: "sa",
   password: "Green2580a.",
-  server: "187.188.133.4", 
-  database: "SAE90Empre02",
+  server: "35.222.201.74",
+  database: "SAE90EMPRE01_MDCONNECTA",
   options: {
     encrypt: true, // Si estás usando SSL
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
   },
-};*/
+};
 // Conexión a la base de datos
 sql
   .connect(config)
@@ -64,6 +64,31 @@ app.get("/api/proveedores", async (req, res) => {
     // Verifica si hay resultados
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "No hay proveedores activos." });
+    }
+
+    // Enviar la respuesta
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("Error al ejecutar la consulta:", err);
+    res.status(500).json({
+      error: "Error al obtener datos de la base de datos",
+      details: err.message,
+    });
+  }
+});
+app.get("/api/cliente", async (req, res) => {
+  try {
+    // Conectar a la base de datos
+    const pool = await sql.connect(config);
+
+    // Ejecutar la consulta
+    const result = await pool
+      .request()
+      .query("SELECT CLAVE, NOMBRE FROM CLIE01 WHERE STATUS = 'A'");
+
+    // Verifica si hay resultados
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No hay clientes activos." });
     }
 
     // Enviar la respuesta
@@ -196,6 +221,29 @@ app.get("/api/obtenerFolio", async (req, res) => {
     console.error("Error al ejecutar la consulta de folio:", err);
     res.status(500).json({
       error: "Error al obtener el folio de la base de datos",
+      details: err.message,
+    });
+  }
+});
+app.get("/api/actualizarFolio", async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+
+    const result = await pool.request().query(`
+      UPDATE FOLIOSF01
+      SET ULT_DOC = ULT_DOC + 1
+      WHERE TIP_DOC = 'C' AND SERIE = 'STAND.'
+    `);
+
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).json({ message: "No se actualizó ningún folio." });
+    }
+
+    res.json({ success: true, message: "Folio actualizado correctamente." });
+  } catch (err) {
+    console.error("❌ Error al actualizar el folio:", err);
+    res.status(500).json({
+      error: "Error al actualizar el folio en la base de datos",
       details: err.message,
     });
   }
