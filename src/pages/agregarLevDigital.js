@@ -17,7 +17,7 @@ import { TabContent, TabPane, Nav, NavItem, NavLink, Label } from "reactstrap";
 import { FaCircleQuestion, FaCirclePlus } from "react-icons/fa6";
 import { HiDocumentPlus } from "react-icons/hi2";
 import { IoSearchSharp } from "react-icons/io5";
-import Swal from "sweetalert2";
+import swal from "sweetalert2";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 
@@ -68,7 +68,7 @@ const AgregarLevDigital = () => {
         // Validación de secuencialidad del número de partida
         if (parseInt(noPartida) !== prevPartida + 1) {
           isValid = false;
-          Swal.fire({
+          swal.fire({
             text: `El número de partida no es secuencial en la fila ${
               index + 2
             }.`,
@@ -80,7 +80,7 @@ const AgregarLevDigital = () => {
         // Validación de cantidad (debe ser un número entero)
         if (!Number.isInteger(Number(cantidad)) || cantidad === "") {
           isValid = false;
-          Swal.fire({
+          swal.fire({
             text: `La cantidad no es un número entero en la fila ${index + 2}.`,
             icon: "error",
           });
@@ -99,7 +99,7 @@ const AgregarLevDigital = () => {
       if (!isValid) {
         return; // Detener el procesamiento si alguna validación falla
       }
-      Swal.fire(
+      swal.fire(
         "Los datos del archivo Excel son válidos y se han procesado correctamente.",
         {
           icon: "success",
@@ -146,7 +146,6 @@ const AgregarLevDigital = () => {
     const item = list[index];
     handleShow(item);
   };
-
   const guardarEdicion = () => {
     setList((prevList) =>
       prevList.map((item) =>
@@ -247,9 +246,8 @@ const AgregarLevDigital = () => {
 
   const addEncabezado = async (e) => {
     e.preventDefault();
-
     if (!fechaInicio || !fechaFin) {
-      Swal.fire({
+      swal.fire({
         icon: "warning",
         title: "Fechas incompletas",
         text: "Debes seleccionar tanto la fecha de inicio como la fecha de fin antes de continuar.",
@@ -263,7 +261,7 @@ const AgregarLevDigital = () => {
     );
     if (!folioSnapshot.empty) {
       if (!clienteSeleccionado) {
-        Swal.fire({
+        swal.fire({
           icon: "warning",
           title: "Sin Cliente",
           text: "No se seleccionó ningún cliente.",
@@ -319,6 +317,10 @@ const AgregarLevDigital = () => {
             fechaModificacion: formattedDate,
           });
           list.forEach(async (item) => {
+            /*console.log(item.noPartida);
+            console.log(item.cantidad);
+            console.log(item.descripcion);
+            console.log(item.observaciones);*/
             await addDoc(bitacora, {
               cve_Docu: selectedFolio + folioSiguiente.toString(),
               tiempo: horaFormateada,
@@ -331,7 +333,7 @@ const AgregarLevDigital = () => {
               noPartida: item.noPartida,
               cantidad: item.cantidad,
               descripcion: item.descripcion,
-              observacion: item.observacion,
+              observacion: item.observaciones,
               fechaRegistro: formattedDate,
               fechaModificacion: formattedDate,
               estatusPartida: "Activa",
@@ -349,7 +351,7 @@ const AgregarLevDigital = () => {
     }
   };
   const infoCliente = () => {
-    Swal({
+    swal({
       title: "Ayuda del sistema",
       text: " El campo cliente te permite ingresar la razón social del cliente. A medida que escribes, el sistema sugiere opciones basadas en clientes existentes. Al seleccionar uno, se asigna automáticamente a los documentos futuros, simplificando el proceso y garantizando consistencia en la información. ",
       icon: "info",
@@ -357,7 +359,7 @@ const AgregarLevDigital = () => {
     });
   };
   const infoFechaElaboracion = () => {
-    Swal({
+    swal({
       title: "Ayuda del sistema",
       text: " La fecha de elaboración es la fecha en la que se creó el documento y por defecto muestra la fecha de hoy. Sin embargo, es posible modificarla según sea necesario. ",
       icon: "info",
@@ -365,7 +367,7 @@ const AgregarLevDigital = () => {
     });
   };
   const infoFechaInicio = () => {
-    Swal({
+    swal({
       title: "Ayuda del sistema",
       text: " La fecha de inicio representa el día planificado para comenzar el proyecto. Es importante destacar que esta fecha debe ser igual o posterior a la fecha de elaboración del documento. ",
       icon: "info",
@@ -373,7 +375,7 @@ const AgregarLevDigital = () => {
     });
   };
   const infoFechaFin = () => {
-    Swal({
+    swal({
       title: "Ayuda del sistema",
       text: " La fecha de fin indica el día previsto para concluir el proyecto. Es esencial tener en cuenta que esta fecha debe ser igual o posterior a la fecha de elaboración del documento y también mayor que la fecha de inicio programada.",
       icon: "info",
@@ -726,7 +728,7 @@ const AgregarLevDigital = () => {
                       <td>{item.noPartida}</td>
                       <td>{item.cantidad}</td>
                       <td>{item.descripcion}</td>
-                      <td>{item.observacion}</td>
+                      <td>{item.observaciones}</td>
                       <td>
                         <button
                           onClick={() => handleEdit(index)}

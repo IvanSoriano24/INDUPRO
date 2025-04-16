@@ -1569,52 +1569,6 @@ const AgregarRevTecFinanciero = () => {
 
     setShow(true); // Abrir el modal
   };
-  const cargarCategoriasDesdeFirestore = async () => {
-    try {
-      const refCategorias = collection(db, "LINEA"); // Colección en Firestore
-      const snapshot = await getDocs(refCategorias);
-
-      // 🔹 Filtramos solo las categorías padres (CUENTA_COI sin puntos)
-      const categoriasProcesadas = snapshot.docs
-        .map((doc) => {
-          const data = doc.data();
-          const cuentaCoi = data.CUENTA_COI || "";
-
-          return {
-            cuenta: cuentaCoi, // Ahora tomamos CUENTA_COI completo, pero solo si no tiene puntos
-            descripcion: data.DESC_LIN || "Sin descripción", // Descripción de la línea
-            puntos: cuentaCoi.split(".").length - 1, // Contamos los puntos en CUENTA_COI
-          };
-        })
-        .filter((categoria) => categoria.cuenta && categoria.puntos === 0); // Solo categorías sin puntos y válidas
-
-      // 🔹 Eliminar duplicados basados en "cuenta"
-      const categoriasUnicas = Array.from(
-        new Map(categoriasProcesadas.map((cat) => [cat.cuenta, cat])).values()
-      );
-
-      console.log("🔹 Categorías obtenidas desde Firestore:", categoriasUnicas);
-      return categoriasUnicas;
-    } catch (error) {
-      console.error(
-        "❌ Error al obtener las categorías desde Firestore:",
-        error
-      );
-      return [];
-    }
-  };
-  // 🔹 Función para obtener la lista de proveedores desde Firestore
-  const cargarProveedoresDesdeFirestore = async () => {
-    try {
-      const refProveedores = collection(db, "PROVEEDORES"); // Cambiado a "listaProveedores"
-      const snapshot = await getDocs(refProveedores);
-      //console.log(snapshot);
-      return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    } catch (error) {
-      console.error("❌ Error al obtener los proveedores:", error);
-      return [];
-    }
-  };
   const limpiarCampos = () => {
     setInsumo("");
     setCantidad(0);

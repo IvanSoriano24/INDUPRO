@@ -92,6 +92,7 @@ const AgregarPreCotizacion = () => {
   const total = costoCotizado * cantidad;
   const [listInsumos, setListInsumos] = useState([]);
   const [insumos, setInsumos] = useState([]); // Estado para los insumos
+  const [insumoss, setInsumoss] = useState([]);
   const [noPartidaMO, setNoParatidaMO] = useState("");
   const [selectedTrabajador, setSelectedTrabajador] = useState("");
   const [cantidadTrabajadores, setCantidadTrabajadores] = useState(0);
@@ -929,7 +930,7 @@ const AgregarPreCotizacion = () => {
     setCantidad("");
     setUnidad("servicio");
   };
-  const handleEditInsumo = (partida, insumo) => {
+  const handleEditInsumo = async (partida, insumo) => {
     console.log("🟢 Editando partida:", partida);
     console.log("🟢 Editando insumo:", insumo);
     console.log("Proveedor recibido:", `"${insumo.proveedor}"`); // ✅ Verifica los espacios
@@ -940,29 +941,43 @@ const AgregarPreCotizacion = () => {
     setCategoria(insumo.categoria);
     setFamilia(insumo.familia);
     setLinea(insumo.linea);
-    setClaveSae(insumo.claveSae);
+    //setClaveSae(insumo.claveSae);
     setCostoCotizado(insumo.costoCotizado);
     setComentariosAdi(insumo.comentariosAdi);
     setDescripcionInsumo(insumo.descripcionInsumo);
+    setProveedor(insumo.proveedor);
 
-    // 🟢 Buscar proveedor eliminando espacios en blanco de ambos lados
-    const proveedorEncontrado = proveedores.find(
-      (prov) => prov.CLAVE.trim() === insumo.proveedor.trim()
-    );
+    // 🟢 Asegurar que los insumo estén cargados antes de asignar el insumo
+    let listaInsumos = [...clavesSAE];
 
-    console.log("🟢 Proveedor encontrado:", proveedorEncontrado);
+    if (clavesSAE.length === 0) {
+      console.log("🔄 Cargando claves SAE antes de editar...");
+      const responseInsumos = await axios.get(
+        "http://localhost:5000/api/clave-sae"
+        //"/api/clave-sae"
+      );
 
-    setProveedor(proveedorEncontrado ? proveedorEncontrado.CLAVE : "");
+      // ✅ Transformamos la respuesta para tener claves limpias y legibles
+      listaInsumos = responseInsumos.data.map((item) => ({
+        clave: item.CVE_ART.trim(), // quitamos espacios
+        descripcion: item.DESCR?.trim(), // opcionalmente también aquí
+      }));
 
-    // 🟢 Cargar familia si hay categoría
-    /*if (insumo.categoria) {
-      obtenerFamilia(insumo.categoria);
+      setClavesSAE(listaInsumos);
+      //console.log("📦 clavesSAE cargadas:", listaInsumos);
     }
 
-    // 🟢 Cargar línea si hay familia
-    if (insumo.familia) {
-      obtenerLineas(insumo.familia);
-    }*/
+    // 🟢 Buscar la clave SAE actual del insumo que se está editando
+    const insumoEncontrado = listaInsumos.find(
+      (item) => item.clave === insumo.claveSae?.trim() // importante hacer trim
+    );
+
+    // ✅ Establecer la clave seleccionada con delay para que el select esté listo
+    setTimeout(() => {
+      setClaveSae(insumoEncontrado ? insumoEncontrado.clave : "");
+    }, 100); // puedes ajustar el delay si lo necesitas
+
+    console.log("📌 Clave SAE seleccionada:", insumo.claveSae);
 
     setSelectedPartida({ noPartida: partida });
     setShowAddModal(true);
@@ -1122,95 +1137,6 @@ const AgregarPreCotizacion = () => {
   const filtrarProveedoresPorLinea = (linea) => {
     // Filtra los proveedores según la línea
     return proveedores.filter((proveedor) => proveedor.LINEA === linea);
-  };
-
-  // Filtrar las líneas según el tipo (si tipoLinea es "Producto", muestra solo esas)
-  //const tiposPermitidos = ["Producto", "Servicio", "Pieza"];
-
-  /*const lineasFiltradas = lineas.filter(linea =>
-    linea.tipoLinea === unidad // Compara el tipoLinea con el tipoUnidad seleccionado
-  );*/
-  const obtenerFamilia = async (categoriaSeleccionada) => {
-    try {
-      const response = await axios.get(
-        // `/api/categorias/${categoriaSeleccionada}`
-        `http://localhost:5000/api/categorias/${categoriaSeleccionada}`
-      );
-      setFamilias(response.data); // Guarda las familias filtradas en el estado
-      console.log("Familias filtradas obtenidas:", response.data);
-    } catch (error) {
-      console.error("Error al obtener las familias:", error);
-    }
-  };
-  const handleLineaChange = async (e) => {
-    const lineaSeleccionada = e.target.value;
-    setLinea(lineaSeleccionada); // Guarda la línea seleccionada
-
-    if (lineaSeleccionada) {
-      const clavesSae = await obtenerClaveSae(lineaSeleccionada);
-      setClavesSAE(Array.isArray(clavesSae) ? clavesSae : []);
-    } else {
-      setClavesSAE([]); // 🔹 Limpia las claves si no hay línea seleccionada
-    }
-  };
-  const obtenerClaveSae = async (cveLin) => {
-    try {
-      console.log("🔎 Buscando Clave SAE para la línea (CVE_LIN):", cveLin); // 🔍 Verifica qué valor se envía
-
-      const response = await axios.get(
-        `http://localhost:5000/api/clave-sae/${cveLin}`
-        //`/api/clave-sae/${cveLin}`
-      );
-
-      console.log("🔹 Claves SAE obtenidas desde SQL:", response.data);
-
-      if (response.data.length === 0) {
-        console.warn("⚠️ No se encontraron claves SAE.");
-        return [];
-      }
-
-      return response.data.map((item) => ({
-        clave: item.CVE_ART || "Clave no encontrada",
-        descripcion: item.DESCR || "Descripción no encontrada",
-      }));
-    } catch (error) {
-      console.error("❌ Error al obtener Clave SAE desde SQL:", error);
-      return [];
-    }
-  };
-  const handleCategoriaChange = async (e) => {
-    const categoriaSeleccionada = e.target.value;
-    setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
-
-    if (categoriaSeleccionada) {
-      obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
-    } else {
-      setFamilia([]); // Limpia la familia si no hay categoría seleccionada
-    }
-  };
-  const handleFamiliaChange = async (e) => {
-    const familiaSeleccionada = e.target.value;
-    setFamilia(familiaSeleccionada); // Guarda la familia seleccionada
-
-    if (familiaSeleccionada) {
-      obtenerLineas(familiaSeleccionada); // Llama a la API para obtener líneas
-    } else {
-      setLineas([]); // Limpia las líneas si no hay familia seleccionada
-    }
-  };
-  const obtenerLineas = async (familiaSeleccionada) => {
-    console.log("Obteniendo líneas para la familia:", familiaSeleccionada); // Verifica la entrada
-    try {
-      //console.log(familiaSeleccionada);
-      const response = await axios.get(
-        //`/api/lineas/${familiaSeleccionada}`
-        `http://localhost:5000/api/lineas/${familiaSeleccionada}`
-      );
-      setLineas(response.data); // Guardar las líneas en el estado
-      console.log("Líneas filtradas obtenidas:", response.data); // Verifica la respuesta
-    } catch (error) {
-      console.error("Error al obtener las líneas:", error);
-    }
   };
   /* Modales */
   const handleDelete = async (noPartida, cve_levDig) => {
@@ -1464,14 +1390,10 @@ const AgregarPreCotizacion = () => {
             cantidad: insumo.cantidad,
             total: insumo.costoCotizado * insumo.cantidad,
             estatus: "Activo",
-            categoria: insumo.categoria,
-            familia: insumo.familia,
-            linea: insumo.linea,
             claveSae: insumo.claveSae,
           });
         }
       }
-
       // 📌 **Guardar PARTIDAS de MANO DE OBRA (listMano)**
       for (const item of listMano) {
         const personalSeleccionado = await obtenerMOPorNombre(item.personal);
@@ -2088,60 +2010,6 @@ const AgregarPreCotizacion = () => {
           {/* Columna para Línea en la misma fila */}
           <div className="row mb-6">
             {/* Columna para Línea en la misma fila */}
-            <div className="col-md-4">
-              <div className="mb-3">
-                <label>Categoría</label>
-                <select
-                  className="form-control"
-                  value={categoria}
-                  onChange={handleCategoriaChange} // Llama a la función cuando cambie
-                >
-                  <option value="">Seleccionar...</option>
-                  {categorias.map((categoria, index) => (
-                    <option key={index} value={categoria.cuenta}>
-                      {categoria.cuenta} - {categoria.descripcion}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div className="mb-3">
-                <label>Familia</label>
-                <select
-                  className="form-control"
-                  value={familia}
-                  onChange={handleFamiliaChange} // Llama a la función cuando cambie
-                  disabled={!categoria} // Solo habilita si hay categoría seleccionada
-                >
-                  <option value="">Seleccionar...</option>
-                  {familias.map((familia, index) => (
-                    <option key={index} value={familia.CUENTA_COI}>
-                      {familia.CUENTA_COI} - {familia.DESC_LIN}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div className="mb-3">
-                <label>Línea</label>
-                <select
-                  className="form-control"
-                  value={linea}
-                  //onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
-                  onChange={handleLineaChange}
-                  disabled={!familia || !categoria} // Solo habilita si hay una familia seleccionada
-                >
-                  <option value="">Seleccionar...</option>
-                  {lineas.map((linea, index) => (
-                    <option key={index} value={linea.CVE_LIN}>
-                      {linea.CUENTA_COI} - {linea.DESC_LIN}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
             {/*EXCEL*/}
             {/*<div className="col-md-10">
               <div className="mb-3">
@@ -2174,7 +2042,6 @@ const AgregarPreCotizacion = () => {
                     className="form-control"
                     value={claveSae}
                     onChange={(e) => setClaveSae(e.target.value)}
-                    disabled={!linea} // Deshabilita si no hay claves disponibles
                   >
                     <option value="">Seleccionar...</option>
                     {Array.isArray(clavesSAE) && clavesSAE.length > 0 ? (
@@ -2192,35 +2059,10 @@ const AgregarPreCotizacion = () => {
               <div className="col-md-6">
                 <div className="mb-3">
                   <label>Proveedor</label>
-                  <Select
-                    options={proveedores.map((prov) => ({
-                      value: prov.CLAVE,
-                      label: prov.NOMBRE,
-                    }))}
-                    value={
-                      proveedor
-                        ? {
-                            value: proveedor,
-                            label:
-                              proveedores.find(
-                                (prov) => prov.CLAVE === proveedor
-                              )?.NOMBRE || "",
-                          }
-                        : null
-                    }
-                    onChange={(selectedOption) => {
-                      console.log(
-                        "🔹 Nuevo proveedor seleccionado:",
-                        selectedOption
-                      );
-                      setProveedor(selectedOption.value);
-                    }}
-                    placeholder="Buscar proveedor..."
-                    menuPortalTarget={document.body} // Renderiza fuera del modal
-                    menuPlacement="auto" // Ajusta la posición automáticamente
-                    styles={{
-                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                    }}
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={proveedor}
                   />
                 </div>
               </div>

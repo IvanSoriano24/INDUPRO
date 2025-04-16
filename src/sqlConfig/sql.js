@@ -5,7 +5,7 @@ const cors = require("cors");
 // Middleware para permitir solicitudes CORS
 app.use(cors());
 // Configuración de conexión a la base de datos SQL Server
-/*const config = {
+const config = {
   user: "sa",
   password: "Green2580a.",
   server: "35.222.201.74",
@@ -14,8 +14,8 @@ app.use(cors());
     encrypt: true, // Si estás usando SSL
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
   },
-};*/
-const config = {
+};
+/*const config = {
   user: "sa",
   password: "Green2580a.",
   server: "35.222.201.74",
@@ -24,7 +24,7 @@ const config = {
     encrypt: true, // Si estás usando SSL
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
   },
-};
+};*/
 // Conexión a la base de datos
 sql
   .connect(config)
@@ -173,22 +173,16 @@ app.get("/api/lineas/:categoria", async (req, res) => {
       .json({ error: "Error al obtener las líneas", details: err });
   }
 });
-app.get("/api/clave-sae/:cveLin", async (req, res) => {
+app.get("/api/clave-sae", async (req, res) => {
   try {
-    const { cveLin } = req.params;
-    console.log("🔎 Recibido en la API (cveLin):", cveLin); // 🔍 Verifica qué está recibiendo la API
 
     const pool = await sql.connect(config);
 
-    const result = await pool.request().input("cveLin", sql.VarChar, cveLin) // 📌 Asegurar que coincida con el tipo de dato
+    const result = await pool.request() // 📌 Asegurar que coincida con el tipo de dato
       .query(`
           SELECT CVE_ART, DESCR 
           FROM INVE01 
-          WHERE LIN_PROD = @cveLin
         `);
-
-    console.log("🔹 Claves SAE obtenidas desde SQL:", result.recordset);
-
     if (result.recordset.length === 0) {
       console.warn("⚠️ No se encontraron claves SAE.");
       return res.status(404).json({ message: "No se encontraron claves SAE." });
