@@ -23,6 +23,7 @@ import { VscFilePdf } from "react-icons/vsc";
 import { FaFileDownload } from "react-icons/fa";
 import axios from "axios";
 import swal from "sweetalert";
+import { ModalTitle, Modal, Button } from "react-bootstrap";
 
 const VisualizarCotizacion = () => {
   const [cve_tecFin, setCve_tecFin] = useState("");
@@ -818,6 +819,88 @@ const VisualizarCotizacion = () => {
           </button>
         </div>
       </div>
+      <Modal
+              show={showAddModalMO}
+              onHide={() => setShowAddModalMO(false)}
+              centered
+              scrollable
+              size="lg"
+            >
+              <Modal.Header closeButton>
+                <Modal.Title>Añadir Mano de Obra</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <form>
+                  <div className="row">
+                    <div className="col-md-2">
+                      <div className="mb-3">
+                        <label>No. Partida</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={noPartidaMO || ""} // Aquí el valor se establece automáticamente
+                          readOnly
+                        />
+                      </div>
+                    </div>
+                    <div className="col-md-5">
+                      <div className="mb-3">
+                        <label className="form-label">TRABAJADOR</label>
+                        <select
+                          id="selectTrabajador"
+                          className="form-control"
+                          value={selectedTrabajador}
+                          onChange={(e) => setSelectedTrabajador(e.target.value)}
+                        >
+                          <option value="" disabled>
+                            SELECCIONA UN TRABAJADOR
+                          </option>
+                          {manoObra.map((trabajador, index) => (
+                            <option key={index} value={trabajador}>
+                              {trabajador}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-md-3">
+                      <label className="form-label">CANTIDAD DE PERSONAL</label>
+                      <div className="input-group mb-3">
+                        <input
+                          type="number"
+                          value={cantidadTrabajadores}
+                          onChange={(e) => setCantidadTrabajadores(e.target.value)}
+                          className="form-control"
+                          placeholder="Cantidad"
+                        />
+                      </div>
+                    </div>
+                    <div className="col-md-3">
+                      <label className="form-label">DÍAS TRABAJADOS</label>
+                      <div className="input-group mb-3">
+                        <input
+                          type="number"
+                          value={diasTrabajados}
+                          onChange={(e) => setDiasTrabajados(e.target.value)}
+                          className="form-control"
+                          placeholder="Días"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowAddModalMO(false)}>
+                  Cancelar
+                </Button>
+                <Button variant="primary" onClick={handleSaveManoObra}>
+                  Guardar
+                </Button>
+              </Modal.Footer>
+            </Modal>
     </div>
   );
 };
