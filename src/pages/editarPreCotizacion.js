@@ -27,6 +27,8 @@ import { ModalTitle, Modal, Form, Button } from "react-bootstrap";
 
 import axios from "axios";
 import Select from "react-select";
+import * as XLSX from "xlsx";
+
 
 const EditarPreCotizacion = () => {
   const [claveSae, setClaveSae] = useState(""); // Estado para la clave SAE
@@ -109,6 +111,11 @@ const EditarPreCotizacion = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [show, setShow] = useState(false);
+
+   /*******************************************************************/
+    const [excelData, setExcelData] = useState([]);
+    const [selectedFile, setSelectedFile] = useState(null);
+    /*******************************************************************/
 
   const handleClose = () => {
     setShow(false);
@@ -763,6 +770,149 @@ const EditarPreCotizacion = () => {
       unsubscribe && unsubscribe();
     };
   }, [cve_precot]);
+
+  /*EXCEL*/
+  const handleFileUpload = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setSelectedFile(file); // Guardar el archivo en el estado
+  
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  
+          const headers = jsonData[0];
+          let isValid = true;
+          let prevPartida = 0;
+          let partidasConError = [];
+  
+          const filteredData = jsonData.slice(1).map((row, index) => {
+            const noPartida = String(row[0] || 0).trim();
+            const insumo = String(row[1] || "").trim();
+            const unidad = String(row[2] || "").trim();
+            const claveSae = String(row[3] || "").trim();
+            const proveedor = String(row[4] || "").trim();
+            const descripcionInsumo = String(row[5] || "").trim();
+            const comentariosAdi = String(row[6] || "").trim();
+            const cantidad = String(row[7] || 0).trim();
+            const costoCotizado = String(row[8] || 0).trim();
+  
+            // Validaciónes
+            if (!validarInsumo(insumo)) {
+              isValid = false;
+              partidasConError.push(noPartida || `Fila ${index + 2}`);
+            }
+            if (!validarUnidad(unidad)) {
+              isValid = false;
+              partidasConError.push(noPartida || `Fila ${index + 2}`);
+            }
+            if (!validarCantidad(cantidad)) {
+              isValid = false;
+              partidasConError.push(noPartida || `Fila ${index + 2}`);
+            }
+            if (!validarCosto(costoCotizado)) {
+              isValid = false;
+              partidasConError.push(noPartida || `Fila ${index + 2}`);
+            }
+  
+            prevPartida = parseInt(noPartida);
+  
+            return {
+              noPartida,
+              insumo,
+              unidad,
+              claveSae,
+              proveedor,
+              descripcionInsumo,
+              comentariosAdi,
+              cantidad,
+              costoCotizado,
+            };
+          });
+  
+          if (!isValid) {
+            swal.fire({
+              title: "Error en validación",
+              text: `Las siguientes partidas tienen errores: ${partidasConError.join(
+                ", "
+              )}`,
+              icon: "error",
+            });
+            return;
+          }
+  
+          swal.fire({
+            title: "Éxito",
+            text: "Los datos del archivo Excel son válidos y se han procesado correctamente.",
+            icon: "success",
+          });
+  
+          setExcelData(filteredData);
+  
+          const transformado = filteredData.map((item) => ({
+            noPartida: item.noPartida,
+            insumos: [item], // ahora cada item tendrá un array insumos
+          }));
+  
+          // Agregar las filas procesadas del archivo a la lista
+          //console.log(filteredData);
+          setListPartidas(transformado);
+          setList([...list, ...filteredData]);
+          //console.log(transformado);
+          setExcelData([]);
+        };
+  
+        //reader.readAsArrayBuffer(selectedFile);
+        reader.readAsArrayBuffer(file);
+      } else {
+        alert("Por favor, selecciona un archivo.");
+      }
+    };
+
+    const validarInsumo = (Insumo) => {
+      if (
+        Insumo == "Subcontratos" ||
+        Insumo == "Viáticos" ||
+        Insumo == "Material"
+      ) {
+        return true;
+      }
+      console.log(Insumo);
+      return false;
+      //return Number.isInteger(Number(cantidad)) && cantidad !== "";
+    };
+    const validarUnidad = (Unidad) => {
+      if (
+        Unidad == "Pza" ||
+        Unidad == "Kit" ||
+        Unidad == "L" ||
+        Unidad == "m" ||
+        Unidad == "kg" ||
+        Unidad == "Serv"
+      ) {
+        return true;
+      }
+      return false;
+      //return Number.isInteger(Number(cantidad)) && cantidad !== "";
+    };
+    const validarCantidad = (Cantidad) => {
+      if (Cantidad <= 0) {
+        return false;
+      }
+      return true;
+      //return Number.isInteger(Number(cantidad)) && cantidad !== "";
+    };
+    const validarCosto = (Costo) => {
+      if (Costo <= 0) {
+        return false;
+      }
+      return true;
+      //return Number.isInteger(Number(cantidad)) && cantidad !== "";
+    };
   /* ----------------------------------------- OBTENER PARTDIAS DE INSUMOS PARA LA PRECOTIZACIÓN -------------------------*/
 
   const getParPreCotizacion = (
@@ -1557,6 +1707,23 @@ const EditarPreCotizacion = () => {
               </table>
             </div>
           </div>
+          <br></br>
+          <input
+            type="file"
+            accept=".xlsx, .xls"
+            onChange={handleFileUpload}
+            className="form-control"
+          />
+          {/*<button className="btn btn-primary mt-2" onClick={processExcelFile}>
+            Procesar Archivo
+          </button>*/}
+          {/*<button
+            className="btn btn-success mt-2 ms-2"
+            onClick={handleAddFromExcel}
+          >
+            Agregar Partidas
+          </button>*/}
+          <br></br>
           <br></br>
           <div className="row" style={{ border: "1px solid #000" }}>
             <label style={{ color: "red" }}>PARTIDAD POR INSUMO </label>

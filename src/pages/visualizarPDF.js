@@ -558,6 +558,13 @@ const calcularCotizacion = async () => {
     });
     const cotTotal = collection(db, "PAR_COTIZACION");
     totalesDoc.forEach(async (item) => {
+      console.log("Fallas");
+      console.log(docFolio + nuevoFolioSiguiente.toString());
+      console.log(item.noPartidaATF);
+      console.log(item.cantidad);
+      console.log(item.descripcion);
+      console.log(item.observacion);
+      console.log(item.totalInsumo);
       await addDoc(cotTotal, {
         cve_tecFin: docFolio + nuevoFolioSiguiente.toString(),
         noPartidaATF: item.noPartidaATF, //DESDE AQUÍ LO RECUPERO
