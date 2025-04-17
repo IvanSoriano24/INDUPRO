@@ -30,7 +30,7 @@ import { ModalTitle, Modal, Button } from "react-bootstrap";
 
 const AgregarLevDigital = () => {
   /*----------------------------------------------------------*/
-  const handleFileUpload = (event) => {
+  /*const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
       setSelectedFile(file); // Guardar el archivo en el estado
@@ -114,7 +114,6 @@ const AgregarLevDigital = () => {
 
     reader.readAsArrayBuffer(selectedFile); // Lee el archivo almacenado en el estado
   };
-
   const handleAddFromExcel = () => {
     if (excelData.length === 0) {
       alert("No hay datos procesados del archivo.");
@@ -124,6 +123,91 @@ const AgregarLevDigital = () => {
     // Agregar las filas procesadas del archivo a la lista
     setList([...list, ...excelData]);
     setExcelData([]); // Limpiar los datos procesados una vez que se han agregado
+  };*/
+ 
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+
+        setSelectedFile(file); // Guardar el archivo en el estado
+
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0]; // Selecciona la primera hoja
+        const sheet = workbook.Sheets[sheetName];
+  
+        // Convertir la hoja de cálculo en JSON
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  
+        // Asegúrate de que las primeras filas son las que contienen los encabezados
+        const headers = jsonData[0]; // Primera fila como encabezados
+  
+        let isValid = true; // Bandera para verificar la validez de los datos
+        let prevPartida = 0; // Variable para almacenar el último número de partida
+        const filteredData = jsonData.slice(1).map((row, index) => {
+          const noPartida = String(row[0] || "").trim();
+          const cantidad = String(row[1] || "").trim();
+          const descripcion = String(row[2] || "").trim();
+          const observaciones = String(row[3] || "").trim();
+  
+          // Validación de secuencialidad del número de partida
+          if (parseInt(noPartida) !== prevPartida + 1) {
+            isValid = false;
+            swal.fire({
+              text: `El número de partida no es secuencial en la fila ${
+                index + 2
+              }.`,
+              icon: "error",
+            });
+            //alert(`El número de partida no es secuencial en la fila ${index + 2}.`);
+          }
+  
+          // Validación de cantidad (debe ser un número entero)
+          if (!Number.isInteger(Number(cantidad)) || cantidad === "") {
+            isValid = false;
+            swal.fire({
+              text: `La cantidad no es un número entero en la fila ${index + 2}.`,
+              icon: "error",
+            });
+            //alert(`La cantidad no es un número entero en la fila ${index + 2}.`);
+          }
+  
+          prevPartida = parseInt(noPartida);
+  
+          return {
+            noPartida,
+            cantidad,
+            descripcion,
+            observaciones,
+          };
+        });
+        if (!isValid) {
+          return; // Detener el procesamiento si alguna validación falla
+        }
+        swal.fire(
+          "Los datos del archivo Excel son válidos y se han procesado correctamente.",
+          {
+            icon: "success",
+          }
+        );
+        // Si todos los datos son correctos
+        //alert("Los datos del archivo Excel son válidos y se han procesado correctamente.");
+  
+        // Actualizar el estado con los datos validados
+        setExcelData(filteredData);
+        setList([...list, ...filteredData]);
+      setExcelData([]); 
+      };
+  
+      reader.readAsArrayBuffer(file); // Lee el archivo almacenado en el estado
+    
+    } else {
+      alert("Por favor, selecciona un archivo.");
+    }
   };
   const [excelData, setExcelData] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -620,7 +704,7 @@ const AgregarLevDigital = () => {
                   onChange={handleFileUpload}
                   className="form-control"
                 />
-                <button
+                {/*<button
                   className="btn btn-primary mt-2"
                   onClick={processExcelFile}
                 >
@@ -631,7 +715,7 @@ const AgregarLevDigital = () => {
                   onClick={handleAddFromExcel}
                 >
                   Agregar Partidas
-                </button>
+                </button>*/}
               </div>
             </div>
 
