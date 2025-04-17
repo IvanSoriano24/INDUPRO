@@ -176,18 +176,22 @@ const AgregarPreCotizacion = () => {
 
           // Validaciónes
           if (!validarInsumo(insumo)) {
+            console.log("1");
             isValid = false;
             partidasConError.push(noPartida || `Fila ${index + 2}`);
           }
           if (!validarUnidad(unidad)) {
+            console.log("1");
             isValid = false;
             partidasConError.push(noPartida || `Fila ${index + 2}`);
           }
           if (!validarCantidad(cantidad)) {
+            console.log("1");
             isValid = false;
             partidasConError.push(noPartida || `Fila ${index + 2}`);
           }
           if (!validarCosto(costoCotizado)) {
+            console.log("1");
             isValid = false;
             partidasConError.push(noPartida || `Fila ${index + 2}`);
           }
@@ -1270,9 +1274,7 @@ const AgregarPreCotizacion = () => {
     // Si listPartidas o listMano están vacíos, mostrar alerta y detener ejecución
     if (
       !listPartidas ||
-      listPartidas.length === 0 ||
-      !listMano ||
-      listMano.length === 0
+      listPartidas.length === 0
     ) {
       swal.fire({
         icon: "warning",
@@ -1385,7 +1387,7 @@ const AgregarPreCotizacion = () => {
             descripcionInsumo: insumo.descripcionInsumo,
             comentariosAdi: insumo.comentariosAdi,
             unidad: insumo.unidad,
-            costoCotizado: insumo.costoCotizado,
+            costoCotizado: parseFloat(insumo.costoCotizado) || 0,
             cantidad: insumo.cantidad,
             total: insumo.costoCotizado * insumo.cantidad,
             estatus: "Activo",

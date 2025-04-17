@@ -269,6 +269,8 @@ const VisualizarPDF = () => {
           });
 
           sumaValorInsumos += moData.totalInsumo; //Factoraje
+          console.log("InsumoValor: ", moData.totalInsumo);
+          console.log("Sumas", sumaValorInsumos);
         });
         seValoresArticulo(claveArticulos);
         setSumaValorInsumos(sumaValorInsumos);

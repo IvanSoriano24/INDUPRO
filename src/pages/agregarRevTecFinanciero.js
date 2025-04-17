@@ -850,9 +850,7 @@ const AgregarRevTecFinanciero = () => {
     // Si listPartidas o listMano están vacíos, mostrar alerta y detener ejecución
     if (
       !par_PreCoti_insu ||
-      par_PreCoti_insu.length === 0 ||
-      !listMO ||
-      listMO.length === 0
+      par_PreCoti_insu.length === 0 
     ) {
       swal.fire({
         icon: "warning",
@@ -1682,7 +1680,7 @@ const AgregarRevTecFinanciero = () => {
           item.total.toLocaleString("en-US", {
             style: "currency",
             currency: "USD",
-          }), // Formatea costoCotizado,
+          }), 
         ]);
 
         // Define el contenido del documento PDF

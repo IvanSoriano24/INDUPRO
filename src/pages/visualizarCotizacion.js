@@ -476,21 +476,6 @@ const VisualizarCotizacion = () => {
     }
   };
   /******************************************** SAE  *****************************************************************/
-  const mandarSae = () => {
-    swal({
-      title: "Estás seguro de aprobar la cotización?",
-      text: "Una vez aprobada, no podrán modificarse los costos del proyecto!",
-      icon: "warning",
-      buttons: true,
-      dangerMode: true,
-    }).then((willDelete) => {
-      if (willDelete) {
-        addSae();
-      } else {
-        swal("No se mando a SAE!");
-      }
-    });
-  };
   const addSae = async () => {
 
     console.log("Cliente:", cliente);
@@ -821,7 +806,7 @@ const VisualizarCotizacion = () => {
                     <th scope="col">No. Partida</th>
                     <th scope="col">Descripción</th>
                     <th scope="col">Observaciones</th>
-                    <th scope="col">Sub total</th>
+                    <th scope="col">Sub Total</th>
                   </tr>
                 </thead>
                 <tbody>

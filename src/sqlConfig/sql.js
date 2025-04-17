@@ -7,7 +7,7 @@ const cors = require("cors");
 app.use(cors());
 
 // Base de Datos Productiva
-/*const config = {
+const config = {
   user: "sa",
   password: "Green2580a.",
   server: "35.222.201.74",
@@ -16,9 +16,9 @@ app.use(cors());
     encrypt: true, // Si estás usando SSL
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
   },
-};*/
+};
 // Base de Datos Desarrollo
-const config = {
+/*const config = {
   user: "sa",
   password: "Green2580a.",
   server: "35.222.201.74",
@@ -27,7 +27,7 @@ const config = {
     encrypt: true, // Si estás usando SSL
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
   },
-};
+};*/
 // Conexión a la base de datos
 sql
   .connect(config)
