@@ -2,10 +2,12 @@ const express = require("express");
 const sql = require("mssql"); // Cambiar a mssql
 const app = express();
 const cors = require("cors");
+
 // Middleware para permitir solicitudes CORS
 app.use(cors());
+app.use(express.json()); 
 // Configuración de conexión a la base de datos SQL Server
-const config = {
+/*const config = {
   user: "sa",
   password: "Green2580a.",
   server: "35.222.201.74",
@@ -14,8 +16,8 @@ const config = {
     encrypt: true, // Si estás usando SSL
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
   },
-};
-/*const config = {
+};*/
+const config = {
   user: "sa",
   password: "Green2580a.",
   server: "35.222.201.74",
@@ -24,7 +26,7 @@ const config = {
     encrypt: true, // Si estás usando SSL
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
   },
-};*/
+};
 // Conexión a la base de datos
 sql
   .connect(config)
@@ -368,6 +370,7 @@ app.post("/api/cotizacion", async (req, res) => {
 });
 app.post("/api/guardarPartidas", async (req, res) => {
   try {
+    console.log("📦 req.body:", req.body);
     const { data: partidas } = req.body;
     for (const data of partidas) {
       const {
@@ -501,11 +504,11 @@ app.post("/api/guardarPartidas", async (req, res) => {
         .input("IMPU5", sql.Float, IMPU5)
         .query(query);
     }
-    res.status(201).json({ message: "Cotización insertada correctamente." });
+    res.status(201).json({ message: "Partidas insertada correctamente." });
   } catch (err) {
-    console.error("Error al insertar la cotización:", err);
+    console.error("Error al insertar las partidas:", err);
     res.status(500).json({
-      error: "Error al insertar la cotización",
+      error: "Error al insertar las partidas",
       details: err.message,
     });
   }

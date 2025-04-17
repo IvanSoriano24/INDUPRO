@@ -598,40 +598,42 @@ const VisualizarCotizacion = () => {
 
       return {
         data: detalle,
-        CVE_DOC: CVE_DOC,
-        nuPartida: detalle.noPartidaATF,
-        CVE_ART: detalle.claveSae,
-        CANT: detalle.cantidad,
-        PREC: detalle.costoCotizado,
-        TOT_PARTIDA: detalle.total,
-        UNI_VENTA: impuestos.UNI_MED,
-        CVE_ESQ: impuestos.CVE_ESQIMPU,
+        CVE_DOC: CVE_DOC ?? "",
+        nuPartida: detalle.noPartidaATF ?? "",
+        CVE_ART: detalle.claveSae ?? "",
+        CANT: detalle.cantidad ?? "",
+        PREC: detalle.costoCotizado ?? "",
+        TOT_PARTIDA: detalle.total ?? "",
+        UNI_VENTA: impuestos.UNI_MED ?? "",
+        CVE_ESQ: impuestos.CVE_ESQIMPU ?? "",
 
-        IMPU1: impuestos.IMPUESTO1,
-        IMPU2: impuestos.IMPUESTO2,
-        IMPU3: impuestos.IMPUESTO3,
-        IMPU4: impuestos.IMPUESTO4,
-        IMPU5: impuestos.IMPUESTO5,
-        IMPU6: impuestos.IMPUESTO6,
-        IMPU7: impuestos.IMPUESTO7,
-        IMPU8: impuestos.IMPUESTO8,
+        IMPU1: impuestos.IMPUESTO1 ?? "",
+        IMPU2: impuestos.IMPUESTO2 ?? "",
+        IMPU3: impuestos.IMPUESTO3 ?? "",
+        IMPU4: impuestos.IMPUESTO4 ?? "",
+        IMPU5: impuestos.IMPUESTO5 ?? "",
+        IMPU6: impuestos.IMPUESTO6 ?? "",
+        IMPU7: impuestos.IMPUESTO7 ?? "",
+        IMPU8: impuestos.IMPUESTO8 ?? "",
 
-        IMP1APLICA: impuestos.IMP1APLICA,
-        IMP2APLICA: impuestos.IMP2APLICA,
-        IMP3APLICA: impuestos.IMP3APLICA,
-        IMP4APLICA: impuestos.IMP4APLICA,
-        IMP5APLICA: impuestos.IMP5APLICA,
-        IMP6APLICA: impuestos.IMP6APLICA,
-        IMP7APLICA: impuestos.IMP7APLICA,
-        IMP8APLICA: impuestos.IMP8APLICA,
+        IMP1APLICA: impuestos.IMP1APLICA ?? "",
+        IMP2APLICA: impuestos.IMP2APLICA ?? "",
+        IMP3APLICA: impuestos.IMP3APLICA ?? "",
+        IMP4APLICA: impuestos.IMP4APLICA ?? "",
+        IMP5APLICA: impuestos.IMP5APLICA ?? "",
+        IMP6APLICA: impuestos.IMP6APLICA ?? "",
+        IMP7APLICA: impuestos.IMP7APLICA ?? "",
+        IMP8APLICA: impuestos.IMP8APLICA ?? "",
       };
     });
-    /*const response = await axios.post(
-      "http://localhost:5000/api/guardarPartidas",
-      dataPartidas
-    );
-    const partidas = response.data;*/
+
     console.log("Partidas: ", dataPartidas);
+
+    await axios.post("http://localhost:5000/api/guardarPartidas", {
+      data: dataPartidas,
+    });
+    
+    //const partidas = response.data;
 
     const IMP_TOT4 = data.reduce((sum, partida, index) => {
       const impuesto4 = results[index]?.IMPUESTO4 || 0;
@@ -645,27 +647,27 @@ const VisualizarCotizacion = () => {
 
     const dataCotizacion = {
       data: data,
-      CVE_DOC: CVE_DOC,
-      clie: clave,
-      IMP_TOT4: IMP_TOT4.toFixed(2),
-      IMPORTE: totalPartida.toFixed(2),
-      RFC: datosCliente.RFC,
-      folio: folioSiguiente,
-      METODOPAGO: datosCliente.METODODEPAGO,
-      NUMCTAPAGO: datosCliente.NUMCTAPAGO,
-      FORMAPAGOSAT: datosCliente.FORMADEPAGOSAT,
-      USO_CFDI: datosCliente.USO_CFDI,
-      REG_FISC: datosCliente.REG_FISC,
+      CVE_DOC: CVE_DOC ?? "",
+      clie: clave ?? "",
+      IMP_TOT4: IMP_TOT4.toFixed(2) ?? "",
+      IMPORTE: totalPartida.toFixed(2) ?? "",
+      RFC: datosCliente.RFC ?? "",
+      folio: folioSiguiente ?? "",
+      METODOPAGO: datosCliente.METODODEPAGO ?? "",
+      NUMCTAPAGO: datosCliente.NUMCTAPAGO ?? "",
+      FORMAPAGOSAT: datosCliente.FORMADEPAGOSAT ?? "",
+      USO_CFDI: datosCliente.USO_CFDI ?? "",
+      REG_FISC: datosCliente.REG_FISC ?? "",
     };
     console.log("Cotizacion: ", dataCotizacion);
-    /*const responseCotizacion = await axios.post(
+    const responseCotizacion = await axios.post(
       "http://localhost:5000/api/cotizacion",
       dataCotizacion
-    );*/
+    );
 
-    /*const { nuevoFolio } = (
+    const { nuevoFolio } = (
       await axios.get("http://localhost:5000/api/actualizarFolio")
-    ).data;*/
+    ).data;
   };
 
   const handleOpenModal = async () => {
