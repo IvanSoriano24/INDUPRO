@@ -29,7 +29,6 @@ import axios from "axios";
 import Select from "react-select";
 import * as XLSX from "xlsx";
 
-
 const EditarPreCotizacion = () => {
   const [claveSae, setClaveSae] = useState(""); // Estado para la clave SAE
   const [clavesSAE, setClavesSAE] = useState([]);
@@ -112,10 +111,10 @@ const EditarPreCotizacion = () => {
   const { id } = useParams();
   const [show, setShow] = useState(false);
 
-   /*******************************************************************/
-    const [excelData, setExcelData] = useState([]);
-    const [selectedFile, setSelectedFile] = useState(null);
-    /*******************************************************************/
+  /*******************************************************************/
+  const [excelData, setExcelData] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  /*******************************************************************/
 
   const handleClose = () => {
     setShow(false);
@@ -170,18 +169,6 @@ const EditarPreCotizacion = () => {
   }, []); // 🔹 Eliminamos `factores` de las dependencias*/
 
   /*-------------------------------------------------------------------------------------------------------*/
-  const obtenerFamilia = async (categoriaSeleccionada) => {
-    try {
-      const response = await axios.get(
-        `/api/categorias/${categoriaSeleccionada}`
-        //`http://localhost:5000/api/categorias/${categoriaSeleccionada}`
-      );
-      setFamilias(response.data); // Guarda las familias filtradas en el estado
-      console.log("Familias filtradas obtenidas:", response.data);
-    } catch (error) {
-      console.error("Error al obtener las familias:", error);
-    }
-  };
   const recolectarDatos = (
     id,
     cve_levDig,
@@ -317,96 +304,6 @@ const EditarPreCotizacion = () => {
       });
     }
   };
-  const handleLineaChange = async (e) => {
-    const lineaSeleccionada = e.target.value;
-    setLinea(lineaSeleccionada); // Guarda la línea seleccionada
-
-    if (lineaSeleccionada) {
-      const clavesSae = await obtenerClaveSae(lineaSeleccionada);
-      setClavesSAE(Array.isArray(clavesSae) ? clavesSae : []);
-    } else {
-      setClavesSAE([]); // 🔹 Limpia las claves si no hay línea seleccionada
-    }
-  };
-  const obtenerClaveSae = async (cveLin) => {
-    try {
-      console.log("🔎 Buscando Clave SAE para la línea (CVE_LIN):", cveLin); // 🔍 Verifica qué valor se envía
-
-      const response = await axios.get(
-        //`http://localhost:5000/api/clave-sae/${cveLin}`
-        `/api/clave-sae/${cveLin}`
-      );
-
-      console.log("🔹 Claves SAE obtenidas desde SQL:", response.data);
-
-      if (response.data.length === 0) {
-        console.warn("⚠️ No se encontraron claves SAE.");
-        return [];
-      }
-
-      return response.data.map((item) => ({
-        clave: item.CVE_ART || "Clave no encontrada",
-        descripcion: item.DESCR || "Descripción no encontrada",
-      }));
-    } catch (error) {
-      console.error("❌ Error al obtener Clave SAE desde SQL:", error);
-      return [];
-    }
-  };
-  const handleCategoriaChange = async (e) => {
-    const categoriaSeleccionada = e.target.value;
-    setCategoria(categoriaSeleccionada); // Guarda la categoría seleccionada
-
-    if (categoriaSeleccionada) {
-      obtenerFamilia(categoriaSeleccionada); // Llama a la API para obtener las familias
-    } else {
-      setFamilia([]); // Limpia la familia si no hay categoría seleccionada
-    }
-  };
-  const handleFamiliaChange = async (e) => {
-    const familiaSeleccionada = e.target.value;
-    setFamilia(familiaSeleccionada); // Guarda la familia seleccionada
-
-    if (familiaSeleccionada) {
-      obtenerLineas(familiaSeleccionada); // Llama a la API para obtener líneas
-    } else {
-      setLineas([]); // Limpia las líneas si no hay familia seleccionada
-    }
-  };
-  const cargarCategoriasDesdeFirestore = async () => {
-    try {
-      const refCategorias = collection(db, "LINEA"); // Colección en Firestore
-      const snapshot = await getDocs(refCategorias);
-
-      // 🔹 Filtramos solo las categorías padres (CUENTA_COI sin puntos)
-      const categoriasProcesadas = snapshot.docs
-        .map((doc) => {
-          const data = doc.data();
-          const cuentaCoi = data.CUENTA_COI || "";
-
-          return {
-            cuenta: cuentaCoi, // Ahora tomamos CUENTA_COI completo, pero solo si no tiene puntos
-            descripcion: data.DESC_LIN || "Sin descripción", // Descripción de la línea
-            puntos: cuentaCoi.split(".").length - 1, // Contamos los puntos en CUENTA_COI
-          };
-        })
-        .filter((categoria) => categoria.cuenta && categoria.puntos === 0); // Solo categorías sin puntos y válidas
-
-      // 🔹 Eliminar duplicados basados en "cuenta"
-      const categoriasUnicas = Array.from(
-        new Map(categoriasProcesadas.map((cat) => [cat.cuenta, cat])).values()
-      );
-
-      console.log("🔹 Categorías obtenidas desde Firestore:", categoriasUnicas);
-      return categoriasUnicas;
-    } catch (error) {
-      console.error(
-        "❌ Error al obtener las categorías desde Firestore:",
-        error
-      );
-      return [];
-    }
-  };
   const limpiarCampos = () => {
     setInsumo("");
     setCantidad(0);
@@ -435,20 +332,35 @@ const EditarPreCotizacion = () => {
       // 🟢 Reiniciar valores del formulario
       setCantidad(0);
       setCostoCotizado(0);
+      let listaInsumos = [...clavesSAE];
 
-      // 🟢 Cargar unidades (categorías)
-      const responseUnidades = await axios.get(
-        "/api/lineasMaster",
-        //"http://localhost:5000/api/lineasMaster"
+      //if (clavesSAE.length === 0) {
+        console.log("🔄 Cargando claves SAE antes de editar...");
+        const responseInsumos = await axios.get(
+          "http://localhost:5000/api/clave-sae"
+          //"/api/clave-sae"
+        );
+  
+        // ✅ Transformamos la respuesta para tener claves limpias y legibles
+        listaInsumos = responseInsumos.data.map((item) => ({
+          clave: item.CVE_ART.trim(), // quitamos espacios
+          descripcion: item.DESCR?.trim(), // opcionalmente también aquí
+        }));
+  
+        setClavesSAE(listaInsumos);
+        //console.log("📦 clavesSAE cargadas:", listaInsumos);
+      //}
+  
+      // 🟢 Buscar la clave SAE actual del insumo que se está editando
+      /*const insumoEncontrado = listaInsumos.find(
+        (item) => item.clave === insumo.claveSae?.trim() // importante hacer trim
       );
-      setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
-      console.log("Unidades obtenidas:", responseUnidades.data);
-      const responseProvedores = await axios.get(
-        //"http://localhost:5000/api/proveedores"
-        "/api/proveedores"
-      );
-      setProveedores(responseProvedores.data);
-
+  
+      // ✅ Establecer la clave seleccionada con delay para que el select esté listo
+      setTimeout(() => {
+        setClaveSae(insumoEncontrado ? insumoEncontrado.clave : "");
+      }, 100); // puedes ajustar el delay si lo necesitas*/
+      
       setShowAddModal(true);
     } catch (error) {
       console.error("⚠️ Error al obtener los datos necesarios:", error);
@@ -471,20 +383,6 @@ const EditarPreCotizacion = () => {
     setFamilia("");
     setLinea("");
     setClaveSae("");
-  };
-  const obtenerLineas = async (familiaSeleccionada) => {
-    console.log("Obteniendo líneas para la familia:", familiaSeleccionada); // Verifica la entrada
-    try {
-      //console.log(familiaSeleccionada);
-      const response = await axios.get(
-        `/api/lineas/${familiaSeleccionada}`
-        //`http://localhost:5000/api/lineas/${familiaSeleccionada}`
-      );
-      setLineas(response.data); // Guardar las líneas en el estado
-      console.log("Líneas filtradas obtenidas:", response.data); // Verifica la respuesta
-    } catch (error) {
-      console.error("Error al obtener las líneas:", error);
-    }
   };
   const guardarPartida = async () => {
     if (!selectedPartida || !insumo || !cantidad || !unidad || !claveSae) {
@@ -577,64 +475,40 @@ const EditarPreCotizacion = () => {
       setCostoCotizado(insumo.costoCotizado);
       setComentariosAdi(insumo.comentariosAdi);
       setDescripcionInsumo(insumo.descripcionInsumo);
+      setProveedor(insumo.proveedor);
+      console.log("Insumos: ", factores);
 
-      // 🟢 Cargar Categoría antes de continuar
-      console.log("🔄 Cargando categorías...");
-      const responseCategorias = await axios.get(
-        //"http://localhost:5000/api/lineasMaster"
-        "/api/lineasMaster"
-      );
-      setCategorias(responseCategorias.data);
+      // 🟢 Asegurar que los insumo estén cargados antes de asignar el insumo
+      let listaInsumos = [...clavesSAE];
 
-      setTimeout(() => {
-        setCategoria(insumo.categoria || "");
-      }, 200); // Pequeño delay para asegurarnos de que la categoría ya está cargada
-
-      // 🟢 Cargar familia si hay categoría
-      if (insumo.categoria) {
-        console.log(
-          "🔄 Cargando familias para la categoría:",
-          insumo.categoria
+      if (clavesSAE.length === 0) {
+        console.log("🔄 Cargando claves SAE antes de editar...");
+        const responseInsumos = await axios.get(
+          "http://localhost:5000/api/clave-sae"
+          //"/api/clave-sae"
         );
-        await obtenerFamilia(insumo.categoria);
-        setFamilia(insumo.familia || "");
+
+        // ✅ Transformamos la respuesta para tener claves limpias y legibles
+        listaInsumos = responseInsumos.data.map((item) => ({
+          clave: item.CVE_ART.trim(), // quitamos espacios
+          descripcion: item.DESCR?.trim(), // opcionalmente también aquí
+        }));
+
+        setClavesSAE(listaInsumos);
+        //console.log("📦 clavesSAE cargadas:", listaInsumos);
       }
 
-      // 🟢 Cargar líneas si hay familia
-      if (insumo.familia) {
-        console.log("🔄 Cargando líneas para la familia:", insumo.familia);
-        await obtenerLineas(insumo.familia);
-        setLinea(insumo.linea || "");
-      }
-
-      // 🟢 Cargar claveSae si hay linea
-      if (insumo.linea) {
-        console.log("🔄 Cargando clave sae para la linea:", insumo.linea);
-        const clavesSae = await obtenerClaveSae(insumo.linea);
-        setClavesSAE(Array.isArray(clavesSae) ? clavesSae : []);
-        console.log("Clave: ", insumo.claveSae);
-      }
-
-      // 🟢 Asegurar que los proveedores estén cargados antes de asignar el proveedor
-      let listaProveedores = [...proveedores];
-      if (proveedores.length === 0) {
-        console.log("🔄 Cargando proveedores antes de editar...");
-        const responseProvedores = await axios.get(
-          //"http://localhost:5000/api/proveedores"
-          "/api/proveedores"
-        );
-        listaProveedores = responseProvedores.data;
-        setProveedores(listaProveedores);
-      }
-
-      // 🟢 Buscar el proveedor en la lista de proveedores
-      const proveedorEncontrado = listaProveedores.find(
-        (prov) => prov.CLAVE === insumo.proveedor
+      // 🟢 Buscar la clave SAE actual del insumo que se está editando
+      const insumoEncontrado = listaInsumos.find(
+        (item) => item.clave === insumo.claveSae?.trim() // importante hacer trim
       );
 
+      // ✅ Establecer la clave seleccionada con delay para que el select esté listo
       setTimeout(() => {
-        setProveedor(proveedorEncontrado ? proveedorEncontrado.CLAVE : "");
-      }, 200);
+        setClaveSae(insumoEncontrado ? insumoEncontrado.clave : "");
+      }, 100); // puedes ajustar el delay si lo necesitas
+
+      console.log("📌 Clave SAE seleccionada:", insumo.claveSae);
 
       // 🟢 Guardar el ID del insumo en editIndex para saber que estamos editando
       setEditIndex(insumoId);
@@ -773,146 +647,146 @@ const EditarPreCotizacion = () => {
 
   /*EXCEL*/
   const handleFileUpload = (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setSelectedFile(file); // Guardar el archivo en el estado
-  
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, { type: "array" });
-          const sheetName = workbook.SheetNames[0];
-          const sheet = workbook.Sheets[sheetName];
-          const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-  
-          const headers = jsonData[0];
-          let isValid = true;
-          let prevPartida = 0;
-          let partidasConError = [];
-  
-          const filteredData = jsonData.slice(1).map((row, index) => {
-            const noPartida = String(row[0] || 0).trim();
-            const insumo = String(row[1] || "").trim();
-            const unidad = String(row[2] || "").trim();
-            const claveSae = String(row[3] || "").trim();
-            const proveedor = String(row[4] || "").trim();
-            const descripcionInsumo = String(row[5] || "").trim();
-            const comentariosAdi = String(row[6] || "").trim();
-            const cantidad = String(row[7] || 0).trim();
-            const costoCotizado = String(row[8] || 0).trim();
-  
-            // Validaciónes
-            if (!validarInsumo(insumo)) {
-              isValid = false;
-              partidasConError.push(noPartida || `Fila ${index + 2}`);
-            }
-            if (!validarUnidad(unidad)) {
-              isValid = false;
-              partidasConError.push(noPartida || `Fila ${index + 2}`);
-            }
-            if (!validarCantidad(cantidad)) {
-              isValid = false;
-              partidasConError.push(noPartida || `Fila ${index + 2}`);
-            }
-            if (!validarCosto(costoCotizado)) {
-              isValid = false;
-              partidasConError.push(noPartida || `Fila ${index + 2}`);
-            }
-  
-            prevPartida = parseInt(noPartida);
-  
-            return {
-              noPartida,
-              insumo,
-              unidad,
-              claveSae,
-              proveedor,
-              descripcionInsumo,
-              comentariosAdi,
-              cantidad,
-              costoCotizado,
-            };
-          });
-  
-          if (!isValid) {
-            swal.fire({
-              title: "Error en validación",
-              text: `Las siguientes partidas tienen errores: ${partidasConError.join(
-                ", "
-              )}`,
-              icon: "error",
-            });
-            return;
-          }
-  
-          swal.fire({
-            title: "Éxito",
-            text: "Los datos del archivo Excel son válidos y se han procesado correctamente.",
-            icon: "success",
-          });
-  
-          setExcelData(filteredData);
-  
-          const transformado = filteredData.map((item) => ({
-            noPartida: item.noPartida,
-            insumos: [item], // ahora cada item tendrá un array insumos
-          }));
-  
-          // Agregar las filas procesadas del archivo a la lista
-          //console.log(filteredData);
-          setListPartidas(transformado);
-          setList([...list, ...filteredData]);
-          //console.log(transformado);
-          setExcelData([]);
-        };
-  
-        //reader.readAsArrayBuffer(selectedFile);
-        reader.readAsArrayBuffer(file);
-      } else {
-        alert("Por favor, selecciona un archivo.");
-      }
-    };
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSelectedFile(file); // Guardar el archivo en el estado
 
-    const validarInsumo = (Insumo) => {
-      if (
-        Insumo == "Subcontratos" ||
-        Insumo == "Viáticos" ||
-        Insumo == "Material"
-      ) {
-        return true;
-      }
-      console.log(Insumo);
-      return false;
-      //return Number.isInteger(Number(cantidad)) && cantidad !== "";
-    };
-    const validarUnidad = (Unidad) => {
-      if (
-        Unidad == "Pza" ||
-        Unidad == "Kit" ||
-        Unidad == "L" ||
-        Unidad == "m" ||
-        Unidad == "kg" ||
-        Unidad == "Serv"
-      ) {
-        return true;
-      }
-      return false;
-      //return Number.isInteger(Number(cantidad)) && cantidad !== "";
-    };
-    const validarCantidad = (Cantidad) => {
-      if (Cantidad <= 0) {
-        return false;
-      }
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        const headers = jsonData[0];
+        let isValid = true;
+        let prevPartida = 0;
+        let partidasConError = [];
+
+        const filteredData = jsonData.slice(1).map((row, index) => {
+          const noPartida = String(row[0] || 0).trim();
+          const insumo = String(row[1] || "").trim();
+          const unidad = String(row[2] || "").trim();
+          const claveSae = String(row[3] || "").trim();
+          const proveedor = String(row[4] || "").trim();
+          const descripcionInsumo = String(row[5] || "").trim();
+          const comentariosAdi = String(row[6] || "").trim();
+          const cantidad = String(row[7] || 0).trim();
+          const costoCotizado = String(row[8] || 0).trim();
+
+          // Validaciónes
+          if (!validarInsumo(insumo)) {
+            isValid = false;
+            partidasConError.push(noPartida || `Fila ${index + 2}`);
+          }
+          if (!validarUnidad(unidad)) {
+            isValid = false;
+            partidasConError.push(noPartida || `Fila ${index + 2}`);
+          }
+          if (!validarCantidad(cantidad)) {
+            isValid = false;
+            partidasConError.push(noPartida || `Fila ${index + 2}`);
+          }
+          if (!validarCosto(costoCotizado)) {
+            isValid = false;
+            partidasConError.push(noPartida || `Fila ${index + 2}`);
+          }
+
+          prevPartida = parseInt(noPartida);
+
+          return {
+            noPartida,
+            insumo,
+            unidad,
+            claveSae,
+            proveedor,
+            descripcionInsumo,
+            comentariosAdi,
+            cantidad,
+            costoCotizado,
+          };
+        });
+
+        if (!isValid) {
+          swal.fire({
+            title: "Error en validación",
+            text: `Las siguientes partidas tienen errores: ${partidasConError.join(
+              ", "
+            )}`,
+            icon: "error",
+          });
+          return;
+        }
+
+        swal.fire({
+          title: "Éxito",
+          text: "Los datos del archivo Excel son válidos y se han procesado correctamente.",
+          icon: "success",
+        });
+
+        setExcelData(filteredData);
+
+        const transformado = filteredData.map((item) => ({
+          noPartida: item.noPartida,
+          insumos: [item], // ahora cada item tendrá un array insumos
+        }));
+
+        // Agregar las filas procesadas del archivo a la lista
+        //console.log(filteredData);
+        setListPartidas(transformado);
+        setList([...list, ...filteredData]);
+        //console.log(transformado);
+        setExcelData([]);
+      };
+
+      //reader.readAsArrayBuffer(selectedFile);
+      reader.readAsArrayBuffer(file);
+    } else {
+      alert("Por favor, selecciona un archivo.");
+    }
+  };
+
+  const validarInsumo = (Insumo) => {
+    if (
+      Insumo == "Subcontratos" ||
+      Insumo == "Viáticos" ||
+      Insumo == "Material"
+    ) {
       return true;
-      //return Number.isInteger(Number(cantidad)) && cantidad !== "";
-    };
-    const validarCosto = (Costo) => {
-      if (Costo <= 0) {
-        return false;
-      }
+    }
+    console.log(Insumo);
+    return false;
+    //return Number.isInteger(Number(cantidad)) && cantidad !== "";
+  };
+  const validarUnidad = (Unidad) => {
+    if (
+      Unidad == "Pza" ||
+      Unidad == "Kit" ||
+      Unidad == "L" ||
+      Unidad == "m" ||
+      Unidad == "kg" ||
+      Unidad == "Serv"
+    ) {
       return true;
-      //return Number.isInteger(Number(cantidad)) && cantidad !== "";
-    };
+    }
+    return false;
+    //return Number.isInteger(Number(cantidad)) && cantidad !== "";
+  };
+  const validarCantidad = (Cantidad) => {
+    if (Cantidad <= 0) {
+      return false;
+    }
+    return true;
+    //return Number.isInteger(Number(cantidad)) && cantidad !== "";
+  };
+  const validarCosto = (Costo) => {
+    if (Costo <= 0) {
+      return false;
+    }
+    return true;
+    //return Number.isInteger(Number(cantidad)) && cantidad !== "";
+  };
   /* ----------------------------------------- OBTENER PARTDIAS DE INSUMOS PARA LA PRECOTIZACIÓN -------------------------*/
 
   const getParPreCotizacion = (
@@ -981,38 +855,28 @@ const EditarPreCotizacion = () => {
   }, [cve_precot]);
 
   /* ------------------------------------ OBTENER TABLA DE INSUMOS -------------------------------*/
-  const obtenerFactores = (setFactores, hasSubscribedRef) => {
-    if (hasSubscribedRef.current) return; // Evita ejecutar más de una vez
-    hasSubscribedRef.current = true;
-
-    console.log("🛠️ Suscribiéndose a cambios en FACTORES...");
-
-    const unsubscribe = onSnapshot(collection(db, "FACTORES"), (snapshot) => {
-      const factoresList = snapshot.docs.map((doc) => {
-        const data = doc.data();
-        console.log("📌 Documento recuperado:", data); // Depuración
-
-        return data.nombre !== undefined ? data.nombre : "Sin nombre"; // Evita undefined
+   const obtenerFactores = (setFactores) => {
+      console.log("🛠️ Suscribiéndose a cambios en FACTORES...");
+  
+      const unsubscribe = onSnapshot(collection(db, "FACTORES"), (snapshot) => {
+        const factoresList = snapshot.docs.map((doc) => doc.data().nombre);
+        setFactores(factoresList);
+  
+        console.log("📌 Datos de FACTORES actualizados:", factoresList);
       });
-
-      setFactores(factoresList);
-      console.log("📌 Datos de FACTORES actualizados:", factoresList);
-    });
-
-    // Cleanup: Nos desuscribimos si el componente se desmonta
-    return unsubscribe;
-  };
-
-  const hasSubscribedRef = useRef(false);
-  useEffect(() => {
-    console.log("🛠️ useEffect ejecutado para FACTORES");
-    const unsubscribe = obtenerFactores(setFactores, hasSubscribedRef);
-
-    return () => {
-      console.log("❌ Desuscribiendo de FACTORES");
-      unsubscribe && unsubscribe();
+  
+      // Cleanup: nos desuscribimos si el componente se desmonta
+      return unsubscribe;
     };
-  }, []);
+    useEffect(() => {
+      console.log("🛠️ useEffect ejecutado para FACTORES");
+      const unsubscribe = obtenerFactores(setFactores);
+  
+      return () => {
+        console.log("❌ Desuscribiendo de FACTORES");
+        unsubscribe && unsubscribe();
+      };
+    }, []); 
   /* ------------------------------------ OBTENER TABLA DE TRABAJADORES -------------------------------*/
   const obtenerPartidasMO = (cve_precot, setListMO, setNoParatidaMO) => {
     if (!cve_precot) return; // Evita ejecutar la consulta si cve_precot es null o undefined
@@ -1542,7 +1406,6 @@ const EditarPreCotizacion = () => {
               </div>
             </div>
 
-
             <div className="col-md-4 ">
               <label className="form-label">FECHA DE INICIO</label>
               <div class="input-group mb-3">
@@ -1708,23 +1571,6 @@ const EditarPreCotizacion = () => {
             </div>
           </div>
           <br></br>
-          <input
-            type="file"
-            accept=".xlsx, .xls"
-            onChange={handleFileUpload}
-            className="form-control"
-          />
-          {/*<button className="btn btn-primary mt-2" onClick={processExcelFile}>
-            Procesar Archivo
-          </button>*/}
-          {/*<button
-            className="btn btn-success mt-2 ms-2"
-            onClick={handleAddFromExcel}
-          >
-            Agregar Partidas
-          </button>*/}
-          <br></br>
-          <br></br>
           <div className="row" style={{ border: "1px solid #000" }}>
             <label style={{ color: "red" }}>PARTIDAD POR INSUMO </label>
             <br></br>
@@ -1792,6 +1638,7 @@ const EditarPreCotizacion = () => {
               </table>
             </div>
           </div>
+          <br></br>
           <div className="row" style={{ border: "1px solid #000" }}>
             <label style={{ color: "red" }}>PARTIDAS POR MANO DE OBRA </label>
             <div>
@@ -1969,108 +1816,6 @@ const EditarPreCotizacion = () => {
           </div>
           {/* Columna para Línea en la misma fila */}
           <div className="row mb-6">
-            {/* Columna para Línea en la misma fila */}
-            <div className="col-md-4">
-              <div className="mb-3">
-                <label>Categoría</label>
-                <select
-                  className="form-control"
-                  value={categoria}
-                  onChange={handleCategoriaChange} // Llama a la función cuando cambie
-                >
-                  <option value="">Seleccionar...</option>
-                  {categorias.map((categoria, index) => (
-                    <option key={index} value={categoria.cuenta}>
-                      {categoria.cuenta} - {categoria.descripcion}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div className="mb-3">
-                <label>Familia</label>
-                <select
-                  className="form-control"
-                  value={familia}
-                  onChange={handleFamiliaChange} // Llama a la función cuando cambie
-                  disabled={!categoria} // Solo habilita si hay categoría seleccionada
-                >
-                  <option value="">Seleccionar...</option>
-                  {familias.map((familia, index) => (
-                    <option key={index} value={familia.CUENTA_COI}>
-                      {familia.CUENTA_COI} - {familia.DESC_LIN}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {/*<div className="mb-3">
-                <label>Familia</label>
-                <select
-                  className="form-control"
-                  value={familia}
-                  onChange={handleFamiliaChange} // Llama a la función cuando cambie
-                  disabled={!categoria} // Asegurar que se habilite correctamente
-                >
-                  <option value="">Seleccionar...</option>
-                  {familias.length > 0 ? (
-                    familias.map((familia, index) => (
-                      <option key={index} value={familia.cuenta}>
-                        {" "}
-
-                        {familia.cuenta} - {familia.descripcion}{" "}
- 
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Cargando familias...</option> // Mensaje si aún no hay datos
-                  )}
-                </select>
-              </div>*/}
-            </div>
-            <div className="col-md-4">
-              <div className="mb-3">
-                <label>Línea</label>
-                <select
-                  className="form-control"
-                  value={linea}
-                  //onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
-                  onChange={handleLineaChange}
-                  disabled={!familia || !categoria} // Solo habilita si hay una familia seleccionada
-                >
-                  <option value="">Seleccionar...</option>
-                  {lineas.map((linea, index) => (
-                    <option key={index} value={linea.CVE_LIN}>
-                      {linea.CUENTA_COI} - {linea.DESC_LIN}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {/*<div className="mb-3">
-                <label>Línea</label>
-                <select
-                  className="form-control"
-                  value={linea}
-                  //onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
-                  onChange={handleLineaChange}
-                  disabled={!familia} // Asegurar que se habilite correctamente
-                >
-                  <option value="">Seleccionar...</option>
-                  {lineas.length > 0 ? (
-                    lineas.map((linea, index) => (
-                      <option key={index} value={linea.cuenta}>
-                        {" "}
-                        
-                        {linea.cuenta} - {linea.descripcion}{" "}
-                        
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Cargando líneas...</option> // Mensaje si aún no hay datos
-                  )}
-                </select>
-              </div>*/}
-            </div>
             {/* Fila 2: Proveedor, Descripcion */}
             <div className="row mb-6">
               <div className="col-md-6">
@@ -2080,7 +1825,6 @@ const EditarPreCotizacion = () => {
                     className="form-control"
                     value={claveSae}
                     onChange={(e) => setClaveSae(e.target.value)}
-                    disabled={!linea} // Deshabilita si no hay claves disponibles
                   >
                     <option value="">Seleccionar...</option>
                     {Array.isArray(clavesSAE) && clavesSAE.length > 0 ? (
@@ -2098,35 +1842,11 @@ const EditarPreCotizacion = () => {
               <div className="col-md-6">
                 <div className="mb-3">
                   <label>Proveedor</label>
-                  <Select
-                    options={proveedores.map((prov) => ({
-                      value: prov.CLAVE,
-                      label: prov.NOMBRE,
-                    }))}
-                    value={
-                      proveedor
-                        ? {
-                            value: proveedor,
-                            label:
-                              proveedores.find(
-                                (prov) => prov.CLAVE === proveedor
-                              )?.NOMBRE || "",
-                          }
-                        : null
-                    }
-                    onChange={(selectedOption) => {
-                      console.log(
-                        "🔹 Nuevo proveedor seleccionado:",
-                        selectedOption
-                      );
-                      setProveedor(selectedOption.value);
-                    }}
-                    placeholder="Buscar proveedor..."
-                    menuPortalTarget={document.body} // Renderiza fuera del modal
-                    menuPlacement="auto" // Ajusta la posición automáticamente
-                    styles={{
-                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                    }}
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={proveedor}
+                    onChange={(e) => setProveedor(e.target.value)}
                   />
                 </div>
               </div>

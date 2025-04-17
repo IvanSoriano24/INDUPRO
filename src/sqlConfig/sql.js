@@ -5,8 +5,8 @@ const cors = require("cors");
 
 // Middleware para permitir solicitudes CORS
 app.use(cors());
-app.use(express.json()); 
-// Configuración de conexión a la base de datos SQL Server
+
+// Base de Datos Productiva
 /*const config = {
   user: "sa",
   password: "Green2580a.",
@@ -17,6 +17,7 @@ app.use(express.json());
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
   },
 };*/
+// Base de Datos Desarrollo
 const config = {
   user: "sa",
   password: "Green2580a.",
@@ -36,6 +37,7 @@ sql
   .catch((err) => {
     console.error("Error al conectar a la base de datos:", err);
   });
+  app.use(express.json());
 
 // Ruta para obtener las claves y descripciones de INVE01
 app.get("/api/claves", async (req, res) => {
@@ -469,7 +471,7 @@ app.post("/api/guardarPartidas", async (req, res) => {
         .input("DESC2", sql.Bit, 0)
         .input("COMI", sql.Int, 0)
         .input("APAR", sql.Bit, 0)
-        .input("ACT_INV", sql.Bit, N)
+        .input("ACT_INV", sql.Bit, 'N')
         .input("NUM_ALM", sql.VarChar, 1)
         .input("TIP_CAM", sql.Float, 1)
         .input("UNI_VENTA", sql.VarChar, UNI_VENTA)

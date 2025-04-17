@@ -27,7 +27,9 @@ import { ModalTitle, Modal, Button } from "react-bootstrap";
 
 import axios from "axios";
 import Select from "react-select";
-import * as XLSX from "xlsx";
+import encabezadoPDF from "../imagenes/GS-ENCABEZADO-2.PNG";
+import pdfMake from "pdfmake/build/pdfmake";
+import { VscFilePdf } from "react-icons/vsc";
 
 const AgregarRevTecFinanciero = () => {
   const [showAddModalMO, setShowAddModalMO] = useState(false);
@@ -123,6 +125,7 @@ const AgregarRevTecFinanciero = () => {
   /*******************************************************************/
   const [excelData, setExcelData] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [clienteLista, setClienteLista] = useState([]);
   /*******************************************************************/
   /* --------------------   Obtener los folios correspondiente  -------------------------- */
   /*useEffect(() => {
@@ -362,6 +365,26 @@ const AgregarRevTecFinanciero = () => {
     };
   }, [cve_precot]);
   /*AQUI*/
+
+  const getCliente = async () => {
+    try {
+      const data = await getDocs(
+        query(collection(db, "CLIENTES"), where("cve_clie", "==", cve_clie))
+      );
+      //par_preCotList
+      const par_preCotList = data.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setClienteLista(par_preCotList);
+    } catch (error) {
+      console.error("Error fetching PAR_LEVDIGITAL data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getCliente();
+  }, [cve_clie]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
   /* --------------------- AGREGAR PARTIDAS DE PRE COTIZACIÓN ------------------------------------- */
   const agregarPartidaAdicional = async (e) => {
     e.preventDefault();
@@ -1490,64 +1513,39 @@ const AgregarRevTecFinanciero = () => {
       setCostoCotizado(insumo.costoCotizado);
       setComentariosAdi(insumo.comentariosAdi);
       setDescripcionInsumo(insumo.descripcionInsumo);
+      setProveedor(insumo.proveedor);
 
-      // 🟢 Cargar Categoría antes de continuar
-      console.log("🔄 Cargando categorías...");
-      const responseCategorias = await axios.get(
-        //"http://localhost:5000/api/lineasMaster"
-        "/api/lineasMaster"
-      );
-      setCategorias(responseCategorias.data);
+      // 🟢 Asegurar que los insumo estén cargados antes de asignar el insumo
+      let listaInsumos = [...clavesSAE];
 
-      setTimeout(() => {
-        setCategoria(insumo.categoria || "");
-      }, 200); // Pequeño delay para asegurarnos de que la categoría ya está cargada
-
-      // 🟢 Cargar familia si hay categoría
-      if (insumo.categoria) {
-        console.log(
-          "🔄 Cargando familias para la categoría:",
-          insumo.categoria
+      if (clavesSAE.length === 0) {
+        console.log("🔄 Cargando claves SAE antes de editar...");
+        const responseInsumos = await axios.get(
+          "http://localhost:5000/api/clave-sae"
+          //"/api/clave-sae"
         );
-        await obtenerFamilia(insumo.categoria);
-        setFamilia(insumo.familia || "");
+
+        // ✅ Transformamos la respuesta para tener claves limpias y legibles
+        listaInsumos = responseInsumos.data.map((item) => ({
+          clave: item.CVE_ART.trim(), // quitamos espacios
+          descripcion: item.DESCR?.trim(), // opcionalmente también aquí
+        }));
+
+        setClavesSAE(listaInsumos);
+        //console.log("📦 clavesSAE cargadas:", listaInsumos);
       }
 
-      // 🟢 Cargar líneas si hay familia
-      if (insumo.familia) {
-        console.log("🔄 Cargando líneas para la familia:", insumo.familia);
-        await obtenerLineas(insumo.familia);
-        setLinea(insumo.linea || "");
-      }
-
-      // 🟢 Cargar claveSae si hay linea
-      if (insumo.linea) {
-        console.log("🔄 Cargando clave sae para la linea:", insumo.linea);
-        const clavesSae = await obtenerClaveSae(insumo.linea);
-        setClavesSAE(Array.isArray(clavesSae) ? clavesSae : []);
-        console.log("Clave: ", insumo.claveSae);
-      }
-
-      // 🟢 Asegurar que los proveedores estén cargados antes de asignar el proveedor
-      let listaProveedores = [...proveedores];
-      if (proveedores.length === 0) {
-        console.log("🔄 Cargando proveedores antes de editar...");
-        const responseProvedores = await axios.get(
-          //"http://localhost:5000/api/proveedores"
-          "/api/proveedores"
-        );
-        listaProveedores = responseProvedores.data;
-        setProveedores(listaProveedores);
-      }
-
-      // 🟢 Buscar el proveedor en la lista de proveedores
-      const proveedorEncontrado = listaProveedores.find(
-        (prov) => prov.CLAVE === insumo.proveedor
+      // 🟢 Buscar la clave SAE actual del insumo que se está editando
+      const insumoEncontrado = listaInsumos.find(
+        (item) => item.clave === insumo.claveSae?.trim() // importante hacer trim
       );
 
+      // ✅ Establecer la clave seleccionada con delay para que el select esté listo
       setTimeout(() => {
-        setProveedor(proveedorEncontrado ? proveedorEncontrado.CLAVE : "");
-      }, 200);
+        setClaveSae(insumoEncontrado ? insumoEncontrado.clave : "");
+      }, 100); // puedes ajustar el delay si lo necesitas
+
+      console.log("📌 Clave SAE seleccionada:", insumo.claveSae);
 
       // 🟢 Guardar el ID del insumo en editIndex para saber que estamos editando
       setEditIndex(insumoId);
@@ -1601,18 +1599,22 @@ const AgregarRevTecFinanciero = () => {
       setCantidad(0);
       setCostoCotizado(0);
       // Llamar a la API para obtener las unidades
-      const responseUnidades = await axios.get(
-        //"http://localhost:5000/api/lineasMaster"
-        "/api/lineasMaster"
-      );
-      setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
-      //console.log("Unidades obtenidas:", responseUnidades.data);
+      let listaInsumos = [...clavesSAE];
 
-      const responseProvedores = await axios.get(
-        //"http://localhost:5000/api/proveedores"
-        "/api/proveedores"
+      //if (clavesSAE.length === 0) {
+      console.log("🔄 Cargando claves SAE antes de editar...");
+      const responseInsumos = await axios.get(
+        "http://localhost:5000/api/clave-sae"
+        //"/api/clave-sae"
       );
-      setProveedores(responseProvedores.data);
+
+      // ✅ Transformamos la respuesta para tener claves limpias y legibles
+      listaInsumos = responseInsumos.data.map((item) => ({
+        clave: item.CVE_ART.trim(), // quitamos espacios
+        descripcion: item.DESCR?.trim(), // opcionalmente también aquí
+      }));
+
+      setClavesSAE(listaInsumos);
 
       setShowAddModal(true);
     } catch (error) {
@@ -1631,161 +1633,181 @@ const AgregarRevTecFinanciero = () => {
     setNoParatidaMO(noPartida); // Establece el noPartida seleccionado
     setShowAddModalMO(true); // Muestra el modal de Mano de Obra
   };
-  /*EXCEL*/
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setSelectedFile(file); // Guardar el archivo en el estado
+  /*PDF*/
+  const handleOpenPDF = () => {
+    try {
+      // Crear un elemento de imagen
+      const img = new Image();
 
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      // Establecer la URL de la imagen
+      img.src = encabezadoPDF;
 
-        const headers = jsonData[0];
-        let isValid = true;
-        let prevPartida = 0;
-        let partidasConError = [];
+      // Manejar la carga de la imagen
+      img.onload = () => {
+        // Crear un lienzo HTML5
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
 
-        const filteredData = jsonData.slice(1).map((row, index) => {
-          const noPartida = String(row[0] || 0).trim();
-          const insumo = String(row[1] || "").trim();
-          const unidad = String(row[2] || "").trim();
-          const claveSae = String(row[3] || "").trim();
-          const proveedor = String(row[4] || "").trim();
-          const descripcionInsumo = String(row[5] || "").trim();
-          const comentariosAdi = String(row[6] || "").trim();
-          const cantidad = String(row[7] || 0).trim();
-          const costoCotizado = String(row[8] || 0).trim();
+        // Establecer las dimensiones del lienzo para que coincidan con las de la imagen
+        canvas.width = img.width;
+        canvas.height = img.height;
+        // Dibujar la imagen en el lienzo
+        ctx.drawImage(img, 0, 0);
+        // Obtener la representación base64 de la imagen desde el lienzo
+        const base64Image = canvas.toDataURL("image/png");
+        const fechaElaboracionFormateada = new Date(
+          fechaElaboracion
+        ).toLocaleDateString("es-ES");
+        // Construir datos para la tabla dinámica
 
-          // Validaciónes
-          if (!validarInsumo(insumo)) {
-            isValid = false;
-            partidasConError.push(noPartida || `Fila ${index + 2}`);
-          }
-          if (!validarUnidad(unidad)) {
-            isValid = false;
-            partidasConError.push(noPartida || `Fila ${index + 2}`);
-          }
-          if (!validarCantidad(cantidad)) {
-            isValid = false;
-            partidasConError.push(noPartida || `Fila ${index + 2}`);
-          }
-          if (!validarCosto(costoCotizado)) {
-            isValid = false;
-            partidasConError.push(noPartida || `Fila ${index + 2}`);
-          }
+        console.log(par_levDigital);
+        const tableBody10 = par_levDigital.map((items) => [
+          items.noPartida,
+          items.cantidad,
+          items.descripcion,
+          items.observacion,
+        ]);
 
-          prevPartida = parseInt(noPartida);
+        const tableBody20 = par_PreCoti_insu.map((item) => [
+          item.noPartidaPC,
+          item.insumo,
+          item.unidad,
+          item.claveSae,
+          item.proveedor,
+          item.cantidad,
+          item.costoCotizado.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+          }),
+          item.total.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+          }), // Formatea costoCotizado,
+        ]);
 
-          const factorSeleccionado = obtenerFactorPorNombre(insumo);
-
-      const { costoFijo, factoraje, fianzas, utilidad } = factorSeleccionado;
-          return {
-            noPartida,
-            insumo,
-            unidad,
-            claveSae,
-            proveedor,
-            descripcionInsumo,
-            comentariosAdi,
-            cantidad,
-            costoCotizado,
-            total: costoCotizado * cantidad,
-            estatus: "Activo",
-            fechaRegistro: new Date().toLocaleDateString(),
-            fechaModificacion: new Date().toLocaleDateString(),
-            costoFijo: (costoFijo / 100) * (costoCotizado * cantidad),
-            factoraje: (factoraje / 100) * (costoCotizado * cantidad),
-            fianzas: (fianzas / 100) * (costoCotizado * cantidad),
-            utilidad: (utilidad / 100) * (costoCotizado * cantidad),
-          };
-        });
-
-        if (!isValid) {
-          swal.fire({
-            title: "Error en validación",
-            text: `Las siguientes partidas tienen errores: ${partidasConError.join(
-              ", "
-            )}`,
-            icon: "error",
-          });
-          return;
-        }
-
-        swal.fire({
-          title: "Éxito",
-          text: "Los datos del archivo Excel son válidos y se han procesado correctamente.",
-          icon: "success",
-        });
-
-        setExcelData(filteredData);
-
-        const transformado = filteredData.map((item) => ({
-          noPartida: item.noPartida,
-          insumos: [item], // ahora cada item tendrá un array insumos
-        }));
-
-        // Agregar las filas procesadas del archivo a la lista
-        //console.log(filteredData);
-        setListPartidas(transformado);
-        addDoc(parPrecotizacionInsumos, transformado);
-        console.log("✅ Insumo agregado correctamente en Firestore");
-        setList([...list, ...filteredData]);
-        //console.log(transformado);
-        setExcelData([]);
+        // Define el contenido del documento PDF
+        const documentDefinition = {
+          pageMargins: [40, 160, 40, 40],
+          header: {
+            margin: [0, 0, 0, 0],
+            image: base64Image,
+            width: 600,
+            height: 150,
+          },
+          content: [
+            {
+              margin: [0, 10, 0, 0],
+              columns: [
+                {
+                  width: "50%",
+                  stack: [
+                    {
+                      text: "Información del cliente:",
+                      fontSize: 12,
+                      bold: true,
+                      margin: [0, 0, 0, 4],
+                    },
+                    {
+                      text: `${clienteLista[0].razonSocial} (${clienteLista[0].cve_clie})\nCalle: ${clienteLista[0].calle} Int: ${clienteLista[0].numInt}, Col: ${clienteLista[0].colonia}\n${clienteLista[0].municipio}, CP: ${clienteLista[0].codigoPostal}, Estado: ${clienteLista[0].estado}, RFC: ${clienteLista[0].rfc}`,
+                      fontSize: 8,
+                    },
+                  ],
+                },
+                {
+                  width: "50%",
+                  stack: [
+                    {
+                      text: "No: " + cve_precot,
+                      fontSize: 12,
+                      bold: true,
+                      alignment: "right",
+                      margin: [0, 0, 0, 4],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              text: "PARTIDAS",
+              style: "sectionTitle",
+              margin: [0, 20, 0, 8],
+            },
+            {
+              margin: [0, 20, 0, 8],
+              alignment: "center", // 👈 Esto es clave: a nivel del objeto exterior
+              table: {
+                widths: ["auto", "auto", "auto", "auto"],
+                body: [
+                  [
+                    { text: "No. Partida", style: "tableHeader" },
+                    { text: "Cantidad", style: "tableHeader" },
+                    { text: "Descripciones", style: "tableHeader" },
+                    { text: "Observaciones", style: "tableHeader" },
+                  ],
+                  ...tableBody10,
+                ],
+              },
+              layout: {
+                fillColor: (rowIndex) => (rowIndex === 0 ? "#eeeeee" : null),
+              },
+            },                 
+            {
+              text: "INSUMOS", // 🔵 TÍTULO para la segunda tabla
+              style: "sectionTitle",
+              margin: [0, 30, 0, 8],
+            },
+            {
+              table: {
+                headerRows: 1,
+                widths: ["auto", "auto", "auto", "auto", "*", "auto", "*", "*"],
+                body: [
+                  [
+                    { text: "No. Partida", style: "tableHeader" },
+                    { text: "Insumo", style: "tableHeader" },
+                    { text: "Unidad", style: "tableHeader" },
+                    { text: "Clave Producto", style: "tableHeader" },
+                    { text: "Proveedor", style: "tableHeader" },
+                    { text: "Cantidad", style: "tableHeader" },
+                    { text: "Costo Cotizado", style: "tableHeader" },
+                    { text: "Total", style: "tableHeader" },
+                  ],
+                  ...tableBody20,
+                ],
+              },
+              layout: {
+                fillColor: (rowIndex) => (rowIndex === 0 ? "#eeeeee" : null),
+              },
+            },
+          ],
+          styles: {
+            tableHeader: {
+              bold: true,
+              fontSize: 9,
+              color: "black",
+              alignment: "center",
+            },
+            sectionTitle: {
+              bold: true,
+              fontSize: 14,
+              alignment: "center",
+              color: "#2E86C1",
+              decoration: "underline",
+            },
+          },
+        };        
+        // Genera el PDF y muestra una vista preliminar
+        pdfMake.createPdf(documentDefinition).open();
       };
 
-      //reader.readAsArrayBuffer(selectedFile);
-      reader.readAsArrayBuffer(file);
-    } else {
-      alert("Por favor, selecciona un archivo.");
+      // Manejar errores durante la carga de la imagen
+      img.onerror = (error) => {
+        console.error("Error al cargar la imagen:", error);
+      };
+    } catch (error) {
+      console.error("Error al abrir el PDF:", error);
     }
   };
 
-  const validarInsumo = (Insumo) => {
-    if (
-      Insumo == "Subcontratos" ||
-      Insumo == "Viáticos" ||
-      Insumo == "Material"
-    ) {
-      return true;
-    }
-    console.log(Insumo);
-    return false;
-    //return Number.isInteger(Number(cantidad)) && cantidad !== "";
-  };
-  const validarUnidad = (Unidad) => {
-    if (
-      Unidad == "Pza" ||
-      Unidad == "Kit" ||
-      Unidad == "L" ||
-      Unidad == "m" ||
-      Unidad == "kg" ||
-      Unidad == "Serv"
-    ) {
-      return true;
-    }
-    return false;
-    //return Number.isInteger(Number(cantidad)) && cantidad !== "";
-  };
-  const validarCantidad = (Cantidad) => {
-    if (Cantidad <= 0) {
-      return false;
-    }
-    return true;
-    //return Number.isInteger(Number(cantidad)) && cantidad !== "";
-  };
-  const validarCosto = (Costo) => {
-    if (Costo <= 0) {
-      return false;
-    }
-    return true;
-    //return Number.isInteger(Number(cantidad)) && cantidad !== "";
-  };
   /*------------------------------------------------------------------------*/
   return (
     <div className="container">
@@ -2085,12 +2107,6 @@ const AgregarRevTecFinanciero = () => {
               </div>
             </div>
             <br></br>
-            <input
-              type="file"
-              accept=".xlsx, .xls"
-              onChange={handleFileUpload}
-              className="form-control"
-            />
             {/*<button className="btn btn-primary mt-2" onClick={processExcelFile}>
             Procesar Archivo
           </button>*/}
@@ -2100,7 +2116,15 @@ const AgregarRevTecFinanciero = () => {
           >
             Agregar Partidas
           </button>*/}
-            <br></br>
+            <div className="col-md-6 ">
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={handleOpenPDF}
+              >
+                <VscFilePdf /> Ver PDF
+              </button>
+            </div>
             <br></br>
             <div className="row" style={{ border: "1px solid #000" }}>
               <label style={{ color: "red" }}>PARTIDAD POR INSUMO </label>
@@ -2172,6 +2196,7 @@ const AgregarRevTecFinanciero = () => {
                 </table>
               </div>
             </div>
+            <br></br>
             <div className="row" style={{ border: "1px solid #000" }}>
               <label style={{ color: "red" }}>PARTIDAD POR MANO DE OBRA </label>
               <div>
@@ -2351,108 +2376,6 @@ const AgregarRevTecFinanciero = () => {
           </div>
           {/* Columna para Línea en la misma fila */}
           <div className="row mb-6">
-            {/* Columna para Línea en la misma fila */}
-            <div className="col-md-4">
-              <div className="mb-3">
-                <label>Categoría</label>
-                <select
-                  className="form-control"
-                  value={categoria}
-                  onChange={handleCategoriaChange} // Llama a la función cuando cambie
-                >
-                  <option value="">Seleccionar...</option>
-                  {categorias.map((categoria, index) => (
-                    <option key={index} value={categoria.cuenta}>
-                      {categoria.cuenta} - {categoria.descripcion}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div className="mb-3">
-                <label>Familia</label>
-                <select
-                  className="form-control"
-                  value={familia}
-                  onChange={handleFamiliaChange} // Llama a la función cuando cambie
-                  disabled={!categoria} // Solo habilita si hay categoría seleccionada
-                >
-                  <option value="">Seleccionar...</option>
-                  {familias.map((familia, index) => (
-                    <option key={index} value={familia.CUENTA_COI}>
-                      {familia.CUENTA_COI} - {familia.DESC_LIN}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {/*<div className="mb-3">
-                <label>Familia</label>
-                <select
-                  className="form-control"
-                  value={familia}
-                  onChange={handleFamiliaChange} // Llama a la función cuando cambie
-                  disabled={!categoria} // Asegurar que se habilite correctamente
-                >
-                  <option value="">Seleccionar...</option>
-                  {familias.length > 0 ? (
-                    familias.map((familia, index) => (
-                      <option key={index} value={familia.cuenta}>
-                        {" "}
-                        
-                        {familia.cuenta} - {familia.descripcion}{" "}
-                        
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Cargando familias...</option> // Mensaje si aún no hay datos
-                  )}
-                </select>
-              </div>*/}
-            </div>
-            <div className="col-md-4">
-              <div className="mb-3">
-                <label>Línea</label>
-                <select
-                  className="form-control"
-                  value={linea}
-                  //onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
-                  onChange={handleLineaChange}
-                  disabled={!familia || !categoria} // Solo habilita si hay una familia seleccionada
-                >
-                  <option value="">Seleccionar...</option>
-                  {lineas.map((linea, index) => (
-                    <option key={index} value={linea.CVE_LIN}>
-                      {linea.CUENTA_COI} - {linea.DESC_LIN}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {/*<div className="mb-3">
-                <label>Línea</label>
-                <select
-                  className="form-control"
-                  value={linea}
-                  //onChange={(e) => setLinea(e.target.value)} // Guarda la línea seleccionada
-                  onChange={handleLineaChange}
-                  disabled={!familia} // Asegurar que se habilite correctamente
-                >
-                  <option value="">Seleccionar...</option>
-                  {lineas.length > 0 ? (
-                    lineas.map((linea, index) => (
-                      <option key={index} value={linea.cuenta}>
-                        {" "}
-                        
-                        {linea.cuenta} - {linea.descripcion}{" "}
-                        
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Cargando líneas...</option> // Mensaje si aún no hay datos
-                  )}
-                </select>
-              </div>*/}
-            </div>
             {/* Fila 2: Proveedor, Descripcion */}
             <div className="row mb-6">
               <div className="col-md-6">
@@ -2462,7 +2385,6 @@ const AgregarRevTecFinanciero = () => {
                     className="form-control"
                     value={claveSae}
                     onChange={(e) => setClaveSae(e.target.value)}
-                    disabled={!linea || clavesSAE.length === 0} // Deshabilita si no hay claves disponibles
                   >
                     <option value="">Seleccionar...</option>
                     {Array.isArray(clavesSAE) && clavesSAE.length > 0 ? (
@@ -2480,35 +2402,11 @@ const AgregarRevTecFinanciero = () => {
               <div className="col-md-6">
                 <div className="mb-3">
                   <label>Proveedor</label>
-                  <Select
-                    options={proveedores.map((prov) => ({
-                      value: prov.CLAVE,
-                      label: prov.NOMBRE,
-                    }))}
-                    value={
-                      proveedor
-                        ? {
-                            value: proveedor,
-                            label:
-                              proveedores.find(
-                                (prov) => prov.CLAVE === proveedor
-                              )?.NOMBRE || "",
-                          }
-                        : null
-                    }
-                    onChange={(selectedOption) => {
-                      console.log(
-                        "🔹 Nuevo proveedor seleccionado:",
-                        selectedOption
-                      );
-                      setProveedor(selectedOption.value);
-                    }}
-                    placeholder="Buscar proveedor..."
-                    menuPortalTarget={document.body} // Renderiza fuera del modal
-                    menuPlacement="auto" // Ajusta la posición automáticamente
-                    styles={{
-                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                    }}
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={proveedor}
+                    onChange={(e) => setProveedor(e.target.value)}
                   />
                 </div>
               </div>

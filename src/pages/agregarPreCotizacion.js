@@ -552,7 +552,6 @@ const AgregarPreCotizacion = () => {
     // Cleanup: nos desuscribimos si el componente se desmonta
     return unsubscribe;
   };
-
   useEffect(() => {
     console.log("🛠️ useEffect ejecutado para FACTORES");
     const unsubscribe = obtenerFactores(setFactores);
@@ -2063,6 +2062,7 @@ const AgregarPreCotizacion = () => {
                     type="text"
                     className="form-control"
                     value={proveedor}
+                    onChange={(e) => setProveedor(e.target.value)}
                   />
                 </div>
               </div>
