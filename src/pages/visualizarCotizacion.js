@@ -501,7 +501,8 @@ const VisualizarCotizacion = () => {
     setFolioSig(folioSiguiente);
 
     let CVE = folioSiguiente.toString().padStart(10, "0");
-    let CVE_DOC = CVE.toString().padStart(20, " ");
+    console.log("CVE:", CVE);
+    const CVE_DOC = CVE.toString().padStart(20, " ");
 
     let clave = cliente.toString(); // sin padStart
     const clie = await axios.get(
@@ -601,33 +602,33 @@ const VisualizarCotizacion = () => {
         CVE_DOC: CVE_DOC ?? "",
         nuPartida: detalle.noPartidaATF ?? "",
         CVE_ART: detalle.claveSae ?? "",
-        CANT: detalle.cantidad ?? "",
-        PREC: detalle.costoCotizado ?? "",
-        TOT_PARTIDA: detalle.total ?? "",
+        CANT: detalle.cantidad ?? 0,
+        PREC: detalle.costoCotizado ?? 0,
+        TOT_PARTIDA: detalle.total ?? 0,
         UNI_VENTA: impuestos.UNI_MED ?? "",
-        CVE_ESQ: impuestos.CVE_ESQIMPU ?? "",
+        CVE_ESQ: impuestos.CVE_ESQIMPU ?? 0,
 
-        IMPU1: impuestos.IMPUESTO1 ?? "",
-        IMPU2: impuestos.IMPUESTO2 ?? "",
-        IMPU3: impuestos.IMPUESTO3 ?? "",
-        IMPU4: impuestos.IMPUESTO4 ?? "",
-        IMPU5: impuestos.IMPUESTO5 ?? "",
-        IMPU6: impuestos.IMPUESTO6 ?? "",
-        IMPU7: impuestos.IMPUESTO7 ?? "",
-        IMPU8: impuestos.IMPUESTO8 ?? "",
+        IMPU1: impuestos.IMPUESTO1 ?? 0,
+        IMPU2: impuestos.IMPUESTO2 ?? 0,
+        IMPU3: impuestos.IMPUESTO3 ?? 0,
+        IMPU4: impuestos.IMPUESTO4 ?? 0,
+        IMPU5: impuestos.IMPUESTO5 ?? 0,
+        IMPU6: impuestos.IMPUESTO6 ?? 0,
+        IMPU7: impuestos.IMPUESTO7 ?? 0,
+        IMPU8: impuestos.IMPUESTO8 ?? 0,
 
-        IMP1APLICA: impuestos.IMP1APLICA ?? "",
-        IMP2APLICA: impuestos.IMP2APLICA ?? "",
-        IMP3APLICA: impuestos.IMP3APLICA ?? "",
-        IMP4APLICA: impuestos.IMP4APLICA ?? "",
-        IMP5APLICA: impuestos.IMP5APLICA ?? "",
-        IMP6APLICA: impuestos.IMP6APLICA ?? "",
-        IMP7APLICA: impuestos.IMP7APLICA ?? "",
-        IMP8APLICA: impuestos.IMP8APLICA ?? "",
+        IMP1APLICA: impuestos.IMP1APLICA ?? 0,
+        IMP2APLICA: impuestos.IMP2APLICA ?? 0,
+        IMP3APLICA: impuestos.IMP3APLICA ?? 0,
+        IMP4APLICA: impuestos.IMP4APLICA ?? 0,
+        IMP5APLICA: impuestos.IMP5APLICA ?? 0,
+        IMP6APLICA: impuestos.IMP6APLICA ?? 0,
+        IMP7APLICA: impuestos.IMP7APLICA ?? 0,
+        IMP8APLICA: impuestos.IMP8APLICA ?? 0,
       };
     });
 
-    console.log("Partidas: ", dataPartidas);
+    console.log("CVE_DOC:", CVE_DOC);
 
     await axios.post("http://localhost:5000/api/guardarPartidas", {
       data: dataPartidas,
@@ -648,11 +649,11 @@ const VisualizarCotizacion = () => {
     const dataCotizacion = {
       data: data,
       CVE_DOC: CVE_DOC ?? "",
-      clie: clave ?? "",
-      IMP_TOT4: IMP_TOT4.toFixed(2) ?? "",
-      IMPORTE: totalPartida.toFixed(2) ?? "",
+      clie: clave ?? 0,
+      IMP_TOT4: IMP_TOT4.toFixed(2) ?? 0,
+      IMPORTE: totalPartida.toFixed(2) ?? 0,
       RFC: datosCliente.RFC ?? "",
-      folio: folioSiguiente ?? "",
+      FOLIO: folioSiguiente ?? 0,
       METODOPAGO: datosCliente.METODODEPAGO ?? "",
       NUMCTAPAGO: datosCliente.NUMCTAPAGO ?? "",
       FORMAPAGOSAT: datosCliente.FORMADEPAGOSAT ?? "",
@@ -665,7 +666,7 @@ const VisualizarCotizacion = () => {
       dataCotizacion
     );
 
-    const { nuevoFolio } = (
+   const { nuevoFolio } = (
       await axios.get("http://localhost:5000/api/actualizarFolio")
     ).data;
   };

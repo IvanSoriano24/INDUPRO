@@ -283,24 +283,24 @@ app.post("/api/cotizacion", async (req, res) => {
       .toString()
       .padStart(2, "0")}.000`;
     const query = `
-      INSERT INTO FACTP01 (
+      INSERT INTO FACTC01 (
         TIP_DOC, CVE_DOC, CVE_CLPV, STATUS, FECHA_DOC, FECHA_ENT, FECHA_VEN,
-        IMP_TOT1, IMP_TOT2, IMP_TOT3, IMP_TOT4, DESC_FIN, COM_TOT,
+        IMP_TOT1, IMP_TOT2, IMP_TOT3, IMP_TOT4, DES_FIN, COM_TOT,
         NUM_MONED, TIPCAMB, PRIMERPAGO, RFC, AUTORIZA, FOLIO, SERIE, ESCFD,
-        NUM_ALMA, ACT_CXC, ACT_COI, CVE_VEND, DES_TOT, CONDICION, NUMPAGOS,
+        NUM_ALMA, ACT_CXC, ACT_COI, CVE_VEND, DES_TOT, CONDICION, NUM_PAGOS,
         DAT_ENVIO, CONTADO, DAT_MOSTR, CVE_BITA, BLOQ, FECHAELAB, CTLPOL,
-        CVE_OBS, FORMAENCIO, DES_FIN_PORC, DES_TOT_PORC, IMPORTE,
-        COM_TOT_PORC, METODODEPAGO, NUMCATPAGO, UUID, VERSION_SINC,
+        CVE_OBS, FORMAENVIO, DES_FIN_PORC, DES_TOT_PORC, IMPORTE,
+        COM_TOT_PORC, METODODEPAGO, NUMCTAPAGO, UUID, VERSION_SINC,
         FORMADEPAGOSAT, USO_CFDI, IMP_TOT5, IMP_TOT6, IMP_TOT7, REG_FISC, TIP_FAC, IMP_TOT8
       )
       VALUES (
         @TIP_DOC, @CVE_DOC, @CVE_CLPV, @STATUS, @FECHA_DOC, @FECHA_ENT, @FECHA_VEN,
-        @IMP_TOT1, @IMP_TOT2, @IMP_TOT3, @IMP_TOT4, @DESC_FIN, @COM_TOT,
+        @IMP_TOT1, @IMP_TOT2, @IMP_TOT3, @IMP_TOT4, @DES_FIN, @COM_TOT,
         @NUM_MONED, @TIPCAMB, @PRIMERPAGO, @RFC, @AUTORIZA, @FOLIO, @SERIE, @ESCFD,
-        @NUM_ALMA, @ACT_CXC, @ACT_COI, @CVE_VEND, @DES_TOT, @CONDICION, @NUMPAGOS,
+        @NUM_ALMA, @ACT_CXC, @ACT_COI, @CVE_VEND, @DES_TOT, @CONDICION, @NUM_PAGOS,
         @DAT_ENVIO, @CONTADO, @DAT_MOSTR, @CVE_BITA, @BLOQ, @FECHAELAB, @CTLPOL,
-        @CVE_OBS, @FORMAENCIO, @DES_FIN_PORC, @DES_TOT_PORC, @IMPORTE,
-        @COM_TOT_PORC, @METODODEPAGO, @NUMCATPAGO, @UUID, @VERSION_SIN,
+        @CVE_OBS, @FORMAENVIO, @DES_FIN_PORC, @DES_TOT_PORC, @IMPORTE,
+        @COM_TOT_PORC, @METODODEPAGO, @NUMCTAPAGO, @UUID, @VERSION_SIN,
         @FORMADEPAGOSAT, @USO_CFDI, @IMP_TOT5, @IMP_TOT6, @IMP_TOT7, @REG_FISC, @TIP_FAC, @IMP_TOT8
       )
     `;
@@ -318,39 +318,41 @@ app.post("/api/cotizacion", async (req, res) => {
       .input("IMP_TOT2", sql.Float, 0)
       .input("IMP_TOT3", sql.Float, 0)
       .input("IMP_TOT4", sql.Float, IMP_TOT4)
-      .input("DESC_FIN", sql.Float, 0)
+      .input("DES_FIN", sql.Float, 0)
       .input("COM_TOT", sql.Float, 0)
       .input("NUM_MONED", sql.Int, 1)
       .input("TIPCAMB", sql.Float, 1)
       .input("PRIMERPAGO", sql.Float, 0)
       .input("RFC", sql.VarChar, RFC)
-      .input("AUTORIZA", sql.VarChar, 1)
+      .input("AUTORIZA", sql.Int, 1)
       .input("FOLIO", sql.Int, FOLIO)
       .input("SERIE", sql.VarChar, '')
-      .input("ESCFD", sql.Bit, 'N')
+      .input("ESCFD", sql.VarChar, 'N')
       .input("NUM_ALMA", sql.Int, 1)
-      .input("ACT_CXC", sql.Bit, 'S')
-      .input("ACT_COI", sql.Bit, 'N')
-      .input("CANT_TOT", sql.VarChar, IMPORTE)
+      .input("ACT_CXC", sql.VarChar, 'S')
+      .input("ACT_COI", sql.VarChar, 'N')
+      .input("CANT_TOT", sql.Float, IMPORTE)
       .input("CVE_VEND", sql.VarChar, CVE_VEND)//AQUI
       .input("DES_TOT", sql.Float, 0)
       .input("CONDICION", sql.VarChar, '')
-      .input("NUMPAGOS", sql.Int, 1)
-      .input("DAT_ENVIO", sql.VarChar, 0)
-      .input("CONTADO", sql.Bit, 'N')
-      .input("DAT_MOSTR", sql.VarChar, 0)
+      .input("NUM_PAGOS", sql.Int, 1)
+      .input("DAT_ENVIO", sql.Int, 0)
+      .input("CONTADO", sql.VarChar, 'N')
+      .input("DAT_MOSTR", sql.Int, 0)
       .input("CVE_BITA", sql.Int, 0)//AQUI
-      .input("BLOQ", sql.Int, BLOQ)
+      .input("BLOQ", sql.VarChar, 'N')
       .input("FECHAELAB", sql.DateTime, VERSION_SINC)
       .input("CTLPOL", sql.Int, 0)
       .input("CVE_OBS", sql.Int, 0)//AQUI
-      .input("FORMAENCIO", sql.Int, 'I')
+      .input("FORMAENVIO", sql.VarChar, 'I')
       .input("DES_FIN_PORC", sql.Float, 0)
       .input("DES_TOT_PORC", sql.Float, 0)
       .input("IMPORTE", sql.Float, (IMPORTE + IMP_TOT4))
       .input("COM_TOT_PORC", sql.Float, 0)
       .input("METODODEPAGO", sql.VarChar, METODODEPAGO)
-      .input("NUMCATPAGO", sql.Int, NUMCATPAGO)
+      .input("NUMCTAPAGO", sql.VarChar, NUMCATPAGO)
+      .input("FORMADEPAGOSAT", sql.VarChar, FORMAPAGOSAT)
+      .input("USO_CFDI", sql.VarChar, USO_CFDI)
       .input("UUID", sql.VarChar, '')
       .input("VERSION_SIN", sql.VarChar, VERSION_SINC)
       .input("IMP_TOT5", sql.Float, 0)
@@ -372,7 +374,7 @@ app.post("/api/cotizacion", async (req, res) => {
 });
 app.post("/api/guardarPartidas", async (req, res) => {
   try {
-    console.log("📦 req.body:", req.body);
+    //console.log("📦 req.body:", req.body);
     const { data: partidas } = req.body;
     for (const data of partidas) {
       const {
@@ -400,7 +402,7 @@ app.post("/api/guardarPartidas", async (req, res) => {
         IMP7APLICA,
         IMP8APLICA,
         UNI_VENTA,
-      } = req.body;
+      } = data;
 
       const pool = await sql.connect(config);
       const date = new Date();
@@ -424,24 +426,24 @@ app.post("/api/guardarPartidas", async (req, res) => {
         : "P";
       const TOTIMP4 = TOT_PARTIDA - TOT_PARTIDA * (IMPU4 / 100);
       const query = `
-      INSERT INTO PAR_FACTP01 (
-        CVE_DOC, NUM_PAR, CVE_ART, CANT, PXS, PREC, COST
-        IMPU1, IMPU2, IMPU3, IMPU4, IMP1APLA, IMP2APLA, IMP3APLA, IMP4APLA
+      INSERT INTO PAR_FACTC01 (
+        CVE_DOC, NUM_PAR, CVE_ART, CANT, PXS, PREC, COST,
+        IMPU1, IMPU2, IMPU3, IMPU4, IMP1APLA, IMP2APLA, IMP3APLA, IMP4APLA,
         TOTIMP1, TOTIMP2, TOTIMP3, TOTIMP4, DESC1, DESC2, DESC3, COMI,
         APAR, ACT_INV, NUM_ALM, TIP_CAM, UNI_VENTA, TIPO_PROD, CVE_OBS,
         REG_SERIE, E_LTPD, TIPO_ELEM, NUM_MOV, TOT_PARTIDA, IMPRIMIR, MAN_IEPS,
         APL_MAN_IMP, CUOTA_IEPS, APL_MAN_IEPS, MTO_PORC, MTO_CUOTA, CVE_ESQ,
-        UUID, VERSION_SINC, TOTIMP8, TOTIMP7, TOTIMP6, TOTIMP5
+        UUID, VERSION_SINC, TOTIMP8, TOTIMP7, TOTIMP6, TOTIMP5,
         IMP8APLA, IMP7APLA, IMP6APLA, IMP5APLA, IMPU8, IMPU7, IMPU6, IMPU5
       )
       VALUES (
-        @CVE_DOC, @NUM_PAR, @CVE_ART, @CANT, @PXS, @PREC, @COST
-        @IMPU1, @IMPU2, @IMPU3, @IMPU4, @IMP1APLA, @IMP2APLA, I@MP3APLA, I@MP4APLA
+        @CVE_DOC, @NUM_PAR, @CVE_ART, @CANT, @PXS, @PREC, @COST,
+        @IMPU1, @IMPU2, @IMPU3, @IMPU4, @IMP1APLA, @IMP2APLA, @IMP3APLA, @IMP4APLA,
         @TOTIMP1, @TOTIMP2, @TOTIMP3, @TOTIMP4, @DESC1, @DESC2, @DESC3, @COMI,
         @APAR, @ACT_INV, @NUM_ALM, @TIP_CAM, @UNI_VENTA, @TIPO_PROD, @CVE_OBS,
         @REG_SERIE, @E_LTPD, @TIPO_ELEM, @NUM_MOV, @TOT_PARTIDA, @IMPRIMIR, @MAN_IEPS,
         @APL_MAN_IMP, @CUOTA_IEPS, @APL_MAN_IEPS, @MTO_PORC, @MTO_CUOTA, @CVE_ESQ,
-        @UUID, @VERSION_SINC, @TOTIMP8, @TOTIMP7, @TOTIMP6, @TOTIMP5
+        @UUID, @VERSION_SINC, @TOTIMP8, @TOTIMP7, @TOTIMP6, @TOTIMP5,
         @IMP8APLA, @IMP7APLA, @IMP6APLA, @IMP5APLA, @IMPU8, @IMPU7, @IMPU6, @IMPU5
       )
     `;
@@ -449,12 +451,12 @@ app.post("/api/guardarPartidas", async (req, res) => {
       await pool
         .request()
         .input("CVE_DOC", sql.VarChar, CVE_DOC)
-        .input("NUM_PAR", sql.VarChar, nuPartida)
+        .input("NUM_PAR", sql.Int, nuPartida)
         .input("CVE_ART", sql.VarChar, CVE_ART)
         .input("CANT", sql.VarChar, CANT)
-        .input("PXS", sql.DateTime, 0)
-        .input("PREC", sql.DateTime, PREC)
-        .input("COST", sql.DateTime, 0)
+        .input("PXS", sql.Float, 0)
+        .input("PREC", sql.Float, PREC)
+        .input("COST", sql.Float, 0)
         .input("IMPU1", sql.Float, IMPU1)
         .input("IMPU2", sql.Float, IMPU2)
         .input("IMPU3", sql.Float, IMPU3)
@@ -464,39 +466,40 @@ app.post("/api/guardarPartidas", async (req, res) => {
         .input("IMP3APLA", sql.Int, IMP3APLICA)
         .input("IMP4APLA", sql.Float, IMP4APLICA)
         .input("TOTIMP1", sql.Float, 0)
-        .input("TOTIMP2", sql.VarChar, 0)
-        .input("TOTIMP3", sql.VarChar, 0)
-        .input("TOTIMP4", sql.Int, TOTIMP4)
-        .input("DESC1", sql.VarChar, 0)
-        .input("DESC2", sql.Bit, 0)
-        .input("COMI", sql.Int, 0)
-        .input("APAR", sql.Bit, 0)
-        .input("ACT_INV", sql.Bit, 'N')
-        .input("NUM_ALM", sql.VarChar, 1)
+        .input("TOTIMP2", sql.Float, 0)
+        .input("TOTIMP3", sql.Float, 0)
+        .input("TOTIMP4", sql.Float, TOTIMP4)
+        .input("DESC1", sql.Float, 0)
+        .input("DESC2", sql.Float, 0)
+        .input("DESC3", sql.Float, 0)
+        .input("COMI", sql.Float, 0)
+        .input("APAR", sql.Float, 0)
+        .input("ACT_INV", sql.VarChar, 'N')
+        .input("NUM_ALM", sql.Float, 1)
         .input("TIP_CAM", sql.Float, 1)
         .input("UNI_VENTA", sql.VarChar, UNI_VENTA)
-        .input("TIPO_PROD", sql.Int, TIPO_PROD)
+        .input("TIPO_PROD", sql.VarChar, TIPO_PROD)
         .input("CVE_OBS", sql.Int, 0)
-        .input("REG_SERIE", sql.VarChar, 0)
-        .input("E_LTPD", sql.Bit, 0)
+        .input("REG_SERIE", sql.Int, 0)
+        .input("E_LTPD", sql.Int, 0)
         .input("TIPO_ELEM", sql.VarChar, "N")
         .input("NUM_MOV", sql.Int, 0)
-        .input("TOT_PARTIDA", sql.Int, TOT_PARTIDA)
-        .input("IMPRIMIR", sql.DateTime, "S")
-        .input("MAN_IEPS", sql.DateTime, "N")
+        .input("TOT_PARTIDA", sql.Float, TOT_PARTIDA)
+        .input("IMPRIMIR", sql.VarChar, "S")
+        .input("MAN_IEPS", sql.VarChar, "N")
         .input("APL_MAN_IMP", sql.Int, 1)
-        .input("CUOTA_IEPS", sql.Int, 0)
-        .input("APL_MAN_IEPS", sql.Int, "N")
+        .input("CUOTA_IEPS", sql.Float, 0)
+        .input("APL_MAN_IEPS", sql.VarChar, "N")
         .input("MTO_PORC", sql.Float, 0)
         .input("MTO_CUOTA", sql.Float, 0)
-        .input("CVE_ESQ", sql.Float, CVE_ESQ)
+        .input("CVE_ESQ", sql.Int, CVE_ESQ)
         .input("UUID", sql.VarChar, "")
-        .input("VERSION_SINC", sql.VarChar, VERSION_SINC)
+        .input("VERSION_SINC", sql.DateTime, VERSION_SINC)
         .input("TOTIMP8", sql.Float, 0)
         .input("TOTIMP7", sql.Float, 0)
         .input("TOTIMP6", sql.Float, 0)
-        .input("TOTIMP5", sql.VarChar, 0)
-        .input("IMP8APLA", sql.VarChar, IMP8APLICA)
+        .input("TOTIMP5", sql.Float, 0)
+        .input("IMP8APLA", sql.Float, IMP8APLICA)
         .input("IMP7APLA", sql.Float, IMP7APLICA)
         .input("IMP6APLA", sql.Float, IMP6APLICA)
         .input("IMP5APLA", sql.Float, IMP5APLICA)
