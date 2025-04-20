@@ -597,13 +597,13 @@ const calcularCotizacion = async () => {
       await axios.get("http://localhost:5000/api/obtenerFolio")
     ).data;
     setFolioSig(folioSiguiente);
-    
+
     let CVE = folioSig.toString().padStart(10, "0");
     let CVE_DOC = CVE.toString().padStart(20, " ");
 
     let clave = cve_int.toString(); // sin padStart
     const clie = await axios.get(`http://localhost:5000/api/datosClie/${clave}`);
-    
+
     const datosCliente = clie.data.datosCliente;
 
     console.log("Cliente:", datosCliente);
@@ -642,7 +642,7 @@ const calcularCotizacion = async () => {
         console.error(`Error consultando el insumo ${cve_art}:`, err.message);
       }
     }
-    
+
     const dataPartidas = {
       data: data,
       CVE_DOC: CVE_DOC,
@@ -726,14 +726,83 @@ const calcularCotizacion = async () => {
         <div className="col">
           <br></br>
           <h1 style={{ textAlign: "center" }}>Analisis Técnico Financiero </h1>
-          <label> Documento: {cve_tecFin}</label>
+          <div className="row">
+            {/* Documento */}
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Documento:</label>
+              <input
+                className="form-control"
+                id="cve_tecFin"
+                type="text"
+                value={cve_tecFin}
+                readOnly
+              />
+            </div>
+
+            {/* id Monday */}
+            <div className="col-md-6 mb-3">
+              <label className="form-label">id Monday:</label>
+              <input
+                className="form-control"
+                id="idMonday"
+                type="number"
+                value={idMonday}
+                readOnly
+              />
+            </div>
+
+            {/* Cliente */}
+            <div className="col-md-6 mb-3">
+              <label className="form-label">Cliente:</label>
+              <input
+                className="form-control"
+                id="razonSocial"
+                type="text"
+                value={razonSocial}
+                readOnly
+              />
+            </div>
+
+            {/* Porcentaje de Factoraje */}
+            <div className="col-md-6 mb-3">
+              <label htmlFor="factoringPercentage" className="form-label">
+                Porcentaje de Factoraje:
+              </label>
+              <input
+                id="factoringPercentage"
+                type="number"
+                placeholder="Ingresa el porcentaje"
+                value={factorajeManual}
+                onChange={(e) => setFactorajeManual(e.target.value)}
+                className="form-control"
+              />
+              <br></br>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setFactorajeManual("")}
+              >
+                Valores Originales
+              </button>
+            </div>
+
+            {/* Botón para restablecer valores */}
+            {/*<div className="col-md-6 mb-3 d-flex align-items-end">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setFactorajeManual("")}
+              >
+                Valores Originales
+              </button>
+            </div>*/}
+          </div>
+
+          {/*<label> Documento: {cve_tecFin}</label>
           <br />
           <label> id Monday: {idMonday}</label>
           <br />
           <label> Cliente: {razonSocial} </label>
           <br />
           <label> Nombre comercial: {nombreComercial}</label>
-          {/*Mostrar Factoraje*/}
           <div className="col">
             <label htmlFor="factoringPercentage">
               Porcentaje de Factoraje:
@@ -750,7 +819,7 @@ const calcularCotizacion = async () => {
               Valores Originales
             </button>
             <br />
-          </div>
+          </div>*/}
           {/*Fin Mostrar Factoraje*/}
 
           <table className="table table-hover">
@@ -943,7 +1012,7 @@ const calcularCotizacion = async () => {
           </button>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

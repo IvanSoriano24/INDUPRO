@@ -666,8 +666,8 @@ const openModal = async (noPartida) => {
                     <th scope="col">Valor de insumos</th>
                     <th scope="col">Costo por partida</th>
                     <th scope="col">Factoraje</th>
-                    <th scope="col">Fijos</th>
-                    <th scope="col">Factor indirecto</th>
+                    <th scope="col">Indirecto</th>
+                    <th scope="col">Factor Indirecto</th>
                     <th scope="col">Costo unitario</th>
                     <th scope="col">Costo factorizado</th>
                     <th scope="col">Factor utilidad</th>
@@ -902,7 +902,7 @@ const openModal = async (noPartida) => {
                 />
           </div>
           <div className="mb-3">
-            <label>Costo Fijo</label>
+            <label>Costo Indirecto</label>
             <input
                   placeholder=""
                   aria-label=""

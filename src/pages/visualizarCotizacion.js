@@ -686,6 +686,38 @@ const VisualizarCotizacion = () => {
     setShowModal(true);
   };
   /******************************************** SAE  *****************************************************************/
+  const actualizarStatusMonday = async ({ itemId, columnId, nuevoStatus }) => {
+    const apiKey = "TU_TOKEN_DE_API"; // Reemplaza con tu API Token
+    const query = `
+      mutation {
+        change_column_value(
+          item_id: ${itemId},
+          column_id: "${columnId}",
+          value: "{\"index\": ${nuevoStatus}}"
+        ) {
+          id
+        }
+      }
+    `;
+  
+    try {
+      const response = await fetch("https://api.monday.com/v2", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: apiKey
+        },
+        body: JSON.stringify({ query })
+      });
+  
+      const data = await response.json();
+      console.log("Respuesta de Monday:", data);
+      return data;
+    } catch (error) {
+      console.error("Error al actualizar el status en Monday:", error);
+      throw error;
+    }
+  };  
   return (
     <div className="container">
       <div className="row">

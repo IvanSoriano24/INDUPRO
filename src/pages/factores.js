@@ -94,7 +94,7 @@ const Factores = () => {
                     <table className="table">
                         <thead>
                             <tr>
-                                <th>Costo fijo</th>
+                                <th>Costo Indirecto</th>
                                 <th>Factoraje</th>
                                 <th>Fianzas</th>
                                 <th>Utilidad</th>
