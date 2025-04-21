@@ -848,10 +848,7 @@ const AgregarRevTecFinanciero = () => {
       return;
     }
     // Si listPartidas o listMano están vacíos, mostrar alerta y detener ejecución
-    if (
-      !par_PreCoti_insu ||
-      par_PreCoti_insu.length === 0 
-    ) {
+    if (!par_PreCoti_insu || par_PreCoti_insu.length === 0) {
       swal.fire({
         icon: "warning",
         title: "Faltan Datos",
@@ -1074,7 +1071,7 @@ const AgregarRevTecFinanciero = () => {
           });
         });
       }
-      navigate("/precotizacion");
+      navigate("/revTecnicoFinanciero");
     } else {
       alert("Selecciona un folio valido");
     }
@@ -1326,7 +1323,27 @@ const AgregarRevTecFinanciero = () => {
   };
   const guardarPartida = async () => {
     if (!selectedPartida || !insumo || !cantidad || !unidad || !claveSae) {
-      alert("Faltan datos para completar la operación.");
+      swal.fire({
+        icon: "warning",
+        title: "Faltan datos",
+        text: "Faltan datos para completar la operación.",
+      });
+      return;
+    }
+    if (cantidad <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "La cantidad no puede ser menor o igual a 0.",
+      });
+      return;
+    }
+    if (costoCotizado <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Costo",
+        text: "El costo no puede ser menor o igual a 0.",
+      });
       return;
     }
 
@@ -1658,14 +1675,18 @@ const AgregarRevTecFinanciero = () => {
         ).toLocaleDateString("es-ES");
         // Construir datos para la tabla dinámica
 
-        console.log(par_levDigital);
         const tableBody10 = par_levDigital.map((items) => [
           items.noPartida,
           items.cantidad,
           items.descripcion,
           items.observacion,
         ]);
-
+        const tableBody30 = listMO.map((itemMO) => [
+          itemMO.noPartidaMO,
+          itemMO.cantidadTrabajadores,
+          itemMO.personal,
+          itemMO.diasTrabajados,
+        ]);
         const tableBody20 = par_PreCoti_insu.map((item) => [
           item.noPartidaPC,
           item.insumo,
@@ -1680,7 +1701,7 @@ const AgregarRevTecFinanciero = () => {
           item.total.toLocaleString("en-US", {
             style: "currency",
             currency: "USD",
-          }), 
+          }),
         ]);
 
         // Define el contenido del documento PDF
@@ -1748,7 +1769,7 @@ const AgregarRevTecFinanciero = () => {
               layout: {
                 fillColor: (rowIndex) => (rowIndex === 0 ? "#eeeeee" : null),
               },
-            },                 
+            },
             {
               text: "INSUMOS", // 🔵 TÍTULO para la segunda tabla
               style: "sectionTitle",
@@ -1776,6 +1797,29 @@ const AgregarRevTecFinanciero = () => {
                 fillColor: (rowIndex) => (rowIndex === 0 ? "#eeeeee" : null),
               },
             },
+            {
+              text: "Mano de Obra", // 🔵 TÍTULO para la segunda tabla
+              style: "sectionTitle",
+              margin: [0, 30, 0, 8],
+            },
+            {
+              table: {
+                headerRows: 1,
+                widths: ["auto", "auto", "auto", "auto"],
+                body: [
+                  [
+                    { text: "No. Partida", style: "tableHeader" },
+                    { text: "No. Trabajadores", style: "tableHeader" },
+                    { text: "Trabajador", style: "tableHeader" },
+                    { text: "Dias Trabajados", style: "tableHeader" },
+                  ],
+                  ...tableBody30,
+                ],
+              },
+              layout: {
+                fillColor: (rowIndex) => (rowIndex === 0 ? "#eeeeee" : null),
+              },
+            },
           ],
           styles: {
             tableHeader: {
@@ -1792,7 +1836,7 @@ const AgregarRevTecFinanciero = () => {
               decoration: "underline",
             },
           },
-        };        
+        };
         // Genera el PDF y muestra una vista preliminar
         pdfMake.createPdf(documentDefinition).open();
       };
@@ -1811,12 +1855,12 @@ const AgregarRevTecFinanciero = () => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1>Convertir precotización a análisis técnico financiero </h1>
+          <h1>Convertir Precotización a Análisis Técnico Financiero </h1>
           <form>
             <div className="row">
               <div className="col-md-2">
                 <div className="mb-3">
-                  <label className="form-label">FOLIO</label>
+                  <label className="form-label">Folio</label>
                   <select
                     id="selectFolio"
                     className="form-control"
@@ -1838,7 +1882,7 @@ const AgregarRevTecFinanciero = () => {
 
               <div className="col-md-4">
                 <div className="mb-3">
-                  <label className="form-label">FOLIO SIGUIENTE</label>
+                  <label className="form-label">Folio Siguiente</label>
                   <input
                     className="form-control"
                     id="inputFolioSecuencial"
@@ -1850,7 +1894,7 @@ const AgregarRevTecFinanciero = () => {
                 </div>
               </div>
               <div className="col-md-4 ">
-                <label className="form-label">CLIENTE</label>
+                <label className="form-label">Cliente</label>
                 <div class="input-group mb-3">
                   <input
                     placeholder=""
@@ -1875,32 +1919,23 @@ const AgregarRevTecFinanciero = () => {
               </div>
 
               <div className="col-md-2">
-                <label className="form-label">Folio Monday: </label>
+                <label className="form-label">ID GS: </label>
                 <div className="input-group mb-3">
                   <input
                     placeholder=""
                     aria-label=""
                     aria-describedby="basic-addon1"
-                    type="number"
+                    type="text"
                     value={idMonday}
-                    onChange={(e) => {
-                      const value = e.target.value;
-
-                      // Validar: solo números positivos y máximo 10 dígitos
-                      if (/^\d{0,10}$/.test(value)) {
-                        setIdMonday(value);
-                      }
-                    }}
+                    onChange={(e) => setIdMonday(e.target.value)}
                     className="form-control"
                     readOnly
-                    min="0"
-                    max="9999999999"
                   />
                 </div>
               </div>
 
               <div className="col-md-4 ">
-                <label className="form-label">FECHA DE ELABORACIÓN</label>
+                <label className="form-label">Fecha de Elaboración</label>
                 <div class="input-group mb-3">
                   <input
                     placeholder=""
@@ -1924,7 +1959,7 @@ const AgregarRevTecFinanciero = () => {
               </div>
 
               <div className="col-md-4 ">
-                <label className="form-label">FECHA DE INICIO</label>
+                <label className="form-label">Fecha de Inicio</label>
                 <div class="input-group mb-3">
                   <input
                     placeholder=""
@@ -1948,7 +1983,7 @@ const AgregarRevTecFinanciero = () => {
               </div>
 
               <div className="col-md-4 ">
-                <label className="form-label">FECHA FIN</label>
+                <label className="form-label">Fecha Fin</label>
                 <div class="input-group mb-3">
                   <input
                     placeholder=""
@@ -1976,7 +2011,7 @@ const AgregarRevTecFinanciero = () => {
               style={{ border: "1px solid #000", borderColor: "gray" }}
             >
               <div className="col-md-2">
-                <label className="form-label">NO. PARTIDA</label>
+                <label className="form-label">No. Partida</label>
                 <div class="input-group mb-3">
                   <input
                     placeholder=""
@@ -1991,7 +2026,7 @@ const AgregarRevTecFinanciero = () => {
                 </div>
               </div>
               <div className="col-md-5 ">
-                <label className="form-label">DESCRIPCIÓN</label>
+                <label className="form-label">Descripción</label>
                 <div class="input-group mb-3">
                   <textarea
                     placeholder=""
@@ -2005,7 +2040,7 @@ const AgregarRevTecFinanciero = () => {
                 </div>
               </div>
               <div className="col-md-5 ">
-                <label className="form-label">OBSERVACIONES</label>
+                <label className="form-label">Observaciones</label>
                 <div class="input-group mb-3">
                   <textarea
                     placeholder=""
@@ -2125,7 +2160,7 @@ const AgregarRevTecFinanciero = () => {
             </div>
             <br></br>
             <div className="row" style={{ border: "1px solid #000" }}>
-              <label style={{ color: "red" }}>PARTIDAD POR INSUMO </label>
+              <label style={{ color: "red" }}>Partidas por Insumo </label>
               <br></br>
               <div>
                 <br></br>
@@ -2133,15 +2168,15 @@ const AgregarRevTecFinanciero = () => {
                   <thead>
                     <tr>
                       <th scope="col">No. Partida</th>
-                      <th scope="col">TIPO DE INSUMO</th>
-                      <th scope="col">PROVEEDOR</th>
-                      <th scope="col">DESCRIPCIÓN</th>
-                      <th scope="col">COMENTARIOS ADICIONALES</th>
-                      <th scope="col">CANTIDAD</th>
-                      <th scope="col">COSTO</th>
-                      <th scope="col">TOTAL</th>
-                      <th scope="col">EDITAR</th>
-                      <th scope="col">ELIMINAR</th>
+                      <th scope="col">Tipo de Insumo</th>
+                      <th scope="col">Proveedor</th>
+                      <th scope="col">Descripción</th>
+                      <th scope="col">Comentarios Adicionales</th>
+                      <th scope="col">Cantidad</th>
+                      <th scope="col">Costo</th>
+                      <th scope="col">Total</th>
+                      <th scope="col">Editar</th>
+                      <th scope="col">Eliminar</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2202,12 +2237,12 @@ const AgregarRevTecFinanciero = () => {
                 <table class="table">
                   <thead>
                     <tr>
-                      <th scope="col">No. Partida</th>
-                      <th scope="col">No. trabajadores</th>
+                      <th scope="col">No Partida</th>
+                      <th scope="col">No. de Trabajadores</th>
                       <th scope="col">Trabajador</th>
-                      <th scope="col">Días trabajados</th>
-                      <th scope="col">EDITAR</th>
-                      <th scope="col">ELIMINAR</th>
+                      <th scope="col">Días Trabajados</th>
+                      <th scope="col">Editar</th>
+                      <th scope="col">Eliminar</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2443,6 +2478,7 @@ const AgregarRevTecFinanciero = () => {
                     className="form-control"
                     value={cantidad}
                     onChange={(e) => setCantidad(e.target.value)}
+                    min="0"
                   />
                 </div>
               </div>
@@ -2454,6 +2490,7 @@ const AgregarRevTecFinanciero = () => {
                     className="form-control"
                     value={costoCotizado}
                     onChange={(e) => setCostoCotizado(e.target.value)}
+                    min="0"
                   />
                 </div>
               </div>

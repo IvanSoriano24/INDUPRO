@@ -59,6 +59,7 @@ import EditarParPrecot from './pages/editarParPrecot';
 import EditarPartidasInsumosPC from './pages/editarPartidasInsumoPC';
 import EditarPartidasMO from './pages/editarPartidasMO';
 import SegDocLevDig from './pages/segDocLevDig';
+import SegDocPreCotizacion from './pages/segDocPreCotizacion';
 import AgregarRevTecFinanciero from './pages/agregarRevTecFinanciero';
 import EditarRecTecFinanciero from './pages/editarRevTecFinanciero';
 import EditarPartidasInsumosATF from './pages/editarPartidasInsumosATF';
@@ -152,6 +153,7 @@ function App() {
             <Route path="/editarPartidasInsumoPC/:id" element={<EditarPartidasInsumosPC />} />
             <Route path="/editarPartidasMO/:id" element={<EditarPartidasMO />} />
             <Route path="/segDocLevDig/:id" element={<SegDocLevDig />} />
+            <Route path="/segDocPreCotizacion/:id" element={<SegDocPreCotizacion />} />
             <Route path="/agregarRevTecFinanciero/:id" element={<AgregarRevTecFinanciero />} />
             <Route path="/editarRevTecFinanciero/:id" element={<EditarRecTecFinanciero />} />
             <Route path="/editarPartidasInsumosATF/:id" element={<EditarPartidasInsumosATF />} />

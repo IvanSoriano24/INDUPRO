@@ -124,36 +124,34 @@ const AgregarLevDigital = () => {
     setList([...list, ...excelData]);
     setExcelData([]); // Limpiar los datos procesados una vez que se han agregado
   };*/
- 
+
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      
-      
       const reader = new FileReader();
       reader.onload = (e) => {
-
         setSelectedFile(file); // Guardar el archivo en el estado
 
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: "array" });
         const sheetName = workbook.SheetNames[0]; // Selecciona la primera hoja
         const sheet = workbook.Sheets[sheetName];
-  
+
         // Convertir la hoja de cálculo en JSON
         const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-  
+
         // Asegúrate de que las primeras filas son las que contienen los encabezados
         const headers = jsonData[0]; // Primera fila como encabezados
-  
+
         let isValid = true; // Bandera para verificar la validez de los datos
         let prevPartida = 0; // Variable para almacenar el último número de partida
+        let contador = 0;
         const filteredData = jsonData.slice(1).map((row, index) => {
           const noPartida = String(row[0] || "").trim();
           const cantidad = String(row[1] || "").trim();
           const descripcion = String(row[2] || "").trim();
-          const observaciones = String(row[3] || "").trim();
-  
+          const observacion = String(row[3] || "").trim();
+
           // Validación de secuencialidad del número de partida
           if (parseInt(noPartida) !== prevPartida + 1) {
             isValid = false;
@@ -165,24 +163,26 @@ const AgregarLevDigital = () => {
             });
             //alert(`El número de partida no es secuencial en la fila ${index + 2}.`);
           }
-  
+
           // Validación de cantidad (debe ser un número entero)
           if (!Number.isInteger(Number(cantidad)) || cantidad === "") {
             isValid = false;
             swal.fire({
-              text: `La cantidad no es un número entero en la fila ${index + 2}.`,
+              text: `La cantidad no es un número entero en la fila ${
+                index + 2
+              }.`,
               icon: "error",
             });
             //alert(`La cantidad no es un número entero en la fila ${index + 2}.`);
           }
-  
+
           prevPartida = parseInt(noPartida);
-  
+          contador++;
           return {
             noPartida,
             cantidad,
             descripcion,
-            observaciones,
+            observacion,
           };
         });
         if (!isValid) {
@@ -196,15 +196,17 @@ const AgregarLevDigital = () => {
         );
         // Si todos los datos son correctos
         //alert("Los datos del archivo Excel son válidos y se han procesado correctamente.");
-  
+
         // Actualizar el estado con los datos validados
         setExcelData(filteredData);
         setList([...list, ...filteredData]);
-      setExcelData([]); 
+        setExcelData([]);
+
+        setNoPartida(idCounter + contador);
+        setIdCounter(idCounter + contador);
       };
-  
+
       reader.readAsArrayBuffer(file); // Lee el archivo almacenado en el estado
-    
     } else {
       alert("Por favor, selecciona un archivo.");
     }
@@ -417,7 +419,7 @@ const AgregarLevDigital = () => {
               noPartida: item.noPartida,
               cantidad: item.cantidad,
               descripcion: item.descripcion,
-              observacion: item.observaciones,
+              observacion: item.observacion,
               fechaRegistro: formattedDate,
               fechaModificacion: formattedDate,
               estatusPartida: "Activa",
@@ -812,7 +814,7 @@ const AgregarLevDigital = () => {
                       <td>{item.noPartida}</td>
                       <td>{item.cantidad}</td>
                       <td>{item.descripcion}</td>
-                      <td>{item.observaciones}</td>
+                      <td>{item.observacion}</td>
                       <td>
                         <button
                           onClick={() => handleEdit(index)}
@@ -837,7 +839,7 @@ const AgregarLevDigital = () => {
           </div>
           <p></p>
           <button className="btn btn-success" onClick={addEncabezado}>
-            <HiDocumentPlus /> GUARDAR DOCUMENTO
+            <HiDocumentPlus /> Guardar
           </button>
         </div>
       </div>

@@ -168,10 +168,10 @@ const [idMonday, setIdMonday] = useState("");
         id: doc.id,
       }));
       console.log("Datos de PAR_PRECOTIZACION_INSU:", par_levDigList1);
-      par_levDigList1.sort((a, b) => a.noPartidaPC - b.noPartidaPC);
+      par_levDigList1.sort((a, b) => a.noPartidaATF - b.noPartidaATF);
       setPar_PreCoti_insu(par_levDigList1);
       const maxPartida = Math.max(
-        ...par_levDigList1.map((item) => item.noPartidaPC),
+        ...par_levDigList1.map((item) => item.noPartidaATF),
         0
       );
       setNoParatidaMO(maxPartida + 1);
@@ -200,6 +200,7 @@ const [idMonday, setIdMonday] = useState("");
         ...doc.data(),
         id: doc.id,
       }));
+      par_levDigList1.sort((a, b) => a.noPartidaATF - b.noPartidaATF);
       setTotalesDoc(par_levDigList1);
     } catch (error) {
       console.error("Error fetching PAR_LEVDIGITAL data:", error);
@@ -390,11 +391,11 @@ const openModal = async (noPartida) => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1>Editar revisión técnico financiero</h1>
+          <h1>Editar Revisión Técnico Financiero</h1>
           <div className="row">
             <div className="col-md-4">
               <div className="mb-3">
-                <label className="form-label">FOLIO</label>
+                <label className="form-label">Folio</label>
                 <input
                   className="form-control"
                   id="inputFolioSecuencial"
@@ -406,7 +407,7 @@ const openModal = async (noPartida) => {
               </div>
             </div>
             <div className="col-md-4 ">
-              <label className="form-label">CLIENTE</label>
+              <label className="form-label">Cliente</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -422,32 +423,24 @@ const openModal = async (noPartida) => {
             </div>
 
             <div className="col-md-2">
-              <label className="form-label">Folio Monday: </label>
+              <label className="form-label">ID GS: </label>
               <div className="input-group mb-3">
                 <input
                   placeholder=""
                   aria-label=""
                   aria-describedby="basic-addon1"
-                  type="number"
+                  type="text"
                   value={idMonday}
-                  onChange={(e) => {
-                    const value = e.target.value;
-
-                    // Validar: solo números positivos y máximo 10 dígitos
-                    if (/^\d{0,10}$/.test(value)) {
-                      setIdMonday(value);
-                    }
-                  }}
+                  onChange={(e) => setIdMonday(e.target.value)}
                   className="form-control"
                   readOnly
-                  min="0"
-                  max="9999999999"
+                  
                 />
               </div>
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE ELABORACIÓN</label>
+              <label className="form-label">Fecha de Elaboración</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -463,7 +456,7 @@ const openModal = async (noPartida) => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE INICIO</label>
+              <label className="form-label">Fecha de Inicio</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -479,7 +472,7 @@ const openModal = async (noPartida) => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA FIN</label>
+              <label className="form-label">Fecha Fin</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -499,7 +492,7 @@ const openModal = async (noPartida) => {
             style={{ border: "1px solid #000", borderColor: "gray" }}
           >
             <div className="col-md-2">
-              <label className="form-label">NO. PARTIDA</label>
+              <label className="form-label">No. Partida</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -514,7 +507,7 @@ const openModal = async (noPartida) => {
               </div>
             </div>
             <div className="col-md-5 ">
-              <label className="form-label">DESCRIPCIÓN</label>
+              <label className="form-label">Descripción</label>
               <div class="input-group mb-3">
                 <textarea
                   placeholder=""
@@ -528,7 +521,7 @@ const openModal = async (noPartida) => {
               </div>
             </div>
             <div className="col-md-5 ">
-              <label className="form-label">OBSERVACIONES</label>
+              <label className="form-label">Observaciones</label>
               <div class="input-group mb-3">
                 <textarea
                   placeholder=""
@@ -544,7 +537,7 @@ const openModal = async (noPartida) => {
             <div className="col-md-6 ">
               <button className="btn btn-success" onClick={editarPartida}>
                 <CiCirclePlus />
-                Editar partidas
+                Editar Partidas
               </button>
             </div>
             <div>
@@ -587,7 +580,7 @@ const openModal = async (noPartida) => {
           </div>
           <br></br>
           <div className="row" style={{ border: "1px solid #000" }}>
-            <label style={{ color: "red" }}>TOTALES </label>
+            <label style={{ color: "red" }}>Totales </label>
             {/*<div className="col-md-3 ">
               <label className="form-label">Cantidad</label>
               <div class="input-group mb-3">
@@ -661,18 +654,15 @@ const openModal = async (noPartida) => {
                   <tr>
                     <th scope="col">No. Partida</th>
                     <th scope="col">Cantidad</th>
-                    <th scope="col">Insumo</th>
-                    <th scope="col">Mano de obra</th>
-                    <th scope="col">Valor de insumos</th>
-                    <th scope="col">Costo por partida</th>
-                    <th scope="col">Factoraje</th>
+                    <th scope="col">Insumo</th>                    
+                    <th scope="col">Valor de insumos</th>                    
                     <th scope="col">Indirecto</th>
                     <th scope="col">Factor Indirecto</th>
-                    <th scope="col">Costo unitario</th>
-                    <th scope="col">Costo factorizado</th>
+                    <th scope="col">Costo Unitario</th>
+                    <th scope="col">Costo Factorizado</th>
                     <th scope="col">Factor utilidad</th>
-                    <th scope="col">Precio por partida</th>
-                    <th scope="col">Utilidad esperada</th>
+                    <th scope="col">Precio por Partida</th>
+                    <th scope="col">Utilidad Esperada</th>
                     <th scope="col">Editar</th>
                   </tr>
                 </thead>
@@ -688,24 +678,11 @@ const openModal = async (noPartida) => {
                         })}
                       </td>
                       <td>
-                        {(itemTotal.totalMO * 1).toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })}
-                      </td>
-                      <td>
                         {(itemTotal.valorInsumos * 1).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
                       </td>
-                      <td>
-                        {(itemTotal.costoXpartida * 1).toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })}
-                      </td>
-                      <td>{itemTotal.factorajePorcentaje}%</td>
                       <td>{itemTotal.costoFijoPorcentaje}%</td>
                       <td>{itemTotal.factorIndirectoPorcentaje}%</td>
                       <td>
@@ -760,7 +737,7 @@ const openModal = async (noPartida) => {
                     <th scope="col">Tipo de insumo</th>
                     <th scope="col">Cantidad</th>
                     <th scope="col">Costo</th>
-                    <th scope="col">Total sin factores</th>
+                    <th scope="col">Total sin Factores</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -800,8 +777,8 @@ const openModal = async (noPartida) => {
                     <th scope="col">No. Personal</th>
                     <th scope="col">Trabajador</th>
                     <th scope="col">Días trabajados</th>
-                    <th scope="col">Costo lider</th>
-                    <th scope="col">Valor lider</th>
+                    {/*<th scope="col">Costo lider</th>
+                    <th scope="col">Valor lider</th>*/}
                   </tr>
                 </thead>
                 <tbody>
@@ -811,7 +788,7 @@ const openModal = async (noPartida) => {
                       <td>{itemMO.cantidadTrabajadores}</td>
                       <td>{itemMO.personal}</td>
                       <td>{itemMO.diasTrabajados}</td>
-                      <td>
+                      {/*<td>
                         {(itemMO.costoLider * 1).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
@@ -822,7 +799,7 @@ const openModal = async (noPartida) => {
                           style: "currency",
                           currency: "USD",
                         })}
-                      </td>
+                      </td>*/}
                     </tr>
                   ))}
                 </tbody>

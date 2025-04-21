@@ -145,11 +145,12 @@ const AgregarPreCotizacion = () => {
     processExcelFile();
     handleAddFromExcel();
   };*/
-  const handleFileUpload = (event) => {
+  const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      //reader.onload = (e) => {
+      reader.onload = async (e) => {
         setSelectedFile(file); // Guardar el archivo en el estado
 
         const data = new Uint8Array(e.target.result);
@@ -163,7 +164,9 @@ const AgregarPreCotizacion = () => {
         let prevPartida = 0;
         let partidasConError = [];
 
-        const filteredData = jsonData.slice(1).map((row, index) => {
+        const filteredData = [];
+        for (let index = 0; index < jsonData.slice(1).length; index++) {
+          const row = jsonData.slice(1)[index];
           const noPartida = String(row[0] || 0).trim();
           const insumo = String(row[1] || "").trim();
           const unidad = String(row[2] || "").trim();
@@ -174,23 +177,23 @@ const AgregarPreCotizacion = () => {
           const cantidad = String(row[7] || 0).trim();
           const costoCotizado = String(row[8] || 0).trim();
 
-          // Validaciónes
           if (!validarInsumo(insumo)) {
-            console.log("1");
             isValid = false;
             partidasConError.push(noPartida || `Fila ${index + 2}`);
           }
           if (!validarUnidad(unidad)) {
-            console.log("1");
             isValid = false;
             partidasConError.push(noPartida || `Fila ${index + 2}`);
           }
           if (!validarCantidad(cantidad)) {
-            console.log("1");
             isValid = false;
             partidasConError.push(noPartida || `Fila ${index + 2}`);
           }
           if (!validarCosto(costoCotizado)) {
+            isValid = false;
+            partidasConError.push(noPartida || `Fila ${index + 2}`);
+          }
+          if (!(await validarClaveSae(claveSae))) {
             console.log("1");
             isValid = false;
             partidasConError.push(noPartida || `Fila ${index + 2}`);
@@ -198,7 +201,7 @@ const AgregarPreCotizacion = () => {
 
           prevPartida = parseInt(noPartida);
 
-          return {
+          filteredData.push({
             noPartida,
             insumo,
             unidad,
@@ -208,8 +211,8 @@ const AgregarPreCotizacion = () => {
             comentariosAdi,
             cantidad,
             costoCotizado,
-          };
-        });
+          });
+        }
 
         if (!isValid) {
           swal.fire({
@@ -232,14 +235,11 @@ const AgregarPreCotizacion = () => {
 
         const transformado = filteredData.map((item) => ({
           noPartida: item.noPartida,
-          insumos: [item], // ahora cada item tendrá un array insumos
+          insumos: [item],
         }));
 
-        // Agregar las filas procesadas del archivo a la lista
-        //console.log(filteredData);
         setListPartidas(transformado);
         setList([...list, ...filteredData]);
-        //console.log(transformado);
         setExcelData([]);
       };
 
@@ -289,6 +289,27 @@ const AgregarPreCotizacion = () => {
     }
     return true;
     //return Number.isInteger(Number(cantidad)) && cantidad !== "";
+  };
+  const validarClaveSae = async (claveSae) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/claveValidacion/${claveSae}`
+        //`/api/claveValidacion/${claveSae}`
+      );
+      const data = response.data;
+      console.log(data);
+      if (Array.isArray(data) && data.length > 0) {
+        console.log("1");
+        return true;
+      } else {
+        console.log("2");
+        return false;
+      }
+    } catch (error) {
+      return false;
+      //console.error("Error al validar clave SAE:", error.message);
+      console.log("0");
+    }
   };
 
   /*const processExcelFile = () => {
@@ -893,17 +914,22 @@ const AgregarPreCotizacion = () => {
       setCantidad(0);
       setCostoCotizado(0);
       // Llamar a la API para obtener las unidades
-      const responseUnidades = await axios.get(
-        //"/api/lineasMaster"
-        "http://localhost:5000/api/lineasMaster"
+      let listaInsumos = [...clavesSAE];
+
+      //if (clavesSAE.length === 0) {
+      console.log("🔄 Cargando claves SAE antes de editar...");
+      const responseInsumos = await axios.get(
+        "http://localhost:5000/api/clave-sae"
+        //"/api/clave-sae"
       );
-      setCategorias(responseUnidades.data); // Guardar las unidades con descripciones
-      console.log("Unidades obtenidas:", responseUnidades.data);
-      const responseProvedores = await axios.get(
-        "http://localhost:5000/api/proveedores"
-        //"/api/proveedores"
-      );
-      setProveedores(responseProvedores.data);
+
+      // ✅ Transformamos la respuesta para tener claves limpias y legibles
+      listaInsumos = responseInsumos.data.map((item) => ({
+        clave: item.CVE_ART.trim(), // quitamos espacios
+        descripcion: item.DESCR?.trim(), // opcionalmente también aquí
+      }));
+
+      setClavesSAE(listaInsumos);
 
       setShowAddModal(true);
     } catch (error) {
@@ -1015,10 +1041,29 @@ const AgregarPreCotizacion = () => {
   };
   const guardarPartida = () => {
     if (!selectedPartida || !insumo || !cantidad || !unidad || !claveSae) {
-      alert("Faltan datos para completar la operación.");
+      swal.fire({
+        icon: "warning",
+        title: "Faltan datos",
+        text: "Faltan datos para completar la operación.",
+      });
       return;
     }
-
+    if (cantidad <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "La cantidad no puede ser menor o igual a 0.",
+      });
+      return;
+    }
+    if (costoCotizado <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Costo",
+        text: "El costo no puede ser menor o igual a 0.",
+      });
+      return;
+    }
     // 🟢 Normaliza el proveedor eliminando espacios en blanco
     const proveedorNormalizado = proveedor ? proveedor.trim() : "";
     const proveedorClave =
@@ -1272,14 +1317,20 @@ const AgregarPreCotizacion = () => {
       return;
     }
     // Si listPartidas o listMano están vacíos, mostrar alerta y detener ejecución
-    if (
-      !listPartidas ||
-      listPartidas.length === 0
-    ) {
+    if (!listPartidas || listPartidas.length === 0) {
       swal.fire({
         icon: "warning",
         title: "Faltan Datos",
         text: "Debes seleccionar datos de insumos y/o mano de obra para continuar.",
+      });
+      return; // 🚨 DETIENE la ejecución aquí si faltan datos
+    }
+    //ID GS
+    if (!idMonday || idMonday.length === 0) {
+      swal.fire({
+        icon: "warning",
+        title: "ID Invalido",
+        text: "Ingresa un ID GS valido.",
       });
       return; // 🚨 DETIENE la ejecución aquí si faltan datos
     }
@@ -1429,7 +1480,7 @@ const AgregarPreCotizacion = () => {
         });
       }
 
-      navigate("/levantamientoDigital");
+      navigate("/precotizacion");
     } else {
       alert("Selecciona un folio válido");
     }
@@ -1443,7 +1494,7 @@ const AgregarPreCotizacion = () => {
           <div className="row">
             <div className="col-md-2">
               <div className="mb-3">
-                <label className="form-label">FOLIO</label>
+                <label className="form-label">Folio</label>
                 <select
                   id="selectFolio"
                   className="form-control"
@@ -1465,7 +1516,7 @@ const AgregarPreCotizacion = () => {
 
             <div className="col-md-4">
               <div className="mb-3">
-                <label className="form-label">FOLIO SIGUIENTE</label>
+                <label className="form-label">Folio Siguiente</label>
                 <input
                   className="form-control"
                   id="inputFolioSecuencial"
@@ -1503,31 +1554,22 @@ const AgregarPreCotizacion = () => {
             </div>
 
             <div className="col-md-2">
-              <label className="form-label">Folio Monday: </label>
+              <label className="form-label">ID GS: </label>
               <div className="input-group mb-3">
                 <input
                   placeholder=""
                   aria-label=""
                   aria-describedby="basic-addon1"
-                  type="number"
+                  type="text"
                   value={idMonday}
-                  onChange={(e) => {
-                    const value = e.target.value;
-
-                    // Validar: solo números positivos y máximo 10 dígitos
-                    if (/^\d{0,10}$/.test(value)) {
-                      setIdMonday(value);
-                    }
-                  }}
+                  onChange={(e) => setIdMonday(e.target.value)}
                   className="form-control"
-                  min="0"
-                  max="9999999999"
                 />
               </div>
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE ELABORACIÓN</label>
+              <label className="form-label">Fecha De Elaboración</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -1551,7 +1593,7 @@ const AgregarPreCotizacion = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE INICIO</label>
+              <label className="form-label">Fecha de Inicio</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -1575,7 +1617,7 @@ const AgregarPreCotizacion = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA FIN</label>
+              <label className="form-label">Fecha Fin</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -1603,7 +1645,7 @@ const AgregarPreCotizacion = () => {
             style={{ border: "1px solid #000", borderColor: "gray" }}
           >
             <div className="col-md-2">
-              <label className="form-label">NO. PARTIDA</label>
+              <label className="form-label">No. Partida</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -1618,7 +1660,7 @@ const AgregarPreCotizacion = () => {
               </div>
             </div>
             <div className="col-md-3 ">
-              <label className="form-label">CANTIDAD</label>
+              <label className="form-label">Cantidad</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -1633,7 +1675,7 @@ const AgregarPreCotizacion = () => {
             </div>
             <p></p>
             <div className="col-md-5 ">
-              <label className="form-label">DESCRIPCIÓN</label>
+              <label className="form-label">Descripción</label>
               <div class="input-group mb-3">
                 <textarea
                   placeholder=""
@@ -1647,7 +1689,7 @@ const AgregarPreCotizacion = () => {
               </div>
             </div>
             <div className="col-md-5 ">
-              <label className="form-label">OBSERVACIONES</label>
+              <label className="form-label">Observaciones</label>
               <div class="input-group mb-3">
                 <textarea
                   placeholder=""
@@ -1666,9 +1708,11 @@ const AgregarPreCotizacion = () => {
                 onClick={agregarPartidaAdicional}
               >
                 <CiCirclePlus />
-                Agregar tarea
+                Agregar Tarea
               </button>
             </div>
+            <br></br>
+            <br></br>
             <div>
               <table class="table">
                 <thead>
@@ -1676,10 +1720,10 @@ const AgregarPreCotizacion = () => {
                     <th scope="col">No. Partida</th>
                     <th scope="col">Cantidad</th>
                     <th scope="col">Descripción</th>
-                    <th scope="col">observaciones</th>
+                    <th scope="col">Observaciones</th>
                     <th scope="col">Editar</th>
                     <th scope="col">Eliminar</th>
-                    {/*<th scope="col">Agregar Insumos</th>*/}
+                    <th scope="col">Agregar Insumos</th>
                     <th scope="col">Agregar Mano</th>
                   </tr>
                 </thead>
@@ -1717,14 +1761,14 @@ const AgregarPreCotizacion = () => {
                           <MdDelete />
                         </button>{" "}
                       </td>
-                      {/*<td>
+                      <td>
                         <button
                           className="btn btn-success"
                           onClick={() => handleOpenModal(item.noPartida)}
                         >
                           <CiCirclePlus />{" "}
                         </button>
-                      </td>*/}
+                      </td>
                       <td>
                         <button
                           className="btn btn-success"
@@ -1758,7 +1802,7 @@ const AgregarPreCotizacion = () => {
           <br></br>
           <br></br>
           <div className="row" style={{ border: "1px solid #000" }}>
-            <label style={{ color: "red" }}>PARTIDAS POR INSUMO </label>
+            <label style={{ color: "red" }}>Partidas Por Insumo </label>
             <br></br>
             <table className="table">
               <thead>
@@ -1833,7 +1877,7 @@ const AgregarPreCotizacion = () => {
           </div>
           <br></br>
           <div className="row" style={{ border: "1px solid #000" }}>
-            <label style={{ color: "red" }}>PARTIDAS POR MANO DE OBRA </label>
+            <label style={{ color: "red" }}>Partidas por Mano de Obra </label>
             <table className="table">
               <thead>
                 <tr>
@@ -2039,7 +2083,37 @@ const AgregarPreCotizacion = () => {
               <div className="col-md-6">
                 <div className="mb-4">
                   <label>Clave SAE</label>
-                  <select
+                  <Select
+                    options={clavesSAE.map((prov) => ({
+                      value: prov.clave,
+                      label: prov.descripcion,
+                    }))}
+                    value={
+                      claveSae
+                        ? {
+                            value: claveSae,
+                            label:
+                            clavesSAE.find(
+                                (prov) => prov.clave === claveSae
+                              )?.descripcion || "",
+                          }
+                        : null
+                    }
+                    onChange={(selectedOption) => {
+                      console.log(
+                        "🔹 Nuevo insumo seleccionado:",
+                        selectedOption
+                      );
+                      setClaveSae(selectedOption.value);
+                    }}
+                    placeholder="Buscar proveedor..."
+                    menuPortalTarget={document.body} // Renderiza fuera del modal
+                    menuPlacement="auto" // Ajusta la posición automáticamente
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                    }}
+                  />
+                  {/*<select
                     className="form-control"
                     value={claveSae}
                     onChange={(e) => setClaveSae(e.target.value)}
@@ -2054,7 +2128,7 @@ const AgregarPreCotizacion = () => {
                     ) : (
                       <option disabled>No hay claves disponibles</option>
                     )}
-                  </select>
+                  </select>*/}
                 </div>
               </div>
               <div className="col-md-6">
@@ -2103,6 +2177,7 @@ const AgregarPreCotizacion = () => {
                     className="form-control"
                     value={cantidad}
                     onChange={(e) => setCantidad(e.target.value)}
+                    min="0"
                   />
                 </div>
               </div>
@@ -2114,6 +2189,7 @@ const AgregarPreCotizacion = () => {
                     className="form-control"
                     value={costoCotizado}
                     onChange={(e) => setCostoCotizado(e.target.value)}
+                    min="0"
                   />
                 </div>
               </div>

@@ -763,20 +763,11 @@ const VisualizarCotizacion = () => {
                   placeholder=""
                   aria-label=""
                   aria-describedby="basic-addon1"
-                  type="number"
+                  type="text"
                   value={idMonday}
-                  onChange={(e) => {
-                    const value = e.target.value;
-
-                    // Validar: solo números positivos y máximo 10 dígitos
-                    if (/^\d{0,10}$/.test(value)) {
-                      setIdMonday(value);
-                    }
-                  }}
+                  onChange={(e) => setIdMonday(e.target.value)}
                   className="form-control"
-                  readOnly
-                  min="0"
-                  max="9999999999"
+                  readOnly                  
                 />
               </div>
             </div>

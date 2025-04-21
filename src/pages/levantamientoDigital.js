@@ -92,7 +92,7 @@ const LevantamientoDigital = () => {
                 <div className="col-md-10 ">
                     <div className="mb-3">
                         <input
-                            placeholder="BUSCAR POR CLAVE" aria-label="" aria-describedby="basic-addon1"
+                            placeholder="Buscar Por Clave" aria-label="" aria-describedby="basic-addon1"
                             type="text"
                             className="form-control"
                         />
@@ -120,7 +120,7 @@ const LevantamientoDigital = () => {
                         onClick={() => cambiarTab("1")}
                         className={(activeTab == "1" ? "activeTab baseTap" : "baseTap")}
                     >
-                        ACTIVAS
+                        Activas
                     </NavLink>
                 </NavItem>
                 <NavItem>
@@ -128,7 +128,7 @@ const LevantamientoDigital = () => {
                         onClick={() => cambiarTab("2")}
                         className={(activeTab == "2" ? "activeTab baseTap" : "baseTap")}
                     >
-                        BLOQUEADAS
+                        Bloqueadas
                     </NavLink>
                 </NavItem>
 

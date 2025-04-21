@@ -28,7 +28,7 @@ const SegDocPreCotizacion = () => {
     const { id } = useParams();
 
     const getFactoresById = async (id) => {
-        const factoresDOC = await getDoc(doc(db, "LEVDIGITAL", id));
+        const factoresDOC = await getDoc(doc(db, "PRECOTIZACION", id));
         if (factoresDOC.exists()) {
             setCve_levDig(factoresDOC.data().cve_levDig);
             setCve_clie(factoresDOC.data().cve_clie);
@@ -49,12 +49,12 @@ const SegDocPreCotizacion = () => {
       const getPreCot = async () => {
         try {
             const data = await getDocs(
-            query(collection(db, "PRECOTIZACION"), where("cve_precot", "==", docSig)) 
+            query(collection(db, "TECNICOFINANCIERO"), where("cve_tecFin", "==", docSig)) 
             );
             const par_levDigList = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
             setPrecotizacionList(par_levDigList);
         } catch (error) {
-            console.error("Error fetching PAR_LEVDIGITAL data:", error);
+            console.error("Error fetching TECNICOFINANCIERO data:", error);
         }
         };
 

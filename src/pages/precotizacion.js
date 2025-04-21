@@ -92,7 +92,7 @@ const Precotizacion = () => {
                 <div className="col-md-10 ">
                     <div className="mb-3">
                         <input
-                        placeholder="BUSCAR POR CLAVE" aria-label="" aria-describedby="basic-addon1"
+                        placeholder="Buscar por Clave" aria-label="" aria-describedby="basic-addon1"
                         type="text"
                         className="form-control"
                         />
@@ -114,7 +114,7 @@ const Precotizacion = () => {
                 onClick={()=>cambiarTab("1")}
                 className={(activeTab=="1" ? "activeTab baseTap": "baseTap")}
                 >
-                    ACTIVAS
+                    Activas
                 </NavLink>
             </NavItem>
             <NavItem>
@@ -122,7 +122,7 @@ const Precotizacion = () => {
                 onClick={()=>cambiarTab("2")}
                 className={(activeTab=="2" ? "activeTab baseTap": "baseTap")}
                 >
-                    BLOQUEADAS
+                    Bloqeuadas
                 </NavLink>
             </NavItem>
             
@@ -172,11 +172,11 @@ const Precotizacion = () => {
                     <table className="table">
                         <thead>
                             <tr>
-                                <th style={{ padding: '10px' }}>FOLIO</th>
+                                <th style={{ padding: '10px' }}>Folio</th>
                                 <th style={{ padding: '10px' }}>Cliente</th>
-                                <th style={{ padding: '10px' }}>ESTATUS</th>
-                                <th style={{ padding: '10px' }}>FECHA</th>
-                                <th style={{ padding: '7px' }}>Seguimiento de documento<button><FaCircleQuestion /></button></th>
+                                <th style={{ padding: '10px' }}>Estatus</th>
+                                <th style={{ padding: '10px' }}>Fecha</th>
+                                <th style={{ padding: '7px' }}>Seguimiento de Documento<button><FaCircleQuestion /></button></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -186,7 +186,7 @@ const Precotizacion = () => {
                                     <td>{levDigitalItem.cliente.razonSocial}</td>
                                     <td>{levDigitalItem.estatus}</td>
                                     <td>{levDigitalItem.fechaElaboracion}</td>
-                                    <td><Link to={`/segDocLevDig/${levDigitalItem.id}`} className="btn btn-light" style={{ textAlign: "center"}}><HiDocumentMagnifyingGlass /></Link></td>
+                                    <td><Link to={`/segDocPreCotizacion/${levDigitalItem.id}`} className="btn btn-light" style={{ textAlign: "center"}}><HiDocumentMagnifyingGlass /></Link></td>
                                 </tr>
                             ) )}
                         </tbody>

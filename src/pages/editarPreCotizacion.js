@@ -335,22 +335,22 @@ const EditarPreCotizacion = () => {
       let listaInsumos = [...clavesSAE];
 
       //if (clavesSAE.length === 0) {
-        console.log("🔄 Cargando claves SAE antes de editar...");
-        const responseInsumos = await axios.get(
-          "http://localhost:5000/api/clave-sae"
-          //"/api/clave-sae"
-        );
-  
-        // ✅ Transformamos la respuesta para tener claves limpias y legibles
-        listaInsumos = responseInsumos.data.map((item) => ({
-          clave: item.CVE_ART.trim(), // quitamos espacios
-          descripcion: item.DESCR?.trim(), // opcionalmente también aquí
-        }));
-  
-        setClavesSAE(listaInsumos);
-        //console.log("📦 clavesSAE cargadas:", listaInsumos);
+      console.log("🔄 Cargando claves SAE antes de editar...");
+      const responseInsumos = await axios.get(
+        "http://localhost:5000/api/clave-sae"
+        //"/api/clave-sae"
+      );
+
+      // ✅ Transformamos la respuesta para tener claves limpias y legibles
+      listaInsumos = responseInsumos.data.map((item) => ({
+        clave: item.CVE_ART.trim(), // quitamos espacios
+        descripcion: item.DESCR?.trim(), // opcionalmente también aquí
+      }));
+
+      setClavesSAE(listaInsumos);
+      //console.log("📦 clavesSAE cargadas:", listaInsumos);
       //}
-  
+
       // 🟢 Buscar la clave SAE actual del insumo que se está editando
       /*const insumoEncontrado = listaInsumos.find(
         (item) => item.clave === insumo.claveSae?.trim() // importante hacer trim
@@ -360,7 +360,7 @@ const EditarPreCotizacion = () => {
       setTimeout(() => {
         setClaveSae(insumoEncontrado ? insumoEncontrado.clave : "");
       }, 100); // puedes ajustar el delay si lo necesitas*/
-      
+
       setShowAddModal(true);
     } catch (error) {
       console.error("⚠️ Error al obtener los datos necesarios:", error);
@@ -386,7 +386,27 @@ const EditarPreCotizacion = () => {
   };
   const guardarPartida = async () => {
     if (!selectedPartida || !insumo || !cantidad || !unidad || !claveSae) {
-      alert("Faltan datos para completar la operación.");
+      swal.fire({
+        icon: "warning",
+        title: "Faltan datos",
+        text: "Faltan datos para completar la operación.",
+      });
+      return;
+    }
+    if (cantidad <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "La cantidad no puede ser menor o igual a 0.",
+      });
+      return;
+    }
+    if (costoCotizado <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Costo",
+        text: "El costo no puede ser menor o igual a 0.",
+      });
       return;
     }
 
@@ -855,28 +875,28 @@ const EditarPreCotizacion = () => {
   }, [cve_precot]);
 
   /* ------------------------------------ OBTENER TABLA DE INSUMOS -------------------------------*/
-   const obtenerFactores = (setFactores) => {
-      console.log("🛠️ Suscribiéndose a cambios en FACTORES...");
-  
-      const unsubscribe = onSnapshot(collection(db, "FACTORES"), (snapshot) => {
-        const factoresList = snapshot.docs.map((doc) => doc.data().nombre);
-        setFactores(factoresList);
-  
-        console.log("📌 Datos de FACTORES actualizados:", factoresList);
-      });
-  
-      // Cleanup: nos desuscribimos si el componente se desmonta
-      return unsubscribe;
+  const obtenerFactores = (setFactores) => {
+    console.log("🛠️ Suscribiéndose a cambios en FACTORES...");
+
+    const unsubscribe = onSnapshot(collection(db, "FACTORES"), (snapshot) => {
+      const factoresList = snapshot.docs.map((doc) => doc.data().nombre);
+      setFactores(factoresList);
+
+      console.log("📌 Datos de FACTORES actualizados:", factoresList);
+    });
+
+    // Cleanup: nos desuscribimos si el componente se desmonta
+    return unsubscribe;
+  };
+  useEffect(() => {
+    console.log("🛠️ useEffect ejecutado para FACTORES");
+    const unsubscribe = obtenerFactores(setFactores);
+
+    return () => {
+      console.log("❌ Desuscribiendo de FACTORES");
+      unsubscribe && unsubscribe();
     };
-    useEffect(() => {
-      console.log("🛠️ useEffect ejecutado para FACTORES");
-      const unsubscribe = obtenerFactores(setFactores);
-  
-      return () => {
-        console.log("❌ Desuscribiendo de FACTORES");
-        unsubscribe && unsubscribe();
-      };
-    }, []); 
+  }, []);
   /* ------------------------------------ OBTENER TABLA DE TRABAJADORES -------------------------------*/
   const obtenerPartidasMO = (cve_precot, setListMO, setNoParatidaMO) => {
     if (!cve_precot) return; // Evita ejecutar la consulta si cve_precot es null o undefined
@@ -1326,7 +1346,7 @@ const EditarPreCotizacion = () => {
           <div className="row">
             <div className="col-md-4">
               <div className="mb-3">
-                <label className="form-label">FOLIO</label>
+                <label className="form-label">Folio</label>
                 <input
                   className="form-control"
                   id="inputFolioSecuencial"
@@ -1338,7 +1358,7 @@ const EditarPreCotizacion = () => {
               </div>
             </div>
             <div className="col-md-4 ">
-              <label className="form-label">CLIENTE</label>
+              <label className="form-label">Cliente</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -1362,32 +1382,23 @@ const EditarPreCotizacion = () => {
             </div>
 
             <div className="col-md-2">
-              <label className="form-label">Folio Monday: </label>
+              <label className="form-label">ID GS: </label>
               <div className="input-group mb-3">
                 <input
                   placeholder=""
                   aria-label=""
                   aria-describedby="basic-addon1"
-                  type="number"
+                  type="text"
                   value={idMonday}
-                  onChange={(e) => {
-                    const value = e.target.value;
-
-                    // Validar: solo números positivos y máximo 10 dígitos
-                    if (/^\d{0,10}$/.test(value)) {
-                      setIdMonday(value);
-                    }
-                  }}
+                  onChange={(e) => setIdMonday(e.target.value)}
                   className="form-control"
                   readOnly
-                  min="0"
-                  max="9999999999"
                 />
               </div>
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE ELABORACIÓN</label>
+              <label className="form-label">Fecha de Elaboración</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -1407,7 +1418,7 @@ const EditarPreCotizacion = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE INICIO</label>
+              <label className="form-label">Fecha de Inicio</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -1427,7 +1438,7 @@ const EditarPreCotizacion = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA FIN</label>
+              <label className="form-label">Fecha Fin</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -1451,7 +1462,7 @@ const EditarPreCotizacion = () => {
             style={{ border: "1px solid #000", borderColor: "gray" }}
           >
             <div className="col-md-2">
-              <label className="form-label">NO. PARTIDA</label>
+              <label className="form-label">No. Partida</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -1466,7 +1477,7 @@ const EditarPreCotizacion = () => {
               </div>
             </div>
             <div className="col-md-5 ">
-              <label className="form-label">DESCRIPCIÓN</label>
+              <label className="form-label">Descripción</label>
               <div class="input-group mb-3">
                 <textarea
                   placeholder=""
@@ -1480,7 +1491,7 @@ const EditarPreCotizacion = () => {
               </div>
             </div>
             <div className="col-md-5 ">
-              <label className="form-label">OBSERVACIONES</label>
+              <label className="form-label">Observaciones</label>
               <div class="input-group mb-3">
                 <textarea
                   placeholder=""
@@ -1499,7 +1510,7 @@ const EditarPreCotizacion = () => {
                 onClick={agregarPartidaAdicional}
               >
                 <CiCirclePlus />
-                Agregar tarea
+                Agregar Tarea
               </button>
             </div>
             <div>
@@ -1572,23 +1583,23 @@ const EditarPreCotizacion = () => {
           </div>
           <br></br>
           <div className="row" style={{ border: "1px solid #000" }}>
-            <label style={{ color: "red" }}>PARTIDAD POR INSUMO </label>
+            <label style={{ color: "red" }}>Partidas por Insumo </label>
             <br></br>
             <div>
               <br></br>
               <table class="table">
                 <thead>
                   <tr>
-                    <th scope="col">SUB PARTIDA</th>
-                    <th scope="col">TIPO DE INSUMO</th>
-                    <th scope="col">PROVEEDOR</th>
-                    <th scope="col">DESCRIPCIÓN</th>
-                    <th scope="col">COMENTARIOS ADICIONALES</th>
-                    <th scope="col">CANTIDAD</th>
-                    <th scope="col">COSTO</th>
-                    <th scope="col">TOTAL</th>
-                    <th scope="col">EDITAR</th>
-                    <th scope="col">ELIMINAR</th>
+                    <th scope="col">Sub Partida</th>
+                    <th scope="col">Tipo de Insumo</th>
+                    <th scope="col">Proveedor</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Comentarios Adicionales</th>
+                    <th scope="col">Cantidad</th>
+                    <th scope="col">Costo</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Editar</th>
+                    <th scope="col">Eliminar</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1647,11 +1658,11 @@ const EditarPreCotizacion = () => {
                 <thead>
                   <tr>
                     <th scope="col">No Partida</th>
-                    <th scope="col">No. de trabajadores</th>
+                    <th scope="col">No. de Trabajadores</th>
                     <th scope="col">Trabajador</th>
-                    <th scope="col">Días trabajados</th>
-                    <th scope="col">EDITAR</th>
-                    <th scope="col">ELIMINAR</th>
+                    <th scope="col">Días Trabajados</th>
+                    <th scope="col">Editar</th>
+                    <th scope="col">Eliminar</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1688,7 +1699,7 @@ const EditarPreCotizacion = () => {
 
           <br></br>
           <button className="btn btn-success" onClick={updateEncabezado}>
-            <HiDocumentPlus /> Editar documento
+            <HiDocumentPlus /> Editar Documento
           </button>
         </div>
       </div>
@@ -1885,6 +1896,7 @@ const EditarPreCotizacion = () => {
                     className="form-control"
                     value={cantidad}
                     onChange={(e) => setCantidad(e.target.value)}
+                    min="0"
                   />
                 </div>
               </div>
@@ -1896,6 +1908,7 @@ const EditarPreCotizacion = () => {
                     className="form-control"
                     value={costoCotizado}
                     onChange={(e) => setCostoCotizado(e.target.value)}
+                    min="0"
                   />
                 </div>
               </div>

@@ -93,7 +93,7 @@ const RevTecnicoFinanciero = () => {
                 <div className="col-md-10 ">
                     <div className="mb-3">
                         <input
-                        placeholder="BUSCAR POR CLAVE" aria-label="" aria-describedby="basic-addon1"
+                        placeholder="Buscar por Clave" aria-label="" aria-describedby="basic-addon1"
                         type="text"
                         className="form-control"
                         />
@@ -114,7 +114,7 @@ const RevTecnicoFinanciero = () => {
                 onClick={()=>cambiarTab("1")}
                 className={(activeTab=="1" ? "activeTab baseTap": "baseTap")}
                 >
-                    ACTIVAS
+                    Activas
                 </NavLink>
             </NavItem>
             <NavItem>
@@ -122,7 +122,7 @@ const RevTecnicoFinanciero = () => {
                 onClick={()=>cambiarTab("2")}
                 className={(activeTab=="2" ? "activeTab baseTap": "baseTap")}
                 >
-                    BLOQUEADAS
+                    Bloqueadas
                 </NavLink>
             </NavItem>
             
@@ -140,7 +140,7 @@ const RevTecnicoFinanciero = () => {
                                 <th style={{ padding: '10px' }}>Cliente</th>
                                 <th style={{ padding: '10px' }}>Estatus</th>
                                 <th style={{ padding: '10px' }}>Fecha</th>
-                                <th style={{ padding: '7px' }}>Vista preeliminar</th>
+                                <th style={{ padding: '7px' }}>Vista Preeliminar</th>
                                 <th style={{ padding: '10px' }}>Editar</th>
                                 <th style={{ padding: '10px' }}>Cancelar</th>
                             </tr>
@@ -172,12 +172,12 @@ const RevTecnicoFinanciero = () => {
                     <table className="table">
                         <thead>
                             <tr>
-                                <th style={{ padding: '10px' }}>FOLIO</th>
-                                <th style={{ padding: '10px' }}>CLEINTE</th>
-                                <th style={{ padding: '10px' }}>ESTATUS</th>
-                                <th style={{ padding: '10px' }}>FECHA</th>
-                                <th style={{ padding: '7px' }}>SIG. DOCUMENTO<button><FaCircleQuestion /></button></th>
-                                <th style={{ padding: '10px' }}>EDITAR</th>
+                                <th style={{ padding: '10px' }}>Folio</th>
+                                <th style={{ padding: '10px' }}>Cliente</th>
+                                <th style={{ padding: '10px' }}>Estatus</th>
+                                <th style={{ padding: '10px' }}>Fecha</th>
+                                <th style={{ padding: '7px' }}>Sig. Documento<button><FaCircleQuestion /></button></th>
+                                <th style={{ padding: '10px' }}>Editar</th>
                             </tr>
                         </thead>
                         <tbody>

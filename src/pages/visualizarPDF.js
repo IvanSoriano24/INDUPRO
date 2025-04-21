@@ -99,6 +99,7 @@ const VisualizarPDF = () => {
   };
   /******************************************** SAE  *****************************************************************/
   const [folioSig, setFolioSig] = useState("");
+  const [factorajeAplicado, setFactorajeAplicado] = useState(false);
   /******************************************** SAE  *****************************************************************/
   useEffect(() => {
     getFactoresById(id);
@@ -128,6 +129,10 @@ const VisualizarPDF = () => {
   const razonSocial =
     clientesList.length > 0
       ? clientesList[0].razonSocial
+      : "No hay documentos de precotización";
+  const diasCredito =
+    clientesList.length > 0
+      ? clientesList[0].diasCredito
       : "No hay documentos de precotización";
   const cve_int =
     clientesList.length > 0
@@ -300,7 +305,6 @@ const VisualizarPDF = () => {
         console.log(valorDidirecto);
         console.log(valorIndirecto);
         console.log(utilidadEsperada);
-        //addSae
       } catch (error) {
         console.error("Error al sumar valores:", error);
       }
@@ -544,20 +548,39 @@ const calcularCotizacion = async () => {
       noPartida: "N/A",
     });
     const docCotizacion = collection(db, "COTIZACION");
-    await addDoc(docCotizacion, {
-      cve_tecFin: docFolio + nuevoFolioSiguiente.toString(),
-      cve_clie: cve_clie,
-      cve_int: cve_int,
-      estatus: "Activo",
-      fechaElaboracion: fechaElaboracion,
-      fechaInicio: fechaInicio,
-      fechaFin: fechaFin,
-      subtotal: sumaValorProyecto,
-      IVA: sumaValorProyecto * 0.16,
-      total: sumaValorProyecto * 0.16 + sumaValorProyecto,
-      acuedoComercial: nombreComercial,
-      idMonday: idMonday,
-    });
+    if (factorajeAplicado) {
+      await addDoc(docCotizacion, {
+        cve_tecFin: docFolio + nuevoFolioSiguiente.toString(),
+        cve_clie: cve_clie,
+        cve_int: cve_int,
+        estatus: "Activo",
+        fechaElaboracion: fechaElaboracion,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+        subtotal: sumaValorProyecto,
+        IVA: sumaValorProyecto * 0.16,
+        total: sumaValorProyecto * 0.16 + sumaValorProyecto,
+        acuedoComercial: nombreComercial,
+        idMonday: idMonday,
+        factoraje: factoraje,
+        utilidadNeta: utilidadNeta,
+      });
+    } else {
+      await addDoc(docCotizacion, {
+        cve_tecFin: docFolio + nuevoFolioSiguiente.toString(),
+        cve_clie: cve_clie,
+        cve_int: cve_int,
+        estatus: "Activo",
+        fechaElaboracion: fechaElaboracion,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+        subtotal: sumaValorProyecto,
+        IVA: sumaValorProyecto * 0.16,
+        total: sumaValorProyecto * 0.16 + sumaValorProyecto,
+        acuedoComercial: nombreComercial,
+        idMonday: idMonday,
+      });
+    }
     const cotTotal = collection(db, "PAR_COTIZACION");
     totalesDoc.forEach(async (item) => {
       /*console.log("Fallas");
@@ -591,113 +614,6 @@ const calcularCotizacion = async () => {
     };
     await updateDoc(preCotizacionRef, datos);
   };
-  /******************************************** SAE  *****************************************************************/
-  const addSae = async () => {
-    const { folioSiguiente } = (
-      await axios.get("http://localhost:5000/api/obtenerFolio")
-    ).data;
-    setFolioSig(folioSiguiente);
-
-    let CVE = folioSig.toString().padStart(10, "0");
-    let CVE_DOC = CVE.toString().padStart(20, " ");
-
-    let clave = cve_int.toString(); // sin padStart
-    const clie = await axios.get(`http://localhost:5000/api/datosClie/${clave}`);
-
-    const datosCliente = clie.data.datosCliente;
-
-    console.log("Cliente:", datosCliente);
-
-    const partidasEncontradas = valoresArticulo.filter(
-      (art) => art.cve_tecFin === cve_tecFin
-    );
-
-    const articulos = [];
-    const results = [];
-    for (const partida of partidasEncontradas) {
-      const q = query(
-        collection(db, "PAR_TECFIN_INSU"),
-        where("cve_precot", "==", partida.claveSae)
-      );
-
-      const querySnapshot = await getDocs(q);
-
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.claveSae) {
-          articulos.push(data.claveSae);
-        }
-        // Aquí podrías acumular datos en un array si necesitas
-      });
-    }
-    for (const cve_art of articulos) {
-      try {
-        const response = await axios.get(
-          `http://localhost:5000/api/datosInsumoe/${cve_art}`
-        );
-        const datosInsumo = response.data.datosInsumos;
-        console.log("Datos del insumo:", datosInsumo);
-        results.push(datosInsumo);
-      } catch (err) {
-        console.error(`Error consultando el insumo ${cve_art}:`, err.message);
-      }
-    }
-
-    const dataPartidas = {
-      data: data,
-      CVE_DOC: CVE_DOC,
-      nuPartida: data.noPartidaATF,
-      CVE_ART: data.claveSae,
-      CANT: data.cantidad,
-      PREC: data.costoCotizado,
-      IMPU1: results.IMPUESTO1,
-      IMPU2: results.IMPUESTO2,
-      IMPU3: results.IMPUESTO3,
-      IMPU4: results.IMPUESTO4,
-      IMPU5: results.IMPUESTO5,
-      IMPU6: results.IMPUESTO6,
-      IMPU7: results.IMPUESTO7,
-      IMPU8: results.IMPUESTO8,
-      IMP1APLICA: results.IMP1APLICA,
-      IMP2APLICA: results.IMP2APLICA,
-      IMP3APLICA: results.IMP3APLICA,
-      IMP4APLICA: results.IMP4APLICA,
-      IMP5APLICA: results.IMP5APLICA,
-      IMP6APLICA: results.IMP6APLICA,
-      IMP7APLICA: results.IMP7APLICA,
-      IMP8APLICA: results.IMP8APLICA,
-      CVE_ESQ: results.CVE_ESQIMPU,
-      TOT_PARTIDA: data.total,
-      UNI_VENTA: results.UNI_MED,
-    };
-    /*const response = await axios.post(
-      "http://localhost:5000/api/guardarPartidas",
-      dataPartidas
-    );
-    const partidas = response.data;*/
-    console.log(dataPartidas);
-    const dataCotizacion = {
-      data: data,
-      CVE_DOC: CVE_DOC,
-      CVE_CLPV: cve_int,
-      IMPU4: results.IMPUESTO4,
-      TOT_PARTIDA: data.total,
-      RFC: datosCliente.RFC,
-      folio: folioSig,
-      METODOPAGO: datosCliente.METODODEPAGO,
-      NUMCTAPAGO: datosCliente.NUMCTAPAGO,
-      FORMAPAGOSAT: datosCliente.FORMADEPAGOSAT,
-      USO_CFDI: datosCliente.USO_CFDI,
-      REG_FISC: datosCliente.REG_FISC,
-    };
-    console.log(dataCotizacion);
-    /*const responseCotizacion = await axios.post(
-      "http://localhost:5000/api/cotizacion",
-      dataCotizacion
-    );*/
-  };
-
-  /******************************************** SAE  *****************************************************************/
   const asegurarCotizacion = () => {
     swal({
       title: "Estás seguro de aprobar la cotización?",
@@ -708,18 +624,22 @@ const calcularCotizacion = async () => {
     }).then((willDelete) => {
       if (willDelete) {
         addCotizacion();
-        //addSae();
-        //handleOpenPDF()
         swal("¡Felicidades, ahora puedes decargar tu cotización!", {
           icon: "success",
         });
-        //navigate("/cotizacion");
+        navigate("/cotizacion");
       } else {
         swal("¡Ok, seguimos viendo los costos!");
       }
     });
   };
-
+  /*****************************************************************************************************/
+  const aplicarFactoraje = () => {
+    setFactorajeAplicado(true);
+  };
+  const desAplicarFactoraje = () => {
+    setFactorajeAplicado(false);
+  };
   return (
     <div className="container">
       <div className="row">
@@ -741,12 +661,13 @@ const calcularCotizacion = async () => {
 
             {/* id Monday */}
             <div className="col-md-6 mb-3">
-              <label className="form-label">id Monday:</label>
+              <label className="form-label">ID GS:</label>
               <input
                 className="form-control"
                 id="idMonday"
-                type="number"
+                type="text"
                 value={idMonday}
+                onChange={(e) => setIdMonday(e.target.value)}
                 readOnly
               />
             </div>
@@ -775,14 +696,34 @@ const calcularCotizacion = async () => {
                 value={factorajeManual}
                 onChange={(e) => setFactorajeManual(e.target.value)}
                 className="form-control"
+                disabled={factorajeAplicado} // 👈 deshabilita si ya aplicaron
               />
-              <br></br>
+              <br />
               <button
                 className="btn btn-secondary"
                 onClick={() => setFactorajeManual("")}
+                disabled={factorajeAplicado} // 👈 también deshabilita el botón
               >
                 Valores Originales
               </button>
+
+              {factorajeManual !== "" && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    if (factorajeAplicado) {
+                      desAplicarFactoraje();
+                    } else {
+                      aplicarFactoraje();
+                    }
+                  }}
+                  id="factorajeAplicado"
+                >
+                  {factorajeAplicado
+                    ? "No Aplicar Factoraje"
+                    : "Aplicar Factoraje"}
+                </button>
+              )}
             </div>
 
             {/* Botón para restablecer valores */}
@@ -896,7 +837,24 @@ const calcularCotizacion = async () => {
               </tr>
               <tr>
                 <th></th>
-                <th scope="row">Costo directo</th>
+                <th scope="row">Dias de Credito</th>
+                <td></td>
+                <td>
+                  {/*CAMBIAR FORMULA*/}
+                  {diasCredito}
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <th>-</th>
+                <th scope="row"></th>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <th></th>
+                <th scope="row">Costo Directo</th>
                 <td></td>
                 <td>
                   {/*CAMBIAR FORMULA*/}
@@ -918,7 +876,7 @@ const calcularCotizacion = async () => {
               </tr>
               <tr>
                 <th></th>
-                <th scope="row">Costo indirecto</th>
+                <th scope="row">Costo Indirecto</th>
                 <td></td>
                 <td>
                   {valorIndirecto.toLocaleString("en-US", {
@@ -940,7 +898,7 @@ const calcularCotizacion = async () => {
               <tr className="table-success">
                 <th></th>
                 <th scope="row" style={{ color: "green" }}>
-                  Utilidad esperada
+                  Utilidad Esperada
                 </th>
                 <td></td>
                 <td style={{ color: "green" }}>
@@ -1008,11 +966,11 @@ const calcularCotizacion = async () => {
             </tbody>
           </table>
           <button className="btn btn-success" onClick={asegurarCotizacion}>
-            <FaCheckCircle /> Aprobar cotización
+            <FaCheckCircle /> Aprobar Cotización
           </button>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 

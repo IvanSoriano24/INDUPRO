@@ -285,7 +285,7 @@ const AgregarParLevDiGAdicional = () => {
           <h1>Levantamiento Digital</h1>
           <div className="row">
             <div className="col-md-4 ">
-              <label className="form-label">CLIENTE</label>
+              <label className="form-label">Cliente</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -309,7 +309,7 @@ const AgregarParLevDiGAdicional = () => {
               </div>
             </div>
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE ELABORACIÓN</label>
+              <label className="form-label">Fecha de Elaboración</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -332,7 +332,7 @@ const AgregarParLevDiGAdicional = () => {
               </div>
             </div>
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE INICIO</label>
+              <label className="form-label">Fecha de Inicio</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -355,7 +355,7 @@ const AgregarParLevDiGAdicional = () => {
               </div>
             </div>
             <div className="col-md-4 ">
-              <label className="form-label">FECHA FIN</label>
+              <label className="form-label">Fecha Fin</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -392,7 +392,7 @@ const AgregarParLevDiGAdicional = () => {
                   <th scope="col">No. Partida</th>
                   <th scope="col">Cantidad</th>
                   <th scope="col">Descripción</th>
-                  <th scope="col">observaciones</th>
+                  <th scope="col">Observaciones</th>
                   <th scope="col">Editar</th>
                   <th scope="col">Eliminar</th>
                 </tr>
@@ -439,7 +439,7 @@ const AgregarParLevDiGAdicional = () => {
         </div>
         <p></p>
         <button className="btn btn-success" onClick={updateContacto}>
-          <HiDocumentPlus /> GUARDAR DOCUMENTO
+          <HiDocumentPlus /> Guardar
         </button>
       </div>
       {/* Modal para agregar partida */}

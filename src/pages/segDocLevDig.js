@@ -181,7 +181,7 @@ const SegDocLevDig = () => {
             <div className="row">
 
               <div className="col-md-4 ">
-                  <label className="form-label">CLIENTE</label>
+                  <label className="form-label">Cliente</label>
                   <div class="input-group mb-3">            
                       <input
                       placeholder="" aria-label="" aria-describedby="basic-addon1"        
@@ -195,7 +195,7 @@ const SegDocLevDig = () => {
               </div>
 
               <div className="col-md-4 ">
-                  <label className="form-label">FECHA DE ELABORACIÓN</label>
+                  <label className="form-label">Fecha de Elaboración</label>
                   <div class="input-group mb-3">            
                       <input
                       placeholder="" aria-label="" aria-describedby="basic-addon1"        
@@ -212,7 +212,7 @@ const SegDocLevDig = () => {
               </div>
 
               <div className="col-md-4 ">
-                  <label className="form-label">FECHA DE INICIO</label>
+                  <label className="form-label">Fecha de Inicio</label>
                   <div class="input-group mb-3">            
                       <input
                       placeholder="" aria-label="" aria-describedby="basic-addon1"        
@@ -226,7 +226,7 @@ const SegDocLevDig = () => {
               </div>
 
               <div className="col-md-4 ">
-                  <label className="form-label">FECHA FIN</label>
+                  <label className="form-label">Fecha Fin</label>
                   <div class="input-group mb-3">            
                       <input
                       placeholder="" aria-label="" aria-describedby="basic-addon1"        
@@ -246,7 +246,7 @@ const SegDocLevDig = () => {
                 <tr>
                 <th scope="col">No. PARTIDA</th>
                 <th scope="col">DESCRIPCIÓN</th>
-                <th scope="col">observaciones</th>
+                <th scope="col">Observaciones</th>
                 </tr>
               </thead>
               <tbody>
