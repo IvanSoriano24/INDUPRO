@@ -25,7 +25,7 @@ import { FaPencilAlt } from "react-icons/fa";
 import { ModalTitle, Modal, Button } from "react-bootstrap";
 import { BsExclamationCircleFill } from "react-icons/bs";
 
-const CancelarATF = () => {
+const CancelarCotizacion = () => {
   const [cve_precot, setPrecot] = useState("");
   const [par_preCot, setPar_preCot] = useState([]);
   const [cve_tecFin, setCve_tecFin] = useState("");
@@ -70,7 +70,7 @@ const CancelarATF = () => {
 
   /* ---------------------JALAR INFORMACIÓN DE DOCUMENTO ANTERIOR ------------------------------------- */
   const getFactoresById = async (id) => {
-    const factoresDOC = await getDoc(doc(db, "TECNICOFINANCIERO", id));
+    const factoresDOC = await getDoc(doc(db, "COTIZACION", id));
     if (factoresDOC.exists()) {
       setCve_tecFin(factoresDOC.data().cve_tecFin);
       setCve_clie(factoresDOC.data().cve_clie);
@@ -91,7 +91,7 @@ const CancelarATF = () => {
     try {
       const data = await getDocs(
         query(
-          collection(db, "PAR_TECFINANCIERO"),
+          collection(db, "PAR_COTIZACION"),
           where("cve_tecFin", "==", cve_tecFin)
         )
       );
@@ -102,13 +102,14 @@ const CancelarATF = () => {
       }));
       par_preCotList.sort((a, b) => a.noPartida - b.noPartida);
       setPar_preCot(par_preCotList);
+      console.log("Partidas: ", par_preCotList);
       const maxPartida = Math.max(
         ...par_preCotList.map((item) => item.noPartida),
         0
       );
       setNoPartida(maxPartida + 1);
     } catch (error) {
-      console.error("Error fetching PAR_LEVDIGITAL data:", error);
+      console.error("Error fetching PAR_COTIZACION data:", error);
     }
   };
 
@@ -131,7 +132,7 @@ const CancelarATF = () => {
         ...doc.data(),
         id: doc.id,
       }));
-      console.log("Datos de PAR_PRECOTIZACION:", par_levDigList1);
+      console.log("Datos de PAR_COTIZACION:", par_levDigList1);
       par_levDigList1.sort((a, b) => a.noPartidaPC - b.noPartidaPC);
       setPar_PreCoti_insu(par_levDigList1);
       const maxPartida = Math.max(
@@ -154,7 +155,7 @@ const CancelarATF = () => {
   const handleDelete = async (cve_tecFin) => {
     try {
       const q = query(
-        collection(db, "TECNICOFINANCIERO"),
+        collection(db, "COTIZACION"),
         where("cve_tecFin", "==", cve_tecFin)
       );
       const querySnapshot = await getDocs(q);
@@ -177,7 +178,8 @@ const CancelarATF = () => {
       // Si se encuentra un documento que coincide con los identificadores proporcionados, actualiza su estatus
       if (!querySnapshot.empty) {
         const docSnap = querySnapshot.docs[0]; // Suponiendo que solo hay un documento que coincide con los criterios de consulta
-        const factoresRef = doc(db, "TECNICOFINANCIERO", docSnap.id);
+        
+        const factoresRef = doc(db, "COTIZACION", docSnap.id);
 
         // Actualiza el estatus del documento
         const datos = {
@@ -186,16 +188,17 @@ const CancelarATF = () => {
         await updateDoc(factoresRef, datos);
         // Obtener el documento COTIZACION por cve_tecFin
         const levDigQuery = query(
-          collection(db, "PRECOTIZACION"),
+          collection(db, "TECNICOFINANCIERO"),
           where("docSig", "==", cve_tecFin)
         );
+        
         const levDigSnapshot = await getDocs(levDigQuery);
         levDigSnapshot.forEach(async (doc) => {
           // Actualizar el estatus del documento LEVDIGITAL anterior a 'Activo'
           await updateDoc(doc.ref, { estatus: "Activo" });
         });
         // No se recomienda recargar la página; en su lugar, puedes manejar la actualización del estado localmente
-        navigate("/revTecnicoFinanciero");
+        navigate("/cotizacion");
       } else {
         console.log(
           "No se encontró ningún documento que coincida con los identificadores proporcionados."
@@ -230,12 +233,12 @@ const CancelarATF = () => {
       <div className="row">
         <div className="col">
           <h1 style={{ color: "red" }}>
-            <BsExclamationCircleFill /> Cancelar cotización
+            <BsExclamationCircleFill /> Cancelar Cotización
           </h1>
           <div className="row">
             <div className="col-md-4">
               <div className="mb-3">
-                <label className="form-label">FOLIO</label>
+                <label className="form-label">Folio</label>
                 <input
                   className="form-control"
                   id="inputFolioSecuencial"
@@ -247,7 +250,7 @@ const CancelarATF = () => {
               </div>
             </div>
             <div className="col-md-4 ">
-              <label className="form-label">CLIENTE</label>
+              <label className="form-label">Cliente</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -263,7 +266,7 @@ const CancelarATF = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE ELABORACIÓN</label>
+              <label className="form-label">Fecha de Elaboración</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -279,7 +282,7 @@ const CancelarATF = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE INICIO</label>
+              <label className="form-label">Fecha de Inicio</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -295,7 +298,7 @@ const CancelarATF = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA FIN</label>
+              <label className="form-label">Fecha Fin</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -327,7 +330,7 @@ const CancelarATF = () => {
                 <tbody>
                   {par_preCot.map((item, index) => (
                     <tr key={index}>
-                      <td>{item.noPartida}</td>
+                      <td>{item.noPartidaATF}</td>
                       <td>{item.descripcion}</td>
                       <td>{item.observacion}</td>
                     </tr>
@@ -341,7 +344,7 @@ const CancelarATF = () => {
             className="btn btn-danger"
             onClick={() => mostrarAlerta(cve_tecFin)}
           >
-            <HiMiniDocumentMinus /> Cancelar documento
+            <HiMiniDocumentMinus /> Cancelar Documento
           </button>
         </div>
       </div>
@@ -349,4 +352,4 @@ const CancelarATF = () => {
   );
 };
 
-export default CancelarATF;
+export default CancelarCotizacion;

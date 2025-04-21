@@ -159,7 +159,7 @@ const Cotizacion = () => {
                                     <td>{levDigitalItem.estatus}</td>
                                     <td>{levDigitalItem.fechaElaboracion}</td>
                                     <td><Link to={`/visualizarCotizacion/${levDigitalItem.id}`} className="btn btn-success"><FaRegEye /></Link></td>
-                                    <td><Link to={`/cancelarATF/${levDigitalItem.id}`} className="btn btn-danger"><GrDocumentExcel /></Link></td>
+                                    <td><Link to={`/cancelarCotizacion/${levDigitalItem.id}`} className="btn btn-danger"><GrDocumentExcel /></Link></td>
                                 </tr>
                             ) )}
                         </tbody>

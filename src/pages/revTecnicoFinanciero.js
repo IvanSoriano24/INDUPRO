@@ -11,6 +11,7 @@ import { CiCirclePlus } from "react-icons/ci";
 import { RxFilePlus } from "react-icons/rx";
 import { GrLinkNext, GrDocumentExcel} from "react-icons/gr";
 import { Gi3DGlasses } from "react-icons/gi";
+import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 
 
 const RevTecnicoFinanciero = () => {
@@ -176,19 +177,17 @@ const RevTecnicoFinanciero = () => {
                                 <th style={{ padding: '10px' }}>Cliente</th>
                                 <th style={{ padding: '10px' }}>Estatus</th>
                                 <th style={{ padding: '10px' }}>Fecha</th>
-                                <th style={{ padding: '7px' }}>Sig. Documento<button><FaCircleQuestion /></button></th>
-                                <th style={{ padding: '10px' }}>Editar</th>
+                                <th style={{ padding: '7px' }}>Seguimiento de Documento<button><FaCircleQuestion /></button></th>
                             </tr>
                         </thead>
                         <tbody>
                             {levDigitalB.map((levDigitalItem) => (
                                 <tr key={levDigitalItem.id}>
-                                    <td>{levDigitalItem.cve_precot}</td>
+                                    <td>{levDigitalItem.cve_tecFin}</td>
                                     <td>{levDigitalItem.cliente.razonSocial}</td>
                                     <td>{levDigitalItem.estatus}</td>
                                     <td>{levDigitalItem.fechaElaboracion}</td>
-                                    <td><Link to={`/agregarRevTecFinanciero/${levDigitalItem.id}`} className="btn btn-light"><GrLinkNext /></Link></td>
-                                    <td><Link to={`/agregarParLevDigAdicional/${levDigitalItem.id}`} className="btn btn-light"><FaPencilAlt /></Link></td>
+                                   <td><Link to={`/segDocPreCotizacion/${levDigitalItem.id}`} className="btn btn-light" style={{ textAlign: "center"}}><HiDocumentMagnifyingGlass /></Link></td>
                                     
                                 </tr>
                             ) )}

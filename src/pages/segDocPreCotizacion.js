@@ -78,7 +78,7 @@ const SegDocPreCotizacion = () => {
     const getParLevDigital = async () => {
         try {
             const data = await getDocs(
-            query(collection(db, "PAR_LEVDIGITAL"), where("cve_levDig", "==", cve_levDig)) 
+            query(collection(db, "PAR_PRECOTIZACION"), where("cve_levDig", "==", cve_levDig)) 
             );
 
             const par_levDigList = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
