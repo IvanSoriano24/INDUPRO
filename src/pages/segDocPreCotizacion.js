@@ -12,6 +12,7 @@ import swal from "sweetalert";
 const SegDocPreCotizacion = () => {
     /* ---------------------ENCABEZADO DE DOCUMENTO ------------------------------------- */
     const [cve_levDig, setCve_levDig] = useState("");
+    const [cve_precot, setCve_precot] = useState("");
     const [folios, setFolios] = useState([]);
     const [selectedFolio, setSelectedFolio] = useState("");
     const [folioSiguiente, setFolioSiguiente] = useState(1);
@@ -24,18 +25,21 @@ const SegDocPreCotizacion = () => {
     const[estatus, setEstatus] = useState("Bloqueado");
     const [precotizacionList, setPrecotizacionList] = useState([])
     const [analsisTFList, setAnalsisTFList] = useState([])
+    const [cotizacion, setCotizacion] = useState([])
     const navigate = useNavigate()
     const { id } = useParams();
 
     const getFactoresById = async (id) => {
         const factoresDOC = await getDoc(doc(db, "PRECOTIZACION", id));
         if (factoresDOC.exists()) {
-            setCve_levDig(factoresDOC.data().cve_levDig);
+            setCve_precot(factoresDOC.data().cve_precot);
+            console.log("cve_precot: ", cve_precot);
             setCve_clie(factoresDOC.data().cve_clie);
             setFechaElaboracion(factoresDOC.data().fechaElaboracion);
             setFechaInicio(factoresDOC.data().fechaInicio);
             setFechaFin(factoresDOC.data().fechaFin);
             setDocSig(factoresDOC.data().docSig);
+            setDocAnt(factoresDOC.data().docAnt);
             setEstatus(factoresDOC.data().estatus);
         }else{
             console.log("El personals no existe");
@@ -49,10 +53,11 @@ const SegDocPreCotizacion = () => {
       const getPreCot = async () => {
         try {
             const data = await getDocs(
-            query(collection(db, "TECNICOFINANCIERO"), where("cve_tecFin", "==", docSig)) 
+            query(collection(db, "PRECOTIZACION"), where("cve_precot", "==", cve_precot)) 
             );
             const par_levDigList = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
             setPrecotizacionList(par_levDigList);
+            console.log(precotizacionList);
         } catch (error) {
             console.error("Error fetching TECNICOFINANCIERO data:", error);
         }
@@ -68,6 +73,7 @@ const SegDocPreCotizacion = () => {
     const [descripcion, setDescripcion] = useState("");
     const [observacion, setObservacion] = useState("");
     const [par_levDigital, setPar_levDigital] = useState([])
+    const [par_preCot, setPar_preCot] = useState([])
     const [noPartida, setNoPartida] = useState("");
     const partidaAdicional = collection(db,"PAR_LEVDIGITAL");
     
@@ -78,28 +84,29 @@ const SegDocPreCotizacion = () => {
     const getParLevDigital = async () => {
         try {
             const data = await getDocs(
-            query(collection(db, "PAR_PRECOTIZACION"), where("cve_levDig", "==", cve_levDig)) 
+            query(collection(db, "PAR_PRECOTIZACION"), where("cve_precot", "==", cve_precot)) 
             );
-
+            
             const par_levDigList = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
             par_levDigList.sort((a, b) => a.noPartida - b.noPartida);
-            setPar_levDigital(par_levDigList);
+            //console.log("Lista: ", par_levDigList);
+            setPar_preCot(par_levDigList);
             const maxPartida = Math.max(...par_levDigList.map((item) => item.noPartida), 0);
             setNoPartida(maxPartida + 1);
 
         } catch (error) {
-            console.error("Error fetching PAR_LEVDIGITAL data:", error);
+            console.error("Error fetching PAR_PRECOTIZACION data:", error);
         }
         };
 
         useEffect(() => {
         getParLevDigital();
-        }, [cve_levDig]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
+        }, [cve_precot]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
 
     const mostrarAlerta=()=>{
       swal({
         title: "Seguimiento de documento",
-        text: "Documento consultado: " + cve_levDig + "\n" + "Documento anterior: " + docAnt + "\n" + "Documento siguiente: " + docSig + "\n" + "Estatus: " + estatus, 
+        text: "Documento consultado: " + docAnt + "\n" + "Documento anterior: " + "N/A" + "\n" + "Documento siguiente: " + cve_precot + "\n" + "Estatus: " + estatus, 
         icon: "info",
         buttons: "Aceptar"
       })
@@ -148,6 +155,35 @@ const SegDocPreCotizacion = () => {
           })
         }
 
+        const getCotizacion= async () => {
+          try {
+              const data = await getDocs(
+              query(collection(db, "COTIZACION"), where("cve_tecFin", "==", docSigATF)) 
+              );
+              const par_levDigList = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+              setCotizacion(par_levDigList);
+          } catch (error) {
+              console.error("Error fetching PAR_LEVDIGITAL data:", error);
+          }
+          };
+        useEffect(() => {
+          getCotizacion();
+        }, [docSigATF]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
+        const estatusCot = cotizacion.length > 0 ? cotizacion[0].estatus : "No hay Cotizacion";
+        const docAntCot = cotizacion.length > 0 ? cotizacion[0].docAnt : "No hay Cotizacion";
+        const docSigCot = cotizacion.length > 0 ? cotizacion[0].docSig : "No hay Cotizacion";
+        
+        const mostrarCotizacion=()=>{
+          const cveCot = cotizacion.length > 0 ? cotizacion[0].cve_tecFin : "No hay Cotizacion";
+            
+            swal({
+              title: "Seguimiento de documento",
+              text: "Documento consultado: " +  cveCot  + "\n" + "Documento anterior: " + docSigPC + "\n" + "Documento siguiente: " + "N/A" + "\n" + "Estatus: " + estatusCot, 
+              icon: "info",
+              buttons: "Aceptar"
+            })
+          }  
+
   return (
     <div className="container">
       <div className="row">
@@ -170,7 +206,7 @@ const SegDocPreCotizacion = () => {
               <span style={{ fontSize: '20px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }} >Análsis ténico</span>
               <span style={{ fontSize: '20px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }}>financiero</span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '100px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '100px' }} onClick={mostrarCotizacion}>
               <IoDocumentText className="me-2" style={{ fontSize: '80px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }} />
               <span style={{ fontSize: '20px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }}>Cotización</span>
               <span style={{ fontSize: '20px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }}>terminada</span>
@@ -250,7 +286,7 @@ const SegDocPreCotizacion = () => {
                 </tr>
               </thead>
               <tbody>
-              {par_levDigital.map((item, index) => (
+              {par_preCot.map((item, index) => (
               <tr key={index}>
                 <td>{item.noPartida}</td>
                 <td>{item.descripcion}</td>
