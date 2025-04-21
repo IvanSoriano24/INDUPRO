@@ -187,7 +187,7 @@ const RevTecnicoFinanciero = () => {
                                     <td>{levDigitalItem.cliente.razonSocial}</td>
                                     <td>{levDigitalItem.estatus}</td>
                                     <td>{levDigitalItem.fechaElaboracion}</td>
-                                   <td><Link to={`/segDocPreCotizacion/${levDigitalItem.id}`} className="btn btn-light" style={{ textAlign: "center"}}><HiDocumentMagnifyingGlass /></Link></td>
+                                   <td><Link to={`/segDocRev/${levDigitalItem.id}`} className="btn btn-light" style={{ textAlign: "center"}}><HiDocumentMagnifyingGlass /></Link></td>
                                     
                                 </tr>
                             ) )}
