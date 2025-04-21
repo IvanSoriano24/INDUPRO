@@ -2062,7 +2062,10 @@ const AgregarRevTecFinanciero = () => {
                   Agregar tarea
                 </button>
               </div>
-              <div>
+              <div style={{
+                maxHeight: "240px", 
+                overflowY: "auto", 
+              }}>
                 <br></br>
                 <table class="table">
                   <thead>
@@ -2159,7 +2162,7 @@ const AgregarRevTecFinanciero = () => {
               </button>
             </div>
             <br></br>
-            <div className="row" style={{ border: "1px solid #000" }}>
+            <div className="row" style={{ border: "1px solid #000", maxHeight: "240px", overflowY: "auto" }}>
               <label style={{ color: "red" }}>Partidas por Insumo </label>
               <br></br>
               <div>
@@ -2230,7 +2233,7 @@ const AgregarRevTecFinanciero = () => {
               </div>
             </div>
             <br></br>
-            <div className="row" style={{ border: "1px solid #000" }}>
+            <div className="row" style={{ border: "1px solid #000", maxHeight: "240px", overflowY: "auto" }}>
               <label style={{ color: "red" }}>PARTIDAD POR MANO DE OBRA </label>
               <div>
                 <br></br>

@@ -795,7 +795,10 @@ const AgregarLevDigital = () => {
               </button>
             </div>
 
-            <div className="col-12">
+            <div className="col-12" style={{
+                maxHeight: "240px", // 🔵 Puedes ajustar la altura como tú quieras
+                overflowY: "auto", // 🔵 Scroll vertical cuando se necesite
+              }}>
               <br />
               <table className="table">
                 <thead>

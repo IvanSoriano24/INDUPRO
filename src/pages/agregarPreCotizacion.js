@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom"; //Link
 import {
   collection,
   addDoc,
@@ -27,6 +27,7 @@ import { ModalTitle, Modal, Button } from "react-bootstrap";
 import axios from "axios";
 import Select from "react-select";
 import * as XLSX from "xlsx";
+import { Link, animateScroll as scroll } from "react-scroll";
 
 const AgregarPreCotizacion = () => {
   const [partida_levDi, setPartida_levDig] = useState("");
@@ -1713,8 +1714,14 @@ const AgregarPreCotizacion = () => {
             </div>
             <br></br>
             <br></br>
-            <div>
-              <table class="table">
+            <div
+              id="tablaPartidas"
+              style={{
+                maxHeight: "240px", // 🔵 Puedes ajustar la altura como tú quieras
+                overflowY: "auto", // 🔵 Scroll vertical cuando se necesite
+              }}
+            >
+              <table class="table" >
                 <thead>
                   <tr>
                     <th scope="col">No. Partida</th>
@@ -1727,7 +1734,7 @@ const AgregarPreCotizacion = () => {
                     <th scope="col">Agregar Mano</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody >
                   {par_levDigital.map((item, index) => (
                     <tr key={index}>
                       <td>{item.noPartida}</td>
@@ -1801,7 +1808,8 @@ const AgregarPreCotizacion = () => {
           </button>*/}
           <br></br>
           <br></br>
-          <div className="row" style={{ border: "1px solid #000" }}>
+          <div className="row" style={{ border: "1px solid #000", maxHeight: "240px", // 🔵 Puedes ajustar la altura como tú quieras
+            overflowY: "auto", }}>
             <label style={{ color: "red" }}>Partidas Por Insumo </label>
             <br></br>
             <table className="table">
@@ -1876,7 +1884,8 @@ const AgregarPreCotizacion = () => {
             </table>
           </div>
           <br></br>
-          <div className="row" style={{ border: "1px solid #000" }}>
+          <div className="row" style={{ border: "1px solid #000", maxHeight: "240px",
+                overflowY: "auto", }}>
             <label style={{ color: "red" }}>Partidas por Mano de Obra </label>
             <table className="table">
               <thead>
@@ -2093,9 +2102,8 @@ const AgregarPreCotizacion = () => {
                         ? {
                             value: claveSae,
                             label:
-                            clavesSAE.find(
-                                (prov) => prov.clave === claveSae
-                              )?.descripcion || "",
+                              clavesSAE.find((prov) => prov.clave === claveSae)
+                                ?.descripcion || "",
                           }
                         : null
                     }

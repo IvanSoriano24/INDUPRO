@@ -540,7 +540,10 @@ const openModal = async (noPartida) => {
                 Editar Partidas
               </button>
             </div>
-            <div>
+            <div style={{
+                maxHeight: "240px", 
+                overflowY: "auto", 
+              }}>
               <br></br>
               <table class="table">
                 <thead>
@@ -647,7 +650,11 @@ const openModal = async (noPartida) => {
               </button>
             </div>
             <br></br>
-            <div>
+            <br></br>
+            <div style={{
+                maxHeight: "240px", 
+                overflowY: "auto", 
+              }}>
               <br></br>
               <table class="table">
                 <thead>
@@ -725,10 +732,13 @@ const openModal = async (noPartida) => {
             </div>
           </div>
           <br></br>
-          <div className="row" style={{ border: "1px solid #000" }}>
-            <label style={{ color: "red" }}>PARTIDAS POR INSUMO </label>
+          <div className="row" style={{ border: "1px solid #000"}}>
+            <label style={{ color: "red" }}>Partidas por Insumo </label>
             <br></br>
-            <div>
+            <div style={{
+                maxHeight: "240px", 
+                overflowY: "auto", 
+              }}>
               <br></br>
               <table class="table">
                 <thead>
@@ -766,10 +776,14 @@ const openModal = async (noPartida) => {
               </table>
             </div>
           </div>
-          <div className="row" style={{ border: "1px solid #000" }}>
-            <label style={{ color: "red" }}>PARTIDAS POR MANO DE OBRA </label>
-            <div>
-              <br></br>
+          <br></br>
+          <br></br>
+          <div className="row" style={{ border: "1px solid #000"}}>
+            <label style={{ color: "red" }}>Partidas por Mano de Obra </label>
+            <div style={{
+                maxHeight: "240px", 
+                overflowY: "auto", 
+              }}>
               <table class="table">
                 <thead>
                   <tr>

@@ -1513,7 +1513,10 @@ const EditarPreCotizacion = () => {
                 Agregar Tarea
               </button>
             </div>
-            <div>
+            <div style={{
+                maxHeight: "240px", // 🔵 Puedes ajustar la altura como tú quieras
+                overflowY: "auto", // 🔵 Scroll vertical cuando se necesite
+              }}>
               <br></br>
               <table class="table">
                 <thead>
@@ -1582,7 +1585,7 @@ const EditarPreCotizacion = () => {
             </div>
           </div>
           <br></br>
-          <div className="row" style={{ border: "1px solid #000" }}>
+          <div className="row" style={{ border: "1px solid #000", maxHeight: "240px", overflowY: "auto"  }}>
             <label style={{ color: "red" }}>Partidas por Insumo </label>
             <br></br>
             <div>
@@ -1650,7 +1653,7 @@ const EditarPreCotizacion = () => {
             </div>
           </div>
           <br></br>
-          <div className="row" style={{ border: "1px solid #000" }}>
+          <div className="row" style={{ border: "1px solid #000", maxHeight: "240px", overflowY: "auto" }}>
             <label style={{ color: "red" }}>PARTIDAS POR MANO DE OBRA </label>
             <div>
               <br></br>

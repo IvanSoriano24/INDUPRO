@@ -384,7 +384,10 @@ const AgregarParLevDiGAdicional = () => {
               Agregar Partida
             </button>
           </div>
-          <div>
+          <div style={{
+                maxHeight: "240px", // 🔵 Puedes ajustar la altura como tú quieras
+                overflowY: "auto", // 🔵 Scroll vertical cuando se necesite
+              }}>
             <br></br>
             <table class="table">
               <thead>
