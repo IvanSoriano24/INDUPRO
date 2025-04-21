@@ -39,15 +39,15 @@ const SegDocRev = () => {
   const [revisionList, setRevisionList] = useState([]);
   const [analsisTFList, setAnalsisTFList] = useState([]);
   const [analsisPrecot, setAnalsisPrecot] = useState([]);
+  const [cotizacionList, setCotizacionList] = useState([]);
   const [cotizacion, setCotizacion] = useState([]);
   const navigate = useNavigate();
   const { id } = useParams();
 
   const getFactoresById = async (id) => {
-    const factoresDOC = await getDoc(doc(db, "TECNICOFINANCIERO", id));
+    const factoresDOC = await getDoc(doc(db, "COTIZACION", id));
     if (factoresDOC.exists()) {
       setCve_tecFin(factoresDOC.data().cve_tecFin);
-      console.log("cve_tecFin: ", cve_tecFin);
       setCve_clie(factoresDOC.data().cve_clie);
       setFechaElaboracion(factoresDOC.data().fechaElaboracion);
       setFechaInicio(factoresDOC.data().fechaInicio);
@@ -68,7 +68,7 @@ const SegDocRev = () => {
     try {
       const data = await getDocs(
         query(
-          collection(db, "TECNICOFINANCIERO"),
+          collection(db, "COTIZACION"),
           where("cve_tecFin", "==", cve_tecFin)
         )
       );
@@ -76,8 +76,7 @@ const SegDocRev = () => {
         ...doc.data(),
         id: doc.id,
       }));
-      setRevisionList(par_levDigList);
-      console.log(revisionList);
+      setCotizacionList(par_levDigList);
     } catch (error) {
       console.error("Error fetching TECNICOFINANCIERO data:", error);
     }
@@ -101,7 +100,7 @@ const SegDocRev = () => {
     try {
       const data = await getDocs(
         query(
-          collection(db, "PAR_TECFINANCIERO"),
+          collection(db, "PAR_COTIZACION"),
           where("cve_tecFin", "==", cve_tecFin)
         )
       );
@@ -111,7 +110,6 @@ const SegDocRev = () => {
         id: doc.id,
       }));
       par_levDigList.sort((a, b) => a.noPartida - b.noPartida);
-      //console.log("Lista: ", par_levDigList);
       setPar_rev(par_levDigList);
       const maxPartida = Math.max(
         ...par_levDigList.map((item) => item.noPartida),
@@ -126,6 +124,88 @@ const SegDocRev = () => {
   useEffect(() => {
     getParLevDigital();
   }, [cve_tecFin]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
+/********************************************************REV*****************************************************/
+const estatusATF =
+analsisTFList.length > 0
+  ? analsisTFList[0].estatus
+  : "No hay documentos de precotización";
+
+const docSigATF =
+analsisTFList.length > 0
+  ? analsisTFList[0].docSig
+  : "No hay documentos de precotización";
+  const docAntATF =
+analsisTFList.length > 0
+  ? analsisTFList[0].docAnt
+  : "No hay documentos de precotización";
+  const cveATF =
+analsisTFList.length > 0
+  ? analsisTFList[0].cve_tecFin
+  : "No hay documentos de precotización";
+
+const getAnalis = async () => {
+try {
+  const data = await getDocs(
+    query(
+      collection(db, "TECNICOFINANCIERO"),
+      where("docSig", "==", cve_tecFin)
+    )
+  );
+  const par_levDigList = data.docs.map((doc) => ({
+    ...doc.data(),
+    id: doc.id,
+  }));
+  setAnalsisTFList(par_levDigList);
+} catch (error) {
+  console.error("Error fetching LEVDIGITAL data:", error);
+}
+};
+
+useEffect(() => {
+getAnalis();
+}, [cve_tecFin]);
+  const mostrarAnalisTecnico = () => {
+
+    swal({
+      title: "Seguimiento de documento",
+      text:
+        "Documento consultado: " +
+        cveATF +
+        "\n" +
+        "Documento anterior: " +
+        docAntATF +
+        "\n" +
+        "Documento siguiente: " +
+        docSigATF +
+        "\n" +
+        "Estatus: " +
+        estatusATF,
+      icon: "info",
+      buttons: "Aceptar",
+    });
+  };
+
+/********************************************************REV*****************************************************/
+  const mostrarCotizacion = () => {
+    swal({
+      title: "Seguimiento de documento",
+      text:
+        "Documento consultado: " +
+        cve_tecFin +
+        "\n" +
+        "Documento anterior: " +
+        cveATF +
+        "\n" +
+        "Documento siguiente: " +
+        "N/A" +
+        "\n" +
+        "Estatus: " +
+        estatus,
+      icon: "info",
+      buttons: "Aceptar",
+    });
+  };
+/********************************************************COTIZACION*****************************************************/
 /*****************************************************PRECOT*****************************************************/
 const estatusPC =
 precotizacionList.length > 0
@@ -142,10 +222,11 @@ precotizacionList.length > 0
 
 const getPreCotAnalisis = async () => {
 try {
+  console.log("cve_precot: ", docAntATF);
   const data = await getDocs(
     query(
       collection(db, "PRECOTIZACION"),
-      where("cve_precot", "==", docAnt)
+      where("cve_precot", "==", docAntATF)
     )
   );
   const par_levDigList = data.docs.map((doc) => ({
@@ -160,7 +241,7 @@ try {
 
 useEffect(() => {
 getPreCotAnalisis();
-}, [docAnt]);
+}, [docAntATF]);
 
 const mostrarPreCotizacion = () => {
 const cvePrecot =
@@ -187,140 +268,69 @@ swal({
 });
 };
 /*****************************************************PRECOT*****************************************************/
-  /*****************************************************LEV*****************************************************/
-  const estatusLev =
-  levList.length > 0
-    ? levList[0].estatus
-    : "No hay documentos de precotización";
+/*****************************************************LEV*****************************************************/
+const estatusLev =
+levList.length > 0
+  ? levList[0].estatus
+  : "No hay documentos de precotización";
 
 const docSigLev =
 levList.length > 0
-    ? levList[0].docSig
-    : "No hay documentos de precotización";
+  ? levList[0].docSig
+  : "No hay documentos de precotización";
 
 const getLev = async () => {
-  try {
-    const data = await getDocs(
-      query(
-        collection(db, "LEVDIGITAL"),
-        where("cve_levDig", "==", docAntPC)
-      )
-    );
-    const par_levDigList = data.docs.map((doc) => ({
-      ...doc.data(),
-      id: doc.id,
-    }));
-    setLevList(par_levDigList);
-  } catch (error) {
-    console.error("Error fetching LEVDIGITAL data:", error);
-  }
+try {
+  const data = await getDocs(
+    query(
+      collection(db, "LEVDIGITAL"),
+      where("cve_levDig", "==", docAntPC)
+    )
+  );
+  const par_levDigList = data.docs.map((doc) => ({
+    ...doc.data(),
+    id: doc.id,
+  }));
+  setLevList(par_levDigList);
+} catch (error) {
+  console.error("Error fetching LEVDIGITAL data:", error);
+}
 };
 
 useEffect(() => {
-  getLev();
+getLev();
 }, [docAntPC]);
 
-  const mostrarAlerta = () => {
-    const cveLev =
-    levList.length > 0
-        ? levList[0].cve_levDig
-        : "No hay documentos de precotización";
-    swal({
-      title: "Seguimiento de documento",
-      text:
-        "Documento consultado: " +
-        cveLev +
-        "\n" +
-        "Documento anterior: " +
-        "N/A" +
-        "\n" +
-        "Documento siguiente: " +
-        docSigLev +
-        "\n" +
-        "Estatus: " +
-        estatusLev,
-      icon: "info",
-      buttons: "Aceptar",
-    });
-  };
-  /*****************************************************LEV*****************************************************/
-/********************************************************REV*****************************************************/
-
-  const mostrarAnalisTecnico = () => {
-
-    swal({
-      title: "Seguimiento de documento",
-      text:
-        "Documento consultado: " +
-        cve_tecFin +
-        "\n" +
-        "Documento anterior: " +
-        docAnt +
-        "\n" +
-        "Documento siguiente: " +
-        docSig +
-        "\n" +
-        "Estatus: " +
-        estatus,
-      icon: "info",
-      buttons: "Aceptar",
-    });
-  };
-
-/********************************************************REV*****************************************************/
-  const getCotizacion = async () => {
-    try {
-      const data = await getDocs(
-        query(collection(db, "COTIZACION"), where("cve_tecFin", "==", docSig))
-      );
-      const par_levDigList = data.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      
-      setCotizacion(par_levDigList);
-    } catch (error) {
-      console.error("Error fetching PAR_LEVDIGITAL data:", error);
-    }
-  };
-  useEffect(() => {
-    getCotizacion();
-  }, [docSig]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
-
-  const cveCot =
-    cotizacion.length > 0
-      ? cotizacion[0].cve_tecFin
-      : "No hay Cotizacion";
-
-    const estatusCot =
-    cotizacion.length > 0
-      ? cotizacion[0].estatus
-      : "No hay Cotizacion";
-  const mostrarCotizacion = () => {
-    swal({
-      title: "Seguimiento de documento",
-      text:
-        "Documento consultado: " +
-        cveCot +
-        "\n" +
-        "Documento anterior: " +
-        cve_tecFin +
-        "\n" +
-        "Documento siguiente: " +
-        "N/A" +
-        "\n" +
-        "Estatus: " +
-        estatusCot,
-      icon: "info",
-      buttons: "Aceptar",
-    });
-  };
-/********************************************************COTIZACION*****************************************************/
+const mostrarAlerta = () => {
+  const cveLev =
+  levList.length > 0
+      ? levList[0].cve_levDig
+      : "No hay documentos de precotización";
+  swal({
+    title: "Seguimiento de documento",
+    text:
+      "Documento consultado: " +
+      cveLev +
+      "\n" +
+      "Documento anterior: " +
+      "N/A" +
+      "\n" +
+      "Documento siguiente: " +
+      docSigLev +
+      "\n" +
+      "Estatus: " +
+      estatusLev,
+    icon: "info",
+    buttons: "Aceptar",
+  });
+};
+/*****************************************************LEV*****************************************************/
   return (
     <div className="container">
       <div className="row">
         <div className="col">
           <h1>Documento: {cve_tecFin}</h1>
+          {/*INICIO*/}
           <div
             className="row"
             style={{ border: "1px solid #000", borderColor: "gray" }}
@@ -405,13 +415,13 @@ useEffect(() => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatus === "Bloqueado" ? "green" : "black",
+                    color: estatusATF === "Bloqueado" ? "green" : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatus === "Bloqueado" ? "green" : "black",
+                    color: estatusATF === "Bloqueado" ? "green" : "black",
                   }}
                 >
                   Análsis ténico
@@ -419,7 +429,7 @@ useEffect(() => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatus === "Bloqueado" ? "green" : "black",
+                    color: estatusATF === "Bloqueado" ? "green" : "black",
                   }}
                 >
                   financiero
@@ -438,13 +448,13 @@ useEffect(() => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusCot === "Bloqueado" ? "green" : "black",
+                    color: estatus === "Bloqueado" ? "green" : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusCot === "Bloqueado" ? "green" : "black",
+                    color: estatus === "Bloqueado" ? "green" : "black",
                   }}
                 >
                   Cotización
@@ -452,7 +462,7 @@ useEffect(() => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusCot === "Bloqueado" ? "green" : "black",
+                    color: estatus === "Bloqueado" ? "green" : "black",
                   }}
                 >
                   terminada
@@ -460,6 +470,7 @@ useEffect(() => {
               </div>
             </div>
           </div>
+          {/*FIN*/}
           <div className="row">
             <div className="col-md-4 ">
               <label className="form-label">CLIENTE</label>
@@ -543,7 +554,7 @@ useEffect(() => {
               <tbody>
                 {par_rev.map((item, index) => (
                   <tr key={index}>
-                    <td>{item.noPartida}</td>
+                    <td>{item.noPartidaATF}</td>
                     <td>{item.descripcion}</td>
                     <td>{item.observacion}</td>
                   </tr>

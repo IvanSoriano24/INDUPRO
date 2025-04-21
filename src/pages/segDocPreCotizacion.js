@@ -207,9 +207,9 @@ const SegDocPreCotizacion = () => {
               <span style={{ fontSize: '20px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }}>financiero</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '100px' }} onClick={mostrarCotizacion}>
-              <IoDocumentText className="me-2" style={{ fontSize: '80px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }} />
-              <span style={{ fontSize: '20px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }}>Cotización</span>
-              <span style={{ fontSize: '20px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }}>terminada</span>
+              <IoDocumentText className="me-2" style={{ fontSize: '80px', color: estatusCot === 'Bloqueado' ? 'green' : 'black' }} />
+              <span style={{ fontSize: '20px', color: estatusCot === 'Bloqueado' ? 'green' : 'black' }}>Cotización</span>
+              <span style={{ fontSize: '20px', color: estatusCot === 'Bloqueado' ? 'green' : 'black' }}>terminada</span>
             </div>
           </div>
 

@@ -14,6 +14,7 @@ import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import encabezadoPDF from "../imagenes/GS-ENCABEZADO-2.PNG";
 import { FaRegEye } from "react-icons/fa";
+import { HiDocumentMagnifyingGlass } from "react-icons/hi2";
 
 const Cotizacion = () => {
     const [activeTab, setActiveTab] = useState("1");
@@ -181,19 +182,17 @@ const Cotizacion = () => {
                                 <th style={{ padding: '10px' }}>CLEINTE</th>
                                 <th style={{ padding: '10px' }}>ESTATUS</th>
                                 <th style={{ padding: '10px' }}>FECHA</th>
-                                <th style={{ padding: '7px' }}>SIG. DOCUMENTO<button><FaCircleQuestion /></button></th>
-                                <th style={{ padding: '10px' }}>EDITAR</th>
+                                <th style={{ padding: '7px' }}>Seguimiento de Documento<button><FaCircleQuestion /></button></th>
                             </tr>
                         </thead>
                         <tbody>
                             {levDigitalB.map((levDigitalItem) => (
                                 <tr key={levDigitalItem.id}>
-                                    <td>{levDigitalItem.cve_precot}</td>
+                                    <td>{levDigitalItem.cve_tecFin}</td>
                                     <td>{levDigitalItem.cliente.razonSocial}</td>
                                     <td>{levDigitalItem.estatus}</td>
                                     <td>{levDigitalItem.fechaElaboracion}</td>
-                                    <td><Link to={`/agregarRevTecFinanciero/${levDigitalItem.id}`} className="btn btn-light"><GrLinkNext /></Link></td>
-                                    <td><Link to={`/agregarParLevDigAdicional/${levDigitalItem.id}`} className="btn btn-light"><FaPencilAlt /></Link></td>
+                                    <td><Link to={`/segDocCot/${levDigitalItem.id}`} className="btn btn-light" style={{ textAlign: "center"}}><HiDocumentMagnifyingGlass /></Link></td>
                                     
                                 </tr>
                             ) )}
