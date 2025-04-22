@@ -148,7 +148,7 @@ const Cotizacion = () => {
                                 <th style={{ padding: '10px' }}>Cliente</th>
                                 <th style={{ padding: '10px' }}>Estatus</th>
                                 <th style={{ padding: '10px' }}>Fecha</th>
-                                <th style={{ padding: '10px' }}>Ver cotización</th>
+                                <th style={{ padding: '10px' }}>Ver Cotización</th>
                                 <th style={{ padding: '10px' }}>Cancelar</th>
                             </tr>
                         </thead>

@@ -119,7 +119,7 @@ const Clientes = () => {
               <div class="input-group-append">
                 <Link to="/agregarCliente">
                   <button class="btn btn-success" type="button">
-                    <CiCirclePlus /> Agregar nuevo cliente{" "}
+                    <CiCirclePlus /> Agregar Nuevo Cliente{" "}
                   </button>
                 </Link>
               </div>

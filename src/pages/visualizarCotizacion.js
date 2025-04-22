@@ -738,13 +738,13 @@ const VisualizarCotizacion = () => {
       <div className="row">
         <div className="col">
           <h4 style={{ color: "green" }}>
-            Felicidades! terminaste todo el proceso para realizar tu cotización,
-            ahora podrás descargarla y enviarla a tu cliente
+            Felicidades! Terminaste Todo el Proceso para Realizar tu Cotización,
+            Ahora Podrás Descargarla y Enviarla a tu Cliente
           </h4>
           <div className="row">
             <div className="col-md-4">
               <div className="mb-3">
-                <label className="form-label">FOLIO</label>
+                <label className="form-label">Folio</label>
                 <input
                   className="form-control"
                   id="inputFolioSecuencial"
@@ -756,7 +756,7 @@ const VisualizarCotizacion = () => {
               </div>
             </div>
             <div className="col-md-4 ">
-              <label className="form-label">CLIENTE</label>
+              <label className="form-label">Cliente</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -772,7 +772,7 @@ const VisualizarCotizacion = () => {
             </div>
 
             <div className="col-md-2">
-              <label className="form-label">Folio Monday: </label>
+              <label className="form-label">ID GS: </label>
               <div className="input-group mb-3">
                 <input
                   placeholder=""
@@ -788,7 +788,7 @@ const VisualizarCotizacion = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE ELABORACIÓN</label>
+              <label className="form-label">Fecha de Elaboración</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -803,7 +803,7 @@ const VisualizarCotizacion = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE INICIO</label>
+              <label className="form-label">Fecha de Inicio</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -818,7 +818,7 @@ const VisualizarCotizacion = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA FIN</label>
+              <label className="form-label">Fecha Fin</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""

@@ -104,7 +104,7 @@ const EditarCliente = () => {
         <div className="container">
             <div className="row">
                 <div className="col">
-                <h1>Editar cliente</h1>
+                <h1>Editar Cliente</h1>
                         <form onSubmit={updateCliente}>
                 <Nav tabs>
                     <NavItem>
@@ -344,7 +344,7 @@ const EditarCliente = () => {
                     <TabPane tabId="2">
                         <div className="row">
                             <div className="col-md-9 ">
-                                <label className="form-label">NOMBRE COMERCIAL</label>
+                                <label className="form-label">Nombre Comercial</label>
                                 <div class="input-group mb-3">
                                                 
                                 <input
@@ -360,7 +360,7 @@ const EditarCliente = () => {
                                 </div>
                             </div>
                             <div className="col-md-3 ">
-                                <label className="form-label">DÍAS DE CRÉDITO</label>
+                                <label className="form-label">Días de Crédito</label>
                                 <div class="input-group mb-3">
                                                 
                                 <input
@@ -373,7 +373,7 @@ const EditarCliente = () => {
                                 </div>
                             </div>
                             <div className="col-md-12 ">
-                                <label className="form-label">CONDICIÓN COMERCIAL</label>
+                                <label className="form-label">Condición Comercial</label>
                                 <div class="input-group mb-3">
                                                 
                                 <textarea

@@ -7,7 +7,7 @@ const Home = () => {
         <Container>
             <Row>
                 <Col xs="3" style={{ backgroundColor: 'rgba(219, 219, 219, 0.8)', textAlign:"center" }}>
-                    <label>Cotizaciones semanales</label>
+                    <label>Cotizaciones Semanales</label>
                     <p></p>
                     <h3 style={{textAlign:"center"}}>39</h3>
                     <p></p>
@@ -15,7 +15,7 @@ const Home = () => {
                     </Col>
                     <Col xs="1"></Col>
                     <Col xs="3" style={{ backgroundColor: 'rgba(219, 219, 219, 0.8)', textAlign:"center" }}>
-                    <label>Levantamiento digital</label>
+                    <label>Levantamiento Digital</label>
                     <p></p>
                     <h3 style={{textAlign:"center"}}>50</h3>
                     <p></p>
@@ -24,7 +24,7 @@ const Home = () => {
                     <Col xs="1"></Col>
                 <Col xs="1"></Col>
                 <Col xs="3" style={{ backgroundColor: 'rgba(219, 219, 219, 0.8)', textAlign:"center" }}>
-                    <label>Análisis financiero pendientes</label>
+                    <label>Análisis Financiero Pendientes</label>
                     <p></p>
                     <h3 style={{textAlign:"center"}}>35</h3>
                     <p></p>

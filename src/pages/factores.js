@@ -90,7 +90,7 @@ const Factores = () => {
         <div className="container">
             <div className="row">
                 <div className="col">
-                    <h1>Cambiar porcentajes</h1>
+                    <h1>Cambiar Porcentajes</h1>
                     <table className="table">
                         <thead>
                             <tr>
@@ -111,7 +111,7 @@ const Factores = () => {
                     </table>
                     <div className="col-md-3">
                         {/*<label className="form-label">COSTO FIJO (%)</label>*/}
-                        <label className="form-label">COSTO INDIRECTO (%)</label>
+                        <label className="form-label">Costo Indirecto (%)</label>
                         <div className="input-group mb-3">
                             <input
                             value={costoFijo}
@@ -125,7 +125,7 @@ const Factores = () => {
                         </div>
                     </div>
                             <div className="col-md-3">
-                                <label className="form-label">FACTORAJE (%)</label>
+                                <label className="form-label">Factoraje (%)</label>
                                 <div className="input-group mb-3">
                                     <input
                                     value={factoraje}
@@ -139,7 +139,7 @@ const Factores = () => {
                                 </div>
                             </div>
                             <div className="col-md-3">
-                              <label className="form-label">FIANZAS (%)</label>
+                              <label className="form-label">Fianzas (%)</label>
                                 <div className="input-group mb-3">
                                     <input
                                     value={fianzas}
@@ -153,7 +153,7 @@ const Factores = () => {
                                 </div>
                             </div>
                             <div className="col-md-3">
-                                <label className="form-label">UTILIDAD (%)</label>
+                                <label className="form-label">Utilidad (%)</label>
                                 <div className="input-group mb-3">
                                     <input
                                     value={utilidad}
@@ -168,7 +168,7 @@ const Factores = () => {
                             </div>
                             <p></p>
                             <div className="buttons-container">
-                                <button type="submit" className="btn btn-success" onClick={updatePorcentaje}><CiCirclePlus/> Cambiar porcentajes</button>
+                                <button type="submit" className="btn btn-success" onClick={updatePorcentaje}><CiCirclePlus/> Cambiar Porcentajes</button>
                              </div>
                 </div>
             </div>
