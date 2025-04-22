@@ -562,8 +562,8 @@ const calcularCotizacion = async () => {
         total: sumaValorProyecto * 0.16 + sumaValorProyecto,
         acuedoComercial: nombreComercial,
         idMonday: idMonday,
-        factoraje: factoraje,
-        utilidadNeta: utilidadNeta,
+        factoraje: factorajeManual,
+        utilidadNeta: (utilidadEsperada - sumaValorProyecto * (factorajeManual / 100)),
       });
     } else {
       await addDoc(docCotizacion, {

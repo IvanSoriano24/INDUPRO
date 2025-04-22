@@ -961,9 +961,6 @@ const AgregarPreCotizacion = () => {
     setUnidad("servicio");
   };
   const handleEditInsumo = async (partida, insumo) => {
-    console.log("🟢 Editando partida:", partida);
-    console.log("🟢 Editando insumo:", insumo);
-    console.log("Proveedor recibido:", `"${insumo.proveedor}"`); // ✅ Verifica los espacios
 
     setInsumo(insumo.insumo);
     setCantidad(insumo.cantidad);

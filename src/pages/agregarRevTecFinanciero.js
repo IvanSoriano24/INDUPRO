@@ -1507,7 +1507,7 @@ const AgregarRevTecFinanciero = () => {
   };
   const guardarEdicion = async () => {
     if (idPartida) {
-      const partidaRef = doc(db, "PAR_LEVDIGITAL", idPartida);
+      const partidaRef = doc(db, "PAR_PRECOTIZACION", idPartida);
       await updateDoc(partidaRef, {
         cantidad: cantidad,
         descripcion: descripcion,
@@ -1600,6 +1600,7 @@ const AgregarRevTecFinanciero = () => {
     setCantidad(cantidad);
     setDescripcion(descripcion);
     setObservacion(observacion);
+    setIdPartida(id);
 
     setShow(true); // Abrir el modal
   };
@@ -1693,24 +1694,24 @@ const AgregarRevTecFinanciero = () => {
         // Construir datos para la tabla dinámica
 
         const tableBody10 = par_levDigital.map((items) => [
-          items.noPartida,
-          items.cantidad,
-          items.descripcion,
-          items.observacion,
+          items.noPartida ?? "",
+          items.cantidad ?? "",
+          items.descripcion ?? "",
+          items.observacion ?? "",
         ]);
         const tableBody30 = listMO.map((itemMO) => [
-          itemMO.noPartidaMO,
-          itemMO.cantidadTrabajadores,
-          itemMO.personal,
-          itemMO.diasTrabajados,
+          itemMO.noPartidaMO ?? "",
+          itemMO.cantidadTrabajadores ?? "",
+          itemMO.personal ?? "",
+          itemMO.diasTrabajados ?? "",
         ]);
         const tableBody20 = par_PreCoti_insu.map((item) => [
-          item.noPartidaPC,
-          item.insumo,
-          item.unidad,
-          item.claveSae,
-          item.proveedor,
-          item.cantidad,
+          item.noPartidaPC ?? "",
+          item.insumo ?? "",
+          item.unidad ?? "",
+          item.claveSae ?? "",
+          item.proveedor ?? "",
+          item.cantidad ?? "",
           item.costoCotizado.toLocaleString("en-US", {
             style: "currency",
             currency: "USD",

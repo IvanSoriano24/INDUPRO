@@ -181,7 +181,7 @@ const EditarPreCotizacion = () => {
     setCantidad(cantidad);
     setDescripcion(descripcion);
     setObservacion(observacion);
-
+    setIdPartida(id);
     setShow(true); // Abrir el modal
   };
   const guardarEdicion = async () => {
@@ -194,6 +194,8 @@ const EditarPreCotizacion = () => {
       });
       setShow(false); // Cierra el modal
       //getParLevDigital(); // Actualiza la tabla
+    } else{
+      alert("Fallo");
     }
   };
   const handleDeleteInsumo = async (noPartida, insumoId) => {
@@ -1673,7 +1675,7 @@ const EditarPreCotizacion = () => {
           </div>
           <br></br>
           <div className="row" style={{ border: "1px solid #000", maxHeight: "240px", overflowY: "auto" }}>
-            <label style={{ color: "red" }}>PARTIDAS POR MANO DE OBRA </label>
+            <label style={{ color: "red" }}>Partidas por Mano de Obra </label>
             <div>
               <br></br>
               <table class="table">
