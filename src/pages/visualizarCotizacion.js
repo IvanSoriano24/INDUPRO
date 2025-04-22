@@ -481,7 +481,10 @@ const VisualizarCotizacion = () => {
     console.log("Cliente:", cliente);
 
     const { folioSiguiente } = (
-      await axios.get("http://localhost:5000/api/obtenerFolio")
+      await axios.get(
+        "http://localhost:5000/api/obtenerFolio"
+        //"/api/obtenerFolio"
+      )
     ).data;
     setFolioSig(folioSiguiente);
 
@@ -492,6 +495,7 @@ const VisualizarCotizacion = () => {
     let clave = cliente.toString(); // sin padStart
     const clie = await axios.get(
       `http://localhost:5000/api/datosClie/${clave}`
+      //`/api/datosClie/${clave}`
     );
 
     const datosCliente = clie.data.datosCliente;
@@ -539,6 +543,7 @@ const VisualizarCotizacion = () => {
       try {
         const response = await axios.get(
           `http://localhost:5000/api/datosInsumoe/${cve_art}`
+          //`/api/datosInsumoe/${cve_art}`
         );
         const datosInsumo = response.data.datosInsumos;
         console.log("🧾 Datos del insumo:", datosInsumo);
@@ -615,7 +620,9 @@ const VisualizarCotizacion = () => {
 
     console.log("CVE_DOC:", CVE_DOC);
 
-    await axios.post("http://localhost:5000/api/guardarPartidas", {
+    await axios.post(
+      "http://localhost:5000/api/guardarPartidas", {
+      //"/api/guardarPartidas", {
       data: dataPartidas,
     });
     
@@ -648,11 +655,15 @@ const VisualizarCotizacion = () => {
     console.log("Cotizacion: ", dataCotizacion);
     const responseCotizacion = await axios.post(
       "http://localhost:5000/api/cotizacion",
+      //"/api/cotizacion",
       dataCotizacion
     );
 
    const { nuevoFolio } = (
-      await axios.get("http://localhost:5000/api/actualizarFolio")
+      await axios.get(
+        "http://localhost:5000/api/actualizarFolio"
+        //"/api/actualizarFolio"
+      )
     ).data;
   };
 
@@ -679,7 +690,10 @@ const VisualizarCotizacion = () => {
       setCliente(clienteEncontrado ? clienteEncontrado.CLAVE : "");
     }, 200);
     const { folioSiguiente } = (
-      await axios.get("http://localhost:5000/api/obtenerFolio")
+      await axios.get(
+        "http://localhost:5000/api/obtenerFolio"
+        //"/api/obtenerFolio"
+      )
     ).data;
     setFolioSae(folioSiguiente);
     setIdMonday(idMonday);

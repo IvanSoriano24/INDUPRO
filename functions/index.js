@@ -182,8 +182,33 @@ app.get("/api/clave-sae", async (req, res) => {
     });
   }
 });
+app.get("/api/claveValidacion/:claveSae", async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+    const { claveSae } = req.params;
 
+    const result = await pool.request()
+      .input("claveSae", sql.VarChar, claveSae)
+      .query(`
+        SELECT CVE_ART
+        FROM INVE01
+        WHERE CVE_ART = @claveSae
+      `);
 
+    if (result.recordset.length === 0) {
+      console.warn("⚠️ No se encontró la clave SAE:", claveSae);
+      return res.status(404).json({ message: "Clave SAE no encontrada" }); // Aquí mandas un json
+    }
+
+    res.status(200).json(result.recordset); // Todo ok ✅
+  } catch (err) {
+    console.error("❌ Error al obtener la Clave SAE:", err);
+    res.status(500).json({
+      error: "Error interno al buscar la Clave SAE",
+      details: err.message,
+    });
+  }
+});
 app.get("/api/obtenerFolio", async (req, res) => {
   try {
     const pool = await sql.connect(config);
