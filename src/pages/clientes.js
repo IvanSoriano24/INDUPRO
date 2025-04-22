@@ -195,7 +195,7 @@ const Clientes = () => {
         show={showAddModalAC}
         onHide={handleCloseContacto} // Ahora limpia al cerrar
         centered
-        scrollable
+        
         size="lg"
       >
         <Modal.Header closeButton>
@@ -206,7 +206,7 @@ const Clientes = () => {
             <div className="row">
               <div className="col-md-6">
                 <div className="mb-4">
-                  <label>CLAVE</label>
+                  <label>Clave</label>
                   <input
                     value={cve_clie}
                     onChange={(e) => setClave(e.target.value)}
@@ -218,7 +218,7 @@ const Clientes = () => {
               </div>
               <div className="col-md-6">
                 <div className="mb-6">
-                  <label className="form-label">NOMBRE</label>
+                  <label className="form-label">Nombre</label>
                   <input
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
@@ -230,7 +230,7 @@ const Clientes = () => {
             </div>
             <div className="row">
               <div className="col-md-6">
-                <label className="form-label">TELEFONO</label>
+                <label className="form-label">Telefono</label>
                 <div className="input-group mb-3">
                   <input
                     value={telefono}
@@ -241,7 +241,7 @@ const Clientes = () => {
                 </div>
               </div>
               <div className="col-md-6">
-                <label className="form-label">CORREO</label>
+                <label className="form-label">Correo</label>
                 <div className="input-group mb-3">
                   <input
                     value={correo}

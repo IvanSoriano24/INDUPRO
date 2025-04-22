@@ -156,7 +156,7 @@ const Tipo = () => {
       <div className="row">
         <div className="col">
           <button className="btn btn-success mb-3" onClick={handleOpenModal}>
-            <CiCirclePlus /> Agregar nuevo servicio
+            <CiCirclePlus /> Agregar Nuevo Servicio
           </button>
           <table className="table">
             <thead>

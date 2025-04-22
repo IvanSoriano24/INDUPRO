@@ -25,6 +25,7 @@ import axios from "axios";
 import swal from "sweetalert";
 import { ModalTitle, Modal, Button } from "react-bootstrap";
 import Select from "react-select";
+import { FaDatabase } from "react-icons/fa";
 
 const VisualizarCotizacion = () => {
   const [cve_tecFin, setCve_tecFin] = useState("");
@@ -879,7 +880,7 @@ const VisualizarCotizacion = () => {
           </button>
           &nbsp; &nbsp;
           <button className="btn btn-success" onClick={handleOpenModal}>
-            <VscFilePdf /> Mandar a SAE
+            <FaDatabase  /> Mandar a SAE
           </button>
         </div>
       </div>

@@ -239,7 +239,7 @@ const PersonalProyectos = () => {
             <div className="mb-3">
               <div class="input-group-append">
                 <button className="btn btn-success" onClick={handleOpenModal}>
-                  <CiCirclePlus /> Agregar nuevo personal
+                  <CiCirclePlus /> Agregar Nuevo Personal
                 </button>
               </div>
             </div>
@@ -322,7 +322,7 @@ const PersonalProyectos = () => {
           <form>
             <div className="row">
               <div className="col-md-3">
-                <label className="form-label">CVE_PEPR</label>
+                <label className="form-label">Clave</label>
                 <input
                   type="text"
                   className="form-control"
@@ -396,7 +396,7 @@ const PersonalProyectos = () => {
           <form>
             <div className="row">
               <div className="col-md-3">
-                <label className="form-label">CVE_PEPR</label>
+                <label className="form-label">Clave</label>
                 <input
                   type="text"
                   className="form-control"

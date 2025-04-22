@@ -111,13 +111,13 @@ const EditarCliente = () => {
                         <NavLink
                         onClick={()=>cambiarTab("1")}
                         className={(activeTab=="1" ? "activeTab baseTap": "baseTap")}
-                        >Información general</NavLink>
+                        >Información General</NavLink>
                     </NavItem>
                     <NavItem>
                         <NavLink
                         onClick={()=>cambiarTab("2")}
                         className={(activeTab=="2" ? "activeTab baseTap": "baseTap")}
-                        >Información comercial</NavLink>
+                        >Información Comercial</NavLink>
                     </NavItem>
                 </Nav>
                 <TabContent activeTab={activeTab}>
@@ -127,7 +127,7 @@ const EditarCliente = () => {
                             
                                 <div className="col-md-3">
                                     <div className="mb-3">
-                                        <label className="form-label">CLAVE</label>
+                                        <label className="form-label">Clave</label>
                                         <input
                                             value={cve_clie}
                                             onChange={(e) => setClave(e.target.value)}
@@ -139,7 +139,7 @@ const EditarCliente = () => {
                                 </div>
                                 <div className="col-md-9 ">
                                     <div className="mb-3">
-                                        <label className="form-label">RAZON SOCIAL</label>
+                                        <label className="form-label">Razon Social</label>
                                         
                                         <input
                                             placeholder="" aria-label="" aria-describedby="basic-addon1"
@@ -165,7 +165,7 @@ const EditarCliente = () => {
                                 </div>
                                 <div className="col-md-4 ">
                                     <div className="mb-3">
-                                        <label className="form-label">CALLE</label>
+                                        <label className="form-label">Calle</label>
                                         
                                         <input
                                             placeholder="" aria-label="" aria-describedby="basic-addon1"
@@ -177,7 +177,7 @@ const EditarCliente = () => {
                                     </div>
                                 </div>
                                 <div className="col-md-4 ">
-                                <label className="form-label">NÚMERO EXTERIOR</label>
+                                <label className="form-label">Número Exterior</label>
                                     <div class="input-group mb-3">
                                         
                                         <input
@@ -193,7 +193,7 @@ const EditarCliente = () => {
                                     </div>
                                 </div>
                                 <div className="col-md-4 ">
-                                <label className="form-label">NÚMERO INTERIOR</label>
+                                <label className="form-label">Número Interior</label>
                                     <div class="input-group mb-3">
                                         
                                         <input
@@ -209,7 +209,7 @@ const EditarCliente = () => {
                                     </div>
                                 </div>
                                 <div className="col-md-8 ">
-                                <label className="form-label">ENTRE CALLE</label>
+                                <label className="form-label">Entre Calle</label>
                                     <div class="input-group mb-3">
                                         
                                         <input
@@ -222,7 +222,7 @@ const EditarCliente = () => {
                                     </div>
                                 </div>
                                 <div className="col-md-4 ">
-                                <label className="form-label">COLONIA</label>
+                                <label className="form-label">Colonia</label>
                                     <div class="input-group mb-3">
                                         
                                         <input
@@ -235,7 +235,7 @@ const EditarCliente = () => {
                                     </div>
                                 </div>
                                 <div className="col-md-8 ">
-                                <label className="form-label">REREFRENCIA</label>
+                                <label className="form-label">Referencia</label>
                                     <div class="input-group mb-3">
                                         
                                         <input
@@ -251,7 +251,7 @@ const EditarCliente = () => {
                                     </div>
                                 </div>
                                 <div className="col-md-4 ">
-                                <label className="form-label">POBLACIÓN</label>
+                                <label className="form-label">Población</label>
                                     <div class="input-group mb-3">
                                         
                                         <input
@@ -267,7 +267,7 @@ const EditarCliente = () => {
                                     </div>
                                 </div>
                                 <div className="col-md-4 ">
-                                <label className="form-label">ESTADO</label>
+                                <label className="form-label">Estado</label>
                                     <div class="input-group mb-3">
                                         
                                         <input
@@ -280,7 +280,7 @@ const EditarCliente = () => {
                                     </div>
                                 </div>
                                 <div className="col-md-4 ">
-                                <label className="form-label">CÓDIGO POSTAL</label>
+                                <label className="form-label">Código Postal</label>
                                     <div class="input-group mb-3">
                                         
                                         <input
@@ -293,7 +293,7 @@ const EditarCliente = () => {
                                     </div>
                                 </div>
                                 <div className="col-md-4 ">
-                                <label className="form-label">PAIS</label>
+                                <label className="form-label">Pais</label>
                                     <div class="input-group mb-3">
                                         
                                         <input
@@ -306,7 +306,7 @@ const EditarCliente = () => {
                                     </div>
                                 </div>
                                 <div className="col-md-4 ">
-                                <label className="form-label">MUNICIPIO</label>
+                                <label className="form-label">Municipio</label>
                                     <div class="input-group mb-3">
                                         
                                         <input
@@ -319,7 +319,7 @@ const EditarCliente = () => {
                                     </div>
                                 </div>
                                 <div className="col-md-4 ">
-                                <label className="form-label">NACIONALIDAD</label>
+                                <label className="form-label">Nacionalidad</label>
                                     <div class="input-group mb-3">          
                                         <input
                                         placeholder="" aria-label="" aria-describedby="basic-addon1"

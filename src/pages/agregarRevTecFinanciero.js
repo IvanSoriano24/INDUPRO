@@ -2158,7 +2158,7 @@ const AgregarRevTecFinanciero = () => {
                 className="btn btn-success"
                 onClick={handleOpenPDF}
               >
-                <VscFilePdf /> Ver PDF
+                <VscFilePdf /> Ver Partidas
               </button>
             </div>
             <br></br>
