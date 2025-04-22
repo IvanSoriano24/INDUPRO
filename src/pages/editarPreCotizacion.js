@@ -990,8 +990,6 @@ const EditarPreCotizacion = () => {
   const updateEncabezado = async (e) => {
     e.preventDefault();
 
-    console.log("Partidas: ", par_preCot);
-    console.log("Insumos: ", par_PreCoti_insu);
     const partidasSinInsumos = par_preCot.filter((partida) => {
       const tieneInsumos = par_PreCoti_insu.some(
         (insumo) => Number(insumo.noPartidaPC) === Number(partida.noPartida)
@@ -1005,6 +1003,7 @@ const EditarPreCotizacion = () => {
         title: "Faltan Datos",
         text: "Hay Partidas sin Insumos:",
       });
+      return;
     }
 
     const bitacora = collection(db, "BITACORA");

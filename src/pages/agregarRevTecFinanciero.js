@@ -856,6 +856,23 @@ const AgregarRevTecFinanciero = () => {
       });
       return; // 🚨 DETIENE la ejecución aquí si faltan datos
     }
+
+    const partidasSinInsumos = par_levDigital.filter((partida) => {
+          const tieneInsumos = par_PreCoti_insu.some(
+            (insumo) => Number(insumo.noPartidaPC) === Number(partida.noPartida)
+          );
+          return !tieneInsumos;
+        });
+        
+        if (partidasSinInsumos.length > 0) {
+          swal.fire({
+            icon: "warning",
+            title: "Faltan Datos",
+            text: "Hay Partidas sin Insumos:",
+          });
+          return;
+        }
+
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))

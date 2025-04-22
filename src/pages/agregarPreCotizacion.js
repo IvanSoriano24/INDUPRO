@@ -238,7 +238,7 @@ const AgregarPreCotizacion = () => {
           noPartida: item.noPartida,
           insumos: [item],
         }));
-
+        transformado.sort((a, b) => a.noPartida - b.noPartida);
         setListPartidas(transformado);
         setList([...list, ...filteredData]);
         setExcelData([]);
@@ -1335,6 +1335,22 @@ const AgregarPreCotizacion = () => {
       });
       return; // 🚨 DETIENE la ejecución aquí si faltan datos
     }
+
+    const partidasSinInsumos = par_levDigital.filter((partida) => {
+          const tieneInsumos = listPartidas.some(
+            (insumo) => Number(insumo.noPartida) === Number(partida.noPartida)
+          );
+          return !tieneInsumos;
+        });
+        
+        if (partidasSinInsumos.length > 0) {
+          swal.fire({
+            icon: "warning",
+            title: "Faltan Datos",
+            text: "Hay Partidas sin Insumos:",
+          });
+          return;
+        }
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
