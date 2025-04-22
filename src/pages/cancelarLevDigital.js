@@ -23,12 +23,10 @@ import { CiCirclePlus } from "react-icons/ci";
 import { MdDelete } from "react-icons/md";
 import { FaPencilAlt } from "react-icons/fa";
 import { ModalTitle, Modal, Button } from "react-bootstrap";
-import { BsExclamationCircleFill } from "react-icons/bs";
 
-const CancelarATF = () => {
+const CancelarPreCotizacion = () => {
   const [cve_precot, setPrecot] = useState("");
   const [par_preCot, setPar_preCot] = useState([]);
-  const [cve_tecFin, setCve_tecFin] = useState("");
 
   const [folios, setFolios] = useState([]);
   const [cve_clie, setCve_clie] = useState("");
@@ -65,14 +63,20 @@ const CancelarATF = () => {
   const [listMO, setListMO] = useState([]);
   const [cantidadTrabajadores, setCantidadTrabajadores] = useState();
   /* ---------------------------------------- LLAMADA A COLECCIONES ---------------------------------------- */
+  const partida_levDig = collection(db, "PAR_LEVDIGITAL");
+  const parPrecotizacion = collection(db, "PAR_PRECOTIZACION");
+  const precotizacioncoleccion = collection(db, "PRECOTIZACION");
+  const parPrecotizacionInsumos = collection(db, "PAR_PRECOTIZACION_INSU");
+  const parPrecotizacionMO = collection(db, "PAR_PRECOTIZACION_MO");
   const navigate = useNavigate();
   const { id } = useParams();
 
   /* ---------------------JALAR INFORMACIÓN DE DOCUMENTO ANTERIOR ------------------------------------- */
   const getFactoresById = async (id) => {
-    const factoresDOC = await getDoc(doc(db, "TECNICOFINANCIERO", id));
+    const factoresDOC = await getDoc(doc(db, "LEVDIGITAL", id));
+    console.log(factoresDOC.data());
     if (factoresDOC.exists()) {
-      setCve_tecFin(factoresDOC.data().cve_tecFin);
+      setPrecot(factoresDOC.data().cve_levDig);
       setCve_clie(factoresDOC.data().cve_clie);
       setFechaElaboracion(factoresDOC.data().fechaElaboracion);
       setFechaInicio(factoresDOC.data().fechaInicio);
@@ -91,8 +95,8 @@ const CancelarATF = () => {
     try {
       const data = await getDocs(
         query(
-          collection(db, "PAR_TECFINANCIERO"),
-          where("cve_tecFin", "==", cve_tecFin)
+          collection(db, "PAR_LEVDIGITAL"),
+          where("cve_levDig", "==", cve_precot)
         )
       );
       //par_preCotList
@@ -114,48 +118,14 @@ const CancelarATF = () => {
 
   useEffect(() => {
     getParPreCot();
-  }, [cve_tecFin]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
-
-  /* ----------------------------------------- OBTENER PARTDIAS DE INSUMOS PARA LA PRECOTIZACIÓN -------------------------*/
-
-  const getParPreCotizacion = async () => {
-    try {
-      const data = await getDocs(
-        query(
-          collection(db, "PAR_TECFINANCIERO_INSU"),
-          where("cve_tecFin", "==", cve_tecFin)
-        )
-      );
-
-      const par_levDigList1 = data.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      console.log("Datos de PAR_PRECOTIZACION:", par_levDigList1);
-      par_levDigList1.sort((a, b) => a.noPartidaPC - b.noPartidaPC);
-      setPar_PreCoti_insu(par_levDigList1);
-      const maxPartida = Math.max(
-        ...par_levDigList1.map((item) => item.noPartidaPC),
-        0
-      );
-      setNoParatidaMO(maxPartida + 1);
-      //(maxPartida + 1);
-      //console.log("max Partida: " + maxPartida)
-    } catch (error) {
-      console.error("Error fetching PAR_LEVDIGITAL data:", error);
-    }
-  };
-
-  useEffect(() => {
-    getParPreCotizacion();
-  }, [cve_tecFin]);
+  }, [cve_precot]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
 
   /* ------------------------------------------------------------------CANCELAR DOCUMENTO ---------------------------- */
-  const handleDelete = async (cve_tecFin) => {
+  const handleDelete = async (cve_precot) => {
     try {
       const q = query(
-        collection(db, "TECNICOFINANCIERO"),
-        where("cve_tecFin", "==", cve_tecFin)
+        collection(db, "LEVDIGITAL"),
+        where("cve_levDig", "==", cve_precot)
       );
       const querySnapshot = await getDocs(q);
       const bitacora = collection(db, "BITACORA");
@@ -166,9 +136,8 @@ const CancelarATF = () => {
       const segundo = ahora.getSeconds();
       const formattedDate = today.toLocaleDateString(); // Opcional: Puedes pasar opciones de formato
       const horaFormateada = `${hora}:${minuto}:${segundo}`;
-
       await addDoc(bitacora, {
-        cve_Docu: cve_tecFin,
+        cve_Docu: cve_precot,
         tiempo: horaFormateada,
         fechaRegistro: formattedDate,
         tipoDocumento: "Cancelación de documento",
@@ -177,25 +146,15 @@ const CancelarATF = () => {
       // Si se encuentra un documento que coincide con los identificadores proporcionados, actualiza su estatus
       if (!querySnapshot.empty) {
         const docSnap = querySnapshot.docs[0]; // Suponiendo que solo hay un documento que coincide con los criterios de consulta
-        const factoresRef = doc(db, "TECNICOFINANCIERO", docSnap.id);
+        const factoresRef = doc(db, "LEVDIGITAL", docSnap.id);
 
         // Actualiza el estatus del documento
         const datos = {
           estatus: "Cancelado",
         };
         await updateDoc(factoresRef, datos);
-        // Obtener el documento COTIZACION por cve_tecFin
-        const levDigQuery = query(
-          collection(db, "PRECOTIZACION"),
-          where("docSig", "==", cve_tecFin)
-        );
-        const levDigSnapshot = await getDocs(levDigQuery);
-        levDigSnapshot.forEach(async (doc) => {
-          // Actualizar el estatus del documento LEVDIGITAL anterior a 'Activo'
-          await updateDoc(doc.ref, { estatus: "Activo" });
-        });
         // No se recomienda recargar la página; en su lugar, puedes manejar la actualización del estado localmente
-        navigate("/revTecnicoFinanciero");
+        navigate("/levantamientoDigital");
       } else {
         console.log(
           "No se encontró ningún documento que coincida con los identificadores proporcionados."
@@ -205,17 +164,16 @@ const CancelarATF = () => {
       console.error("Error al actualizar el estatus:", error);
     }
   };
-
-  const mostrarAlerta = (cve_tecFin) => {
+  const mostrarAlerta = (cve_precot) => {
     swal({
       title: "Estás segudo de cancelar?",
-      text: "Una vez cancelado el documento no podrás hacer uso de el.",
+      text: "Una vez cancelado el documento no podrás hacer uso de el y solo podrás consultarlo!",
       icon: "warning",
       buttons: true,
       dangerMode: true,
     }).then((willDelete) => {
       if (willDelete) {
-        handleDelete(cve_tecFin);
+        handleDelete(cve_precot);
         swal("¡El documento ha sido cancelado exitosamente!", {
           icon: "success",
         });
@@ -229,25 +187,23 @@ const CancelarATF = () => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1 style={{ color: "red" }}>
-            <BsExclamationCircleFill /> Cancelar cotización
-          </h1>
+          <h1>Cancelar Levantamiento Digital</h1>
           <div className="row">
             <div className="col-md-4">
               <div className="mb-3">
-                <label className="form-label">FOLIO</label>
+                <label className="form-label">Folio</label>
                 <input
                   className="form-control"
                   id="inputFolioSecuencial"
                   type="text"
-                  value={cve_tecFin}
+                  value={cve_precot}
                   onChange={(e) => setPrecot(e.target.value)}
                   readOnly
                 />
               </div>
             </div>
             <div className="col-md-4 ">
-              <label className="form-label">CLIENTE</label>
+              <label className="form-label">Cliente</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -263,7 +219,7 @@ const CancelarATF = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE ELABORACIÓN</label>
+              <label className="form-label">Fecha de Elaboración</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -279,7 +235,7 @@ const CancelarATF = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE INICIO</label>
+              <label className="form-label">Fecha de Inicio</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -295,7 +251,7 @@ const CancelarATF = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA FIN</label>
+              <label className="form-label">Fecha Fin</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -339,9 +295,9 @@ const CancelarATF = () => {
           <br></br>
           <button
             className="btn btn-danger"
-            onClick={() => mostrarAlerta(cve_tecFin)}
+            onClick={() => mostrarAlerta(cve_precot)}
           >
-            <HiMiniDocumentMinus /> Cancelar documento
+            <HiMiniDocumentMinus /> Cancelar Documento
           </button>
         </div>
       </div>
@@ -349,4 +305,4 @@ const CancelarATF = () => {
   );
 };
 
-export default CancelarATF;
+export default CancelarPreCotizacion;

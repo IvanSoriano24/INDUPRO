@@ -24,6 +24,7 @@ const SegDocLevDig = () => {
     const[estatus, setEstatus] = useState("Bloqueado");
     const [precotizacionList, setPrecotizacionList] = useState([])
     const [analsisTFList, setAnalsisTFList] = useState([])
+     const [cotizacion, setCotizacion] = useState([])
     const navigate = useNavigate()
     const { id } = useParams();
 
@@ -148,6 +149,35 @@ const SegDocLevDig = () => {
           })
         }
 
+        const getCotizacion= async () => {
+          try {
+              const data = await getDocs(
+              query(collection(db, "COTIZACION"), where("cve_tecFin", "==", docSigATF)) 
+              );
+              const par_levDigList = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+              setCotizacion(par_levDigList);
+          } catch (error) {
+              console.error("Error fetching PAR_LEVDIGITAL data:", error);
+          }
+          };
+        useEffect(() => {
+          getCotizacion();
+        }, [docSigATF]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
+        const estatusCot = cotizacion.length > 0 ? cotizacion[0].estatus : "No hay Cotizacion";
+        const docAntCot = cotizacion.length > 0 ? cotizacion[0].docAnt : "No hay Cotizacion";
+        const docSigCot = cotizacion.length > 0 ? cotizacion[0].docSig : "No hay Cotizacion";
+        
+        const mostrarCotizacion=()=>{
+          const cveCot = cotizacion.length > 0 ? cotizacion[0].cve_tecFin : "No hay Cotizacion";
+            
+            swal({
+              title: "Seguimiento de documento",
+              text: "Documento consultado: " +  cveCot  + "\n" + "Documento anterior: " + docSigPC + "\n" + "Documento siguiente: " + "N/A" + "\n" + "Estatus: " + estatusCot, 
+              icon: "info",
+              buttons: "Aceptar"
+            })
+          }  
+
   return (
     <div className="container">
       <div className="row">
@@ -156,24 +186,24 @@ const SegDocLevDig = () => {
           <div className="row" style={{ border: '1px solid #000', borderColor: "gray" }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '100px' }} onClick={mostrarAlerta}>
-              <MdEditDocument className="me-2" style={{ fontSize: '80px', color: estatus === 'Bloqueado' ? 'green' : 'black' }} />
-              <span style={{ fontSize: '20px', color: estatus === 'Bloqueado' ? 'green' : 'black' }}>Levantamiento</span>
-              <span style={{ fontSize: '20px', color: estatus === 'Bloqueado' ? 'green' : 'black' }}>digital</span>
+              <MdEditDocument className="me-2" style={{ fontSize: '80px', color: estatus === "Cancelado" ? "red" : estatus === "Bloqueado" ? "green" : "black", }} />
+              <span style={{ fontSize: '20px', color: estatus === "Cancelado" ? "red" : estatus === "Bloqueado" ? "green" : "black", }}>Levantamiento</span>
+              <span style={{ fontSize: '20px', color: estatus === "Cancelado" ? "red" : estatus === "Bloqueado" ? "green" : "black", }}>digital</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '100px' }} onClick={mostrarPreCotizacion}>
-              <IoDocumentText className="me-2" style={{ fontSize: '80px', color: estatusPC === 'Bloqueado' ? 'green' : 'black' }} />
-              <span style={{ fontSize: '20px', color: estatusPC === 'Bloqueado' ? 'green' : 'black' }}>Pre</span>
-              <span style={{ fontSize: '20px', color: estatusPC === 'Bloqueado' ? 'green' : 'black' }}>Cotización</span>
+              <IoDocumentText className="me-2" style={{ fontSize: '80px', color: estatusPC === "Cancelado" ? "red" : estatusPC === "Bloqueado" ? "green" : "black", }} />
+              <span style={{ fontSize: '20px', color: estatusPC === "Cancelado" ? "red" : estatusPC === "Bloqueado" ? "green" : "black", }}>Pre</span>
+              <span style={{ fontSize: '20px', color: estatusPC === "Cancelado" ? "red" : estatusPC === "Bloqueado" ? "green" : "black", }}>Cotización</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '100px' }} onClick={mostrarAnalisTecnico}>
-              <TbDeviceAnalytics   className="me-2" style={{ fontSize: '80px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }} />
-              <span style={{ fontSize: '20px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }} >Análsis ténico</span>
-              <span style={{ fontSize: '20px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }}>financiero</span>
+              <TbDeviceAnalytics   className="me-2" style={{ fontSize: '80px', color: estatusATF === "Cancelado" ? "red" : estatusATF === "Bloqueado" ? "green" : "black", }} />
+              <span style={{ fontSize: '20px', color: estatusATF === "Cancelado" ? "red" : estatusATF === "Bloqueado" ? "green" : "black", }} >Análsis ténico</span>
+              <span style={{ fontSize: '20px', color: estatusATF === "Cancelado" ? "red" : estatusATF === "Bloqueado" ? "green" : "black", }}>financiero</span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '100px' }}>
-              <IoDocumentText className="me-2" style={{ fontSize: '80px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }} />
-              <span style={{ fontSize: '20px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }}>Cotización</span>
-              <span style={{ fontSize: '20px', color: estatusATF === 'Bloqueado' ? 'green' : 'black' }}>terminada</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: '100px' }} onClick={mostrarCotizacion}>
+              <IoDocumentText className="me-2" style={{ fontSize: '80px', color: estatusCot === "Cancelado" ? "red" : estatusCot === "Bloqueado" ? "green" : "black", }} />
+              <span style={{ fontSize: '20px', color: estatusCot === "Cancelado" ? "red" : estatusCot === "Bloqueado" ? "green" : "black", }}>Cotización</span>
+              <span style={{ fontSize: '20px', color: estatusCot === "Cancelado" ? "red" : estatusCot === "Bloqueado" ? "green" : "black", }}>terminada</span>
             </div>
           </div>
 

@@ -985,8 +985,36 @@ const EditarPreCotizacion = () => {
   }, []); // 🔹 Eliminamos `manoObra` de las dependencias
 
   /* ------------------------------------ - AGREGAR NUEVO DOCUMENTO -------------------------------*/
+  
+  
   const updateEncabezado = async (e) => {
     e.preventDefault();
+
+    console.log("Partidas: ", par_preCot);
+    console.log("Insumos: ", par_PreCoti_insu);
+    const partidasSinInsumos = par_preCot.filter((partida) => {
+      const tieneInsumos = par_PreCoti_insu.some(
+        (insumo) => Number(insumo.noPartidaPC) === Number(partida.noPartida)
+      );
+      return !tieneInsumos;
+    });
+    
+    if (partidasSinInsumos.length > 0) {
+      console.warn("⚠️ Partidas sin insumos:", partidasSinInsumos);
+    } else {
+      console.log("✅ Todas las partidas tienen al menos un insumo.");
+    }
+    
+
+    /*if (!listPartidas || listPartidas.length === 0) {
+          swal.fire({
+            icon: "warning",
+            title: "Faltan Datos",
+            text: "Debes seleccionar datos de insumos y/o mano de obra para continuar.",
+          });
+          return; // 🚨 DETIENE la ejecución aquí si faltan datos
+        }*/
+       return;
     const bitacora = collection(db, "BITACORA");
     const today = new Date();
     const ahora = new Date();
@@ -1835,22 +1863,35 @@ const EditarPreCotizacion = () => {
               <div className="col-md-6">
                 <div className="mb-4">
                   <label>Clave SAE</label>
-                  <select
-                    className="form-control"
-                    value={claveSae}
-                    onChange={(e) => setClaveSae(e.target.value)}
-                  >
-                    <option value="">Seleccionar...</option>
-                    {Array.isArray(clavesSAE) && clavesSAE.length > 0 ? (
-                      clavesSAE.map((item, index) => (
-                        <option key={index} value={item.clave}>
-                          {item.descripcion}
-                        </option>
-                      ))
-                    ) : (
-                      <option disabled>No hay claves disponibles</option>
-                    )}
-                  </select>
+                  <Select
+                    options={clavesSAE.map((prov) => ({
+                      value: prov.clave,
+                      label: prov.descripcion,
+                    }))}
+                    value={
+                      claveSae
+                        ? {
+                            value: claveSae,
+                            label:
+                              clavesSAE.find((prov) => prov.clave === claveSae)
+                                ?.descripcion || "",
+                          }
+                        : null
+                    }
+                    onChange={(selectedOption) => {
+                      console.log(
+                        "🔹 Nuevo insumo seleccionado:",
+                        selectedOption
+                      );
+                      setClaveSae(selectedOption.value);
+                    }}
+                    placeholder="Buscar proveedor..."
+                    menuPortalTarget={document.body} // Renderiza fuera del modal
+                    menuPlacement="auto" // Ajusta la posición automáticamente
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                    }}
+                  />
                 </div>
               </div>
               <div className="col-md-6">

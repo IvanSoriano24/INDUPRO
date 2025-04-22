@@ -183,7 +183,7 @@ const CancelarCotizacion = () => {
 
         // Actualiza el estatus del documento
         const datos = {
-          estatus: "Bloqueado",
+          estatus: "Cancelado",
         };
         await updateDoc(factoresRef, datos);
         // Obtener el documento COTIZACION por cve_tecFin

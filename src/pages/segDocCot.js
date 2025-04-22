@@ -109,10 +109,10 @@ const SegDocRev = () => {
         ...doc.data(),
         id: doc.id,
       }));
-      par_levDigList.sort((a, b) => a.noPartida - b.noPartida);
+      par_levDigList.sort((a, b) => a.noPartidaATF - b.noPartidaATF);
       setPar_rev(par_levDigList);
       const maxPartida = Math.max(
-        ...par_levDigList.map((item) => item.noPartida),
+        ...par_levDigList.map((item) => item.noPartidaATF),
         0
       );
       setNoPartida(maxPartida + 1);
@@ -349,13 +349,21 @@ const mostrarAlerta = () => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusLev === "Bloqueado" ? "green" : "black",
+                    color: estatusLev === "Cancelado"
+                    ? "red"
+                    : estatusLev === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusLev === "Bloqueado" ? "green" : "black",
+                    color: estatusLev === "Cancelado"
+                    ? "red"
+                    : estatusLev === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   Levantamiento
@@ -363,7 +371,11 @@ const mostrarAlerta = () => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusLev === "Bloqueado" ? "green" : "black",
+                    color: estatusLev === "Cancelado"
+                    ? "red"
+                    : estatusLev === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   digital
@@ -382,13 +394,21 @@ const mostrarAlerta = () => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusPC === "Bloqueado" ? "green" : "black",
+                    color: estatusPC  === "Cancelado"
+                    ? "red"
+                    : estatusPC === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusPC === "Bloqueado" ? "green" : "black",
+                    color: estatusPC  === "Cancelado"
+                    ? "red"
+                    : estatusPC === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   Pre
@@ -396,7 +416,11 @@ const mostrarAlerta = () => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusPC === "Bloqueado" ? "green" : "black",
+                    color: estatusPC  === "Cancelado"
+                    ? "red"
+                    : estatusPC === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   Cotización
@@ -415,13 +439,21 @@ const mostrarAlerta = () => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusATF === "Bloqueado" ? "green" : "black",
+                    color: estatusATF === "Cancelado"
+                    ? "red"
+                    : estatusATF === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusATF === "Bloqueado" ? "green" : "black",
+                    color: estatusATF === "Cancelado"
+                    ? "red"
+                    : estatusATF === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   Análsis ténico
@@ -429,7 +461,11 @@ const mostrarAlerta = () => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusATF === "Bloqueado" ? "green" : "black",
+                    color: estatusATF === "Cancelado"
+                    ? "red"
+                    : estatusATF === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   financiero
@@ -448,13 +484,21 @@ const mostrarAlerta = () => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatus === "Bloqueado" ? "green" : "black",
+                    color: estatus === "Cancelado"
+                    ? "red"
+                    : estatus === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatus === "Bloqueado" ? "green" : "black",
+                    color: estatus === "Cancelado"
+                    ? "red"
+                    : estatus === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   Cotización
@@ -462,7 +506,11 @@ const mostrarAlerta = () => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatus === "Bloqueado" ? "green" : "black",
+                    color: estatus === "Cancelado"
+                    ? "red"
+                    : estatus === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   terminada
@@ -473,7 +521,7 @@ const mostrarAlerta = () => {
           {/*FIN*/}
           <div className="row">
             <div className="col-md-4 ">
-              <label className="form-label">CLIENTE</label>
+              <label className="form-label">Cliente</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -489,7 +537,7 @@ const mostrarAlerta = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE ELABORACIÓN</label>
+              <label className="form-label">Fecha de Elaboración</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -510,7 +558,7 @@ const mostrarAlerta = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE INICIO</label>
+              <label className="form-label">Fecha de Inicio</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -526,7 +574,7 @@ const mostrarAlerta = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA FIN</label>
+              <label className="form-label">Fecha Fin</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -547,8 +595,8 @@ const mostrarAlerta = () => {
               <thead>
                 <tr>
                   <th scope="col">No. PARTIDA</th>
-                  <th scope="col">DESCRIPCIÓN</th>
-                  <th scope="col">observaciones</th>
+                  <th scope="col">Descripción</th>
+                  <th scope="col">Observaciones</th>
                 </tr>
               </thead>
               <tbody>

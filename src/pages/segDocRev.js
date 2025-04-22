@@ -339,13 +339,21 @@ useEffect(() => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusLev === "Bloqueado" ? "green" : "black",
+                    color: estatusLev  === "Cancelado"
+                    ? "red"
+                    : estatusLev === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusLev === "Bloqueado" ? "green" : "black",
+                    color: estatusLev  === "Cancelado"
+                    ? "red"
+                    : estatusLev === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   Levantamiento
@@ -353,7 +361,11 @@ useEffect(() => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusLev === "Bloqueado" ? "green" : "black",
+                    color: estatusLev  === "Cancelado"
+                    ? "red"
+                    : estatusLev === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   digital
@@ -372,13 +384,21 @@ useEffect(() => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusPC === "Bloqueado" ? "green" : "black",
+                    color: estatusPC === "Cancelado"
+                    ? "red"
+                    : estatusPC === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusPC === "Bloqueado" ? "green" : "black",
+                    color: estatusPC === "Cancelado"
+                    ? "red"
+                    : estatusPC === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   Pre
@@ -386,7 +406,11 @@ useEffect(() => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusPC === "Bloqueado" ? "green" : "black",
+                    color: estatusPC === "Cancelado"
+                    ? "red"
+                    : estatusPC === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   Cotización
@@ -405,13 +429,21 @@ useEffect(() => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatus === "Bloqueado" ? "green" : "black",
+                    color: estatus === "Cancelado"
+                    ? "red"
+                    : estatus === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatus === "Bloqueado" ? "green" : "black",
+                    color: estatus === "Cancelado"
+                    ? "red"
+                    : estatus === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   Análsis ténico
@@ -419,7 +451,11 @@ useEffect(() => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatus === "Bloqueado" ? "green" : "black",
+                    color: estatus === "Cancelado"
+                    ? "red"
+                    : estatus === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   financiero
@@ -438,13 +474,21 @@ useEffect(() => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusCot === "Bloqueado" ? "green" : "black",
+                    color: estatusCot === "Cancelado"
+                    ? "red"
+                    : estatusCot === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusCot === "Bloqueado" ? "green" : "black",
+                    color: estatusCot === "Cancelado"
+                    ? "red"
+                    : estatusCot === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   Cotización
@@ -452,7 +496,11 @@ useEffect(() => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusCot === "Bloqueado" ? "green" : "black",
+                    color: estatusCot === "Cancelado"
+                    ? "red"
+                    : estatusCot === "Bloqueado"
+                    ? "green"
+                    : "black",
                   }}
                 >
                   terminada
@@ -462,7 +510,7 @@ useEffect(() => {
           </div>
           <div className="row">
             <div className="col-md-4 ">
-              <label className="form-label">CLIENTE</label>
+              <label className="form-label">Cliente</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -478,7 +526,7 @@ useEffect(() => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE ELABORACIÓN</label>
+              <label className="form-label">Fecha de Elaboración</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -499,7 +547,7 @@ useEffect(() => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE INICIO</label>
+              <label className="form-label">Fecha de Inicio</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -515,7 +563,7 @@ useEffect(() => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA FIN</label>
+              <label className="form-label">Fecha Fin</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -536,8 +584,8 @@ useEffect(() => {
               <thead>
                 <tr>
                   <th scope="col">No. PARTIDA</th>
-                  <th scope="col">DESCRIPCIÓN</th>
-                  <th scope="col">observaciones</th>
+                  <th scope="col">Descripción</th>
+                  <th scope="col">Observaciones</th>
                 </tr>
               </thead>
               <tbody>

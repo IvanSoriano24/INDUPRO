@@ -67,7 +67,7 @@ const Cotizacion = () => {
     const getLevDigitalBloqueadas = async () => {
         const levDigitalListB = [];
         const levDigitalCollection = collection(db, "COTIZACION");
-        const levDigital = query(levDigitalCollection, "COTIZACION", where("estatus", "==", "Bloqueado"));
+        const levDigital = query(levDigitalCollection, "COTIZACION", where("estatus", "==", "Cancelado"));
         const levDigitalSnapshot = await getDocs(levDigital);
 
         for (const levDigitalDoc of levDigitalSnapshot.docs) {
@@ -122,7 +122,7 @@ const Cotizacion = () => {
                 onClick={()=>cambiarTab("1")}
                 className={(activeTab=="1" ? "activeTab baseTap": "baseTap")}
                 >
-                    ACTIVAS
+                    Activas
                 </NavLink>
             </NavItem>
             <NavItem>
@@ -130,7 +130,7 @@ const Cotizacion = () => {
                 onClick={()=>cambiarTab("2")}
                 className={(activeTab=="2" ? "activeTab baseTap": "baseTap")}
                 >
-                    CANCELEDAS
+                    Canceladas
                 </NavLink>
             </NavItem>
             
@@ -178,10 +178,10 @@ const Cotizacion = () => {
                     <table className="table">
                         <thead>
                             <tr>
-                                <th style={{ padding: '10px' }}>FOLIO</th>
-                                <th style={{ padding: '10px' }}>CLEINTE</th>
-                                <th style={{ padding: '10px' }}>ESTATUS</th>
-                                <th style={{ padding: '10px' }}>FECHA</th>
+                                <th style={{ padding: '10px' }}>Folio</th>
+                                <th style={{ padding: '10px' }}>Cliente</th>
+                                <th style={{ padding: '10px' }}>Estatus</th>
+                                <th style={{ padding: '10px' }}>Fecha</th>
                                 <th style={{ padding: '7px' }}>Seguimiento de Documento<button><FaCircleQuestion /></button></th>
                             </tr>
                         </thead>

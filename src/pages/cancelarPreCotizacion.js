@@ -184,7 +184,7 @@ const CancelarPreCotizacion = () => {
                       
                       // Actualiza el estatus del documento
                       const datos = {
-                        estatus: "Bloqueado"
+                        estatus: "Cancelado"
                       };
                       await updateDoc(factoresRef, datos);
                       // Actualizar el estatus en la colección par_PreCoti_insu

@@ -614,6 +614,7 @@ const calcularCotizacion = async () => {
     };
     await updateDoc(preCotizacionRef, datos);
   };
+  
   const asegurarCotizacion = () => {
     swal({
       title: "Estás seguro de aprobar la cotización?",

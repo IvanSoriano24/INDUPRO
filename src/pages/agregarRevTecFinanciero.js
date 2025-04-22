@@ -2417,22 +2417,35 @@ const AgregarRevTecFinanciero = () => {
               <div className="col-md-6">
                 <div className="mb-4">
                   <label>Clave SAE</label>
-                  <select
-                    className="form-control"
-                    value={claveSae}
-                    onChange={(e) => setClaveSae(e.target.value)}
-                  >
-                    <option value="">Seleccionar...</option>
-                    {Array.isArray(clavesSAE) && clavesSAE.length > 0 ? (
-                      clavesSAE.map((item, index) => (
-                        <option key={index} value={item.clave}>
-                          {item.descripcion}
-                        </option>
-                      ))
-                    ) : (
-                      <option disabled>No hay claves disponibles</option>
-                    )}
-                  </select>
+                  <Select
+                    options={clavesSAE.map((prov) => ({
+                      value: prov.clave,
+                      label: prov.descripcion,
+                    }))}
+                    value={
+                      claveSae
+                        ? {
+                            value: claveSae,
+                            label:
+                              clavesSAE.find((prov) => prov.clave === claveSae)
+                                ?.descripcion || "",
+                          }
+                        : null
+                    }
+                    onChange={(selectedOption) => {
+                      console.log(
+                        "🔹 Nuevo insumo seleccionado:",
+                        selectedOption
+                      );
+                      setClaveSae(selectedOption.value);
+                    }}
+                    placeholder="Buscar proveedor..."
+                    menuPortalTarget={document.body} // Renderiza fuera del modal
+                    menuPlacement="auto" // Ajusta la posición automáticamente
+                    styles={{
+                      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                    }}
+                  />
                 </div>
               </div>
               <div className="col-md-6">

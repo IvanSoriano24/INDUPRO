@@ -70,6 +70,7 @@ import CancelarATF from './pages/cancelarATF';
 import VisualizarCotizacion from './pages/visualizarCotizacion';
 import { useEffect, useState } from 'react';
 import CancelarCotizacion from './pages/cancelarCotizacion';
+import CancelarLevDigital from './pages/cancelarLevDigital';
 
 function App() {
   //const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -166,6 +167,7 @@ function App() {
             <Route path="/visualizarPDF/:id" element={<VisualizarPDF />} />
             <Route path="/cancelarATF/:id" element={<CancelarATF />} />
             <Route path="/cancelarCotizacion/:id" element={<CancelarCotizacion />} />
+            <Route path="/cancelarLevDigital/:id" element={<CancelarLevDigital />} />
             <Route path="/visualizarCotizacion/:id" element={<VisualizarCotizacion />} />
 
           </Routes>
