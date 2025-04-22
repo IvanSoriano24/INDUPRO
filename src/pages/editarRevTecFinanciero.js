@@ -659,64 +659,67 @@ const openModal = async (noPartida) => {
               <table class="table">
                 <thead>
                   <tr>
-                    <th scope="col">No. Partida</th>
-                    <th scope="col">Cantidad</th>
-                    <th scope="col">Insumo</th>                    
-                    <th scope="col">Valor de insumos</th>                    
-                    <th scope="col">Indirecto</th>
-                    <th scope="col">Factor Indirecto</th>
-                    <th scope="col">Costo Unitario</th>
-                    <th scope="col">Costo Factorizado</th>
-                    <th scope="col">Factor utilidad</th>
-                    <th scope="col">Precio por Partida</th>
-                    <th scope="col">Utilidad Esperada</th>
+                    <th scope="col">No. Partida</th> {/*1*/}
+                    <th scope="col">Cantidad</th> {/*2*/}
+                    <th scope="col">Insumo</th>          {/*3*/}           
+                    <th scope="col">Valor de insumos</th>   {/*4*/}                  
+                    <th scope="col">Indirecto</th>  {/*5*/}
+                    <th scope="col">Costo Integrado</th> {/*6*/} {/*AQUI*/}
+                    <th scope="col">Factor utilidad</th> {/*9*/}
+                    <th scope="col">Precio por Partida</th> {/*10*/}
+                    <th scope="col">Precio Unitario</th> 
                     <th scope="col">Editar</th>
                   </tr>
                 </thead>
                 <tbody>
                   {totalesDoc.map((itemTotal, indexPC) => (
                     <tr key={indexPC}>
-                      <td>{itemTotal.noPartidaATF}</td>
-                      <td>{itemTotal.cantidad}</td>
-                      <td>
+                      <td>{itemTotal.noPartidaATF}</td> {/*1*/}
+                      <td>{itemTotal.cantidad}</td> {/*2*/}
+                      <td style={{ textAlign: "right" }}>
                         {(itemTotal.totalInsumo * 1).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
-                      </td>
-                      <td>
-                        {(itemTotal.valorInsumos * 1).toLocaleString("en-US", {
+                      </td> {/*3*/}
+                      <td style={{ textAlign: "right" }}>
+                        {((itemTotal.totalInsumo * 1) * itemTotal.cantidad).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
-                      </td>
-                      <td>{itemTotal.costoFijoPorcentaje}%</td>
-                      <td>{itemTotal.factorIndirectoPorcentaje}%</td>
-                      <td>
+                      </td> {/*4*/}
+                      <td style={{ textAlign: "center" }}>{itemTotal.costoFijoPorcentaje}%</td> {/*5*/}
+                      <td style={{ textAlign: "right" }}>
+                        {((1 + (itemTotal.costoFijoPorcentaje/100) ) * ((itemTotal.totalInsumo * 1) * itemTotal.cantidad)).toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })}
+                      </td> {/*6*/}
+                      {/*<td style={{ textAlign: "right" }}>
                         {(itemTotal.costoUnitario * 1).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
-                      </td>
-                      <td>
+                      </td> */}
+                      {/*<td style={{ textAlign: "right" }}>
                         {(itemTotal.costoFactorizado * 1).toLocaleString(
                           "en-US",
                           { style: "currency", currency: "USD" }
                         )}
-                      </td>
-                      <td>{itemTotal.utilidadPorcentaje}%</td>
-                      <td>
-                        {(itemTotal.precioXpartida * 1).toLocaleString(
+                      </td>*/} {/*8*/}
+                      <td style={{ textAlign: "center" }}>{itemTotal.utilidadPorcentaje}%</td> {/*9*/}
+                      <td style={{ textAlign: "right" }}>
+                        {(((1 + (itemTotal.costoFijoPorcentaje/100) ) * ((itemTotal.totalInsumo * 1) * itemTotal.cantidad)) / (1 - (itemTotal.utilidadPorcentaje/100))).toLocaleString(
                           "en-US",
                           { style: "currency", currency: "USD" }
                         )}
-                      </td>
-                      <td>
-                        {(itemTotal.utilidaEsperada * 1).toLocaleString(
+                      </td> {/*10*/}
+                      <td style={{ textAlign: "right" }}>
+                        {(((1 + (itemTotal.costoFijoPorcentaje/100) ) * ((itemTotal.totalInsumo * 1) * itemTotal.cantidad)) / (1 - (itemTotal.utilidadPorcentaje/100))/itemTotal.cantidad).toLocaleString(
                           "en-US",
                           { style: "currency", currency: "USD" }
                         )}
-                      </td>
+                      </td> {/*11*/}
                       <td>
                         <button
                           className="btn btn-primary"

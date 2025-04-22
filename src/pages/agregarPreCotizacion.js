@@ -130,9 +130,12 @@ const AgregarPreCotizacion = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const [modoModal, setModoModal] = useState("Crear");
+
   /*******************************************************************/
   const [excelData, setExcelData] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
+  const inputFileRef = useRef(null); // 👈 Creamos referencia
   /*******************************************************************/
   /*----------------------------------------------------------*/
   /*const handleFileUpload = (event) => {
@@ -146,6 +149,11 @@ const AgregarPreCotizacion = () => {
     processExcelFile();
     handleAddFromExcel();
   };*/
+  const limpiarArchivo = () => {
+    if (inputFileRef.current) {
+      inputFileRef.current.value = ""; // 👈 Limpiar el valor
+    }
+  };
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -161,11 +169,11 @@ const AgregarPreCotizacion = () => {
         const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
         const headers = jsonData[0];
-        let isValid = true;
+        const filteredData = [];
         let prevPartida = 0;
         let partidasConError = [];
+        let isValid = true;
 
-        const filteredData = [];
         for (let index = 0; index < jsonData.slice(1).length; index++) {
           const row = jsonData.slice(1)[index];
           const noPartida = String(row[0] || 0).trim();
@@ -178,26 +186,43 @@ const AgregarPreCotizacion = () => {
           const cantidad = String(row[7] || 0).trim();
           const costoCotizado = String(row[8] || 0).trim();
 
+          const filaExcel = index + 2; // Recuerda que empieza en fila 2
+
+          // 🔵 Validar cada campo y agregar mensajes específicos
           if (!validarInsumo(insumo)) {
             isValid = false;
-            partidasConError.push(noPartida || `Fila ${index + 2}`);
+            partidasConError.push(
+              `Error en la fila ${filaExcel}: Insumo no válido (${insumo})`
+            );
           }
+
           if (!validarUnidad(unidad)) {
             isValid = false;
-            partidasConError.push(noPartida || `Fila ${index + 2}`);
+            partidasConError.push(
+              `Error en la fila ${filaExcel}: Unidad no válida (${unidad})`
+            );
           }
+
           if (!validarCantidad(cantidad)) {
             isValid = false;
-            partidasConError.push(noPartida || `Fila ${index + 2}`);
+            partidasConError.push(
+              `Error en la fila ${filaExcel}: La cantidad debe ser mayor o igual a 0`
+            );
           }
+
           if (!validarCosto(costoCotizado)) {
             isValid = false;
-            partidasConError.push(noPartida || `Fila ${index + 2}`);
+            partidasConError.push(
+              `Error en la fila ${filaExcel}: El costo debe ser mayor a 0`
+            );
           }
-          if (!(await validarClaveSae(claveSae))) {
-            console.log("1");
+
+          const claveValida = await validarClaveSae(claveSae);
+          if (!claveValida) {
             isValid = false;
-            partidasConError.push(noPartida || `Fila ${index + 2}`);
+            partidasConError.push(
+              `Error en la fila ${filaExcel}: CLAVE SAE no válida (${claveSae})`
+            );
           }
 
           prevPartida = parseInt(noPartida);
@@ -215,12 +240,11 @@ const AgregarPreCotizacion = () => {
           });
         }
 
+        // 🔵 Mostrar los errores
         if (!isValid) {
           swal.fire({
-            title: "Error en validación",
-            text: `Las siguientes partidas tienen errores: ${partidasConError.join(
-              ", "
-            )}`,
+            title: "Errores detectados en el archivo",
+            html: partidasConError.join("<br>"),
             icon: "error",
           });
           return;
@@ -250,7 +274,6 @@ const AgregarPreCotizacion = () => {
       alert("Por favor, selecciona un archivo.");
     }
   };
-
   const validarInsumo = (Insumo) => {
     if (
       Insumo == "Subcontratos" ||
@@ -906,6 +929,7 @@ const AgregarPreCotizacion = () => {
   };
   const handleOpenModal = async (noPartida) => {
     limpiarCampos();
+    setModoModal("Crear");
     try {
       const partidaSeleccionada = par_levDigital.find(
         (item) => item.noPartida === noPartida
@@ -961,7 +985,7 @@ const AgregarPreCotizacion = () => {
     setUnidad("servicio");
   };
   const handleEditInsumo = async (partida, insumo) => {
-
+    setModoModal("Editar");
     setInsumo(insumo.insumo);
     setCantidad(insumo.cantidad);
     setUnidad(insumo.unidad);
@@ -1334,20 +1358,20 @@ const AgregarPreCotizacion = () => {
     }
 
     const partidasSinInsumos = par_levDigital.filter((partida) => {
-          const tieneInsumos = listPartidas.some(
-            (insumo) => Number(insumo.noPartida) === Number(partida.noPartida)
-          );
-          return !tieneInsumos;
-        });
-        
-        if (partidasSinInsumos.length > 0) {
-          swal.fire({
-            icon: "warning",
-            title: "Faltan Datos",
-            text: "Hay Partidas sin Insumos:",
-          });
-          return;
-        }
+      const tieneInsumos = listPartidas.some(
+        (insumo) => Number(insumo.noPartida) === Number(partida.noPartida)
+      );
+      return !tieneInsumos;
+    });
+
+    if (partidasSinInsumos.length > 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Faltan Datos",
+        text: "Hay Partidas sin Insumos:",
+      });
+      return;
+    }
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
@@ -1734,7 +1758,7 @@ const AgregarPreCotizacion = () => {
                 overflowY: "auto", // 🔵 Scroll vertical cuando se necesite
               }}
             >
-              <table class="table" >
+              <table class="table">
                 <thead>
                   <tr>
                     <th scope="col">No. Partida</th>
@@ -1747,11 +1771,11 @@ const AgregarPreCotizacion = () => {
                     <th scope="col">Agregar Mano</th>
                   </tr>
                 </thead>
-                <tbody >
+                <tbody>
                   {par_levDigital.map((item, index) => (
                     <tr key={index}>
                       <td>{item.noPartida}</td>
-                      <td>{item.cantidad}</td>
+                      <td style={{ textAlign: "right" }}>{item.cantidad}</td>
                       <td>{item.descripcion}</td>
                       <td>{item.observacion}</td>
                       <td>
@@ -1809,7 +1833,15 @@ const AgregarPreCotizacion = () => {
             accept=".xlsx, .xls"
             onChange={handleFileUpload}
             className="form-control"
+            ref={inputFileRef} // 👈 Aquí conectas el input a la referencia
           />
+          <button
+            type="button"
+            className="btn btn-danger mt-2"
+            onClick={limpiarArchivo}
+          >
+            Limpiar
+          </button>
           {/*<button className="btn btn-primary mt-2" onClick={processExcelFile}>
             Procesar Archivo
           </button>*/}
@@ -1821,8 +1853,14 @@ const AgregarPreCotizacion = () => {
           </button>*/}
           <br></br>
           <br></br>
-          <div className="row" style={{ border: "1px solid #000", maxHeight: "240px", // 🔵 Puedes ajustar la altura como tú quieras
-            overflowY: "auto", }}>
+          <div
+            className="row"
+            style={{
+              border: "1px solid #000",
+              maxHeight: "240px", // 🔵 Puedes ajustar la altura como tú quieras
+              overflowY: "auto",
+            }}
+          >
             <label style={{ color: "red" }}>Partidas Por Insumo </label>
             <br></br>
             <table className="table">
@@ -1897,8 +1935,14 @@ const AgregarPreCotizacion = () => {
             </table>
           </div>
           <br></br>
-          <div className="row" style={{ border: "1px solid #000", maxHeight: "240px",
-                overflowY: "auto", }}>
+          <div
+            className="row"
+            style={{
+              border: "1px solid #000",
+              maxHeight: "240px",
+              overflowY: "auto",
+            }}
+          >
             <label style={{ color: "red" }}>Partidas por Mano de Obra </label>
             <table className="table">
               <thead>
@@ -2021,7 +2065,7 @@ const AgregarPreCotizacion = () => {
       >
         <Modal.Header closeButton>
           <Modal.Title>
-            {selectedPartida ? "Editar Insumo" : "Añadir Insumo"}
+            {modoModal === "Crear" ? "Crear Partida" : "Editar Partida"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>

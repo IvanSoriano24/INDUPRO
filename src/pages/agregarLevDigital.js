@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   collection,
@@ -124,7 +124,11 @@ const AgregarLevDigital = () => {
     setList([...list, ...excelData]);
     setExcelData([]); // Limpiar los datos procesados una vez que se han agregado
   };*/
-
+  const limpiarArchivo = () => {
+    if (inputFileRef.current) {
+      inputFileRef.current.value = ""; // 👈 Limpiar el valor
+    }
+  };
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -270,7 +274,7 @@ const AgregarLevDigital = () => {
   const navigate = useNavigate();
   const encabezadoCollection = collection(db, "LEVDIGITAL");
   const parLevDigCollection = collection(db, "PAR_LEVDIGITAL");
-
+ const inputFileRef = useRef(null);
   /* --------------------   Obtener los folios correspondiente  -------------------------- */
   useEffect(() => {
     const obtenerFolios = async () => {
@@ -705,7 +709,15 @@ const AgregarLevDigital = () => {
                   accept=".xlsx, .xls"
                   onChange={handleFileUpload}
                   className="form-control"
+                  ref={inputFileRef}
                 />
+                <button
+                  type="button"
+                  className="btn btn-danger mt-2"
+                  onClick={limpiarArchivo}
+                >
+                  Limpiar
+                </button>
                 {/*<button
                   className="btn btn-primary mt-2"
                   onClick={processExcelFile}
@@ -795,10 +807,13 @@ const AgregarLevDigital = () => {
               </button>
             </div>
 
-            <div className="col-12" style={{
+            <div
+              className="col-12"
+              style={{
                 maxHeight: "240px", // 🔵 Puedes ajustar la altura como tú quieras
                 overflowY: "auto", // 🔵 Scroll vertical cuando se necesite
-              }}>
+              }}
+            >
               <br />
               <table className="table">
                 <thead>

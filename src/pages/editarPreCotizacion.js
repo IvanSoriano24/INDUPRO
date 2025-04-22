@@ -114,6 +114,7 @@ const EditarPreCotizacion = () => {
   /*******************************************************************/
   const [excelData, setExcelData] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [modoModal, setModoModal] = useState("Crear");
   /*******************************************************************/
 
   const handleClose = () => {
@@ -194,7 +195,7 @@ const EditarPreCotizacion = () => {
       });
       setShow(false); // Cierra el modal
       //getParLevDigital(); // Actualiza la tabla
-    } else{
+    } else {
       alert("Fallo");
     }
   };
@@ -325,6 +326,7 @@ const EditarPreCotizacion = () => {
   };
   const handleOpenModal = async (noPartida) => {
     limpiarCampos();
+    setModoModal("Crear");
     try {
       console.log("🔄 Abriendo modal para Insumos. No. Partida:", noPartida);
 
@@ -472,8 +474,7 @@ const EditarPreCotizacion = () => {
   };
   const handleEditInsumo = async (partida, insumoId) => {
     try {
-      console.log("🟢 Editando partida:", partida);
-      console.log("🟢 ID del insumo a editar:", insumoId);
+      setModoModal("Editar");
 
       // 🟢 Obtener el insumo desde Firestore
       const insumoDoc = await getDoc(
@@ -987,8 +988,7 @@ const EditarPreCotizacion = () => {
   }, []); // 🔹 Eliminamos `manoObra` de las dependencias
 
   /* ------------------------------------ - AGREGAR NUEVO DOCUMENTO -------------------------------*/
-  
-  
+
   const updateEncabezado = async (e) => {
     e.preventDefault();
 
@@ -998,7 +998,7 @@ const EditarPreCotizacion = () => {
       );
       return !tieneInsumos;
     });
-    
+
     if (partidasSinInsumos.length > 0) {
       swal.fire({
         icon: "warning",
@@ -1534,10 +1534,12 @@ const EditarPreCotizacion = () => {
                 Agregar Tarea
               </button>
             </div>
-            <div style={{
+            <div
+              style={{
                 maxHeight: "240px", // 🔵 Puedes ajustar la altura como tú quieras
                 overflowY: "auto", // 🔵 Scroll vertical cuando se necesite
-              }}>
+              }}
+            >
               <br></br>
               <table class="table">
                 <thead>
@@ -1606,7 +1608,14 @@ const EditarPreCotizacion = () => {
             </div>
           </div>
           <br></br>
-          <div className="row" style={{ border: "1px solid #000", maxHeight: "240px", overflowY: "auto"  }}>
+          <div
+            className="row"
+            style={{
+              border: "1px solid #000",
+              maxHeight: "240px",
+              overflowY: "auto",
+            }}
+          >
             <label style={{ color: "red" }}>Partidas por Insumo </label>
             <br></br>
             <div>
@@ -1635,13 +1644,13 @@ const EditarPreCotizacion = () => {
                       <td>{itemPC.descripcionInsumo}</td>
                       <td>{itemPC.comentariosAdi}</td>
                       <td>{itemPC.cantidad}</td>
-                      <td>
+                      <td style={{ textAlign: "right" }}>
                         {(itemPC.costoCotizado * 1).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
                       </td>
-                      <td>
+                      <td style={{ textAlign: "right" }}>
                         {(itemPC.total * 1).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
@@ -1674,7 +1683,14 @@ const EditarPreCotizacion = () => {
             </div>
           </div>
           <br></br>
-          <div className="row" style={{ border: "1px solid #000", maxHeight: "240px", overflowY: "auto" }}>
+          <div
+            className="row"
+            style={{
+              border: "1px solid #000",
+              maxHeight: "240px",
+              overflowY: "auto",
+            }}
+          >
             <label style={{ color: "red" }}>Partidas por Mano de Obra </label>
             <div>
               <br></br>
@@ -1796,7 +1812,7 @@ const EditarPreCotizacion = () => {
       >
         <Modal.Header closeButton>
           <Modal.Title>
-            {selectedPartida ? "Editar Insumo" : "Añadir Insumo"}
+            {modoModal === "Crear" ? "Crear Partida" : "Editar Partida"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>

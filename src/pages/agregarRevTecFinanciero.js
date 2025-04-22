@@ -107,6 +107,7 @@ const AgregarRevTecFinanciero = () => {
   const [idCounter, setIdCounter] = useState(1); // Inicializamos el contador en 1
   const [editIndex, setEditIndex] = useState(null);
   const [listMO, setListMO] = useState([]);
+  const [modoModal, setModoModal] = useState("Crear");
   /* ---------------------------------------- LLAMADA A COLECCIONES ---------------------------------------- */
 
   const parPrecotizacion = collection(db, "PAR_PRECOTIZACION");
@@ -858,20 +859,20 @@ const AgregarRevTecFinanciero = () => {
     }
 
     const partidasSinInsumos = par_levDigital.filter((partida) => {
-          const tieneInsumos = par_PreCoti_insu.some(
-            (insumo) => Number(insumo.noPartidaPC) === Number(partida.noPartida)
-          );
-          return !tieneInsumos;
-        });
-        
-        if (partidasSinInsumos.length > 0) {
-          swal.fire({
-            icon: "warning",
-            title: "Faltan Datos",
-            text: "Hay Partidas sin Insumos:",
-          });
-          return;
-        }
+      const tieneInsumos = par_PreCoti_insu.some(
+        (insumo) => Number(insumo.noPartidaPC) === Number(partida.noPartida)
+      );
+      return !tieneInsumos;
+    });
+
+    if (partidasSinInsumos.length > 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Faltan Datos",
+        text: "Hay Partidas sin Insumos:",
+      });
+      return;
+    }
 
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
@@ -1399,8 +1400,8 @@ const AgregarRevTecFinanciero = () => {
         descripcionInsumo,
         comentariosAdi,
         unidad,
-        costoCotizado,
-        cantidad,
+        costoCotizado: parseFloat(costoCotizado),
+        cantidad: parseFloat(cantidad),
         total: costoCotizado * cantidad,
         claveSae,
         estatus: "Activo",
@@ -1520,9 +1521,7 @@ const AgregarRevTecFinanciero = () => {
   const handleEditInsumo = async (partida, insumoId) => {
     try {
       limpiarCampos();
-      console.log("🟢 Editando partida:", partida);
-      console.log("🟢 ID del insumo a editar:", insumoId);
-
+      setModoModal("Editar");
       // 🟢 Obtener el insumo desde Firestore
       const insumoDoc = await getDoc(
         doc(db, "PAR_PRECOTIZACION_INSU", insumoId)
@@ -1623,6 +1622,7 @@ const AgregarRevTecFinanciero = () => {
   };
   const handleOpenModal = async (noPartida) => {
     limpiarCampos();
+    setModoModal("Crear");
     try {
       const partidaSeleccionada = par_levDigital.find(
         (item) => item.noPartida === noPartida
@@ -2080,10 +2080,12 @@ const AgregarRevTecFinanciero = () => {
                   Agregar tarea
                 </button>
               </div>
-              <div style={{
-                maxHeight: "240px", 
-                overflowY: "auto", 
-              }}>
+              <div
+                style={{
+                  maxHeight: "240px",
+                  overflowY: "auto",
+                }}
+              >
                 <br></br>
                 <table class="table">
                   <thead>
@@ -2180,7 +2182,14 @@ const AgregarRevTecFinanciero = () => {
               </button>
             </div>
             <br></br>
-            <div className="row" style={{ border: "1px solid #000", maxHeight: "240px", overflowY: "auto" }}>
+            <div
+              className="row"
+              style={{
+                border: "1px solid #000",
+                maxHeight: "240px",
+                overflowY: "auto",
+              }}
+            >
               <label style={{ color: "red" }}>Partidas por Insumo </label>
               <br></br>
               <div>
@@ -2209,13 +2218,13 @@ const AgregarRevTecFinanciero = () => {
                         <td>{itemPC.descripcionInsumo}</td>
                         <td>{itemPC.comentariosAdi}</td>
                         <td>{itemPC.cantidad}</td>
-                        <td>
+                        <td style={{ textAlign: "right" }}>
                           {(itemPC.costoCotizado * 1).toLocaleString("en-US", {
                             style: "currency",
                             currency: "USD",
                           })}
                         </td>
-                        <td>
+                        <td style={{ textAlign: "right" }}>
                           {(itemPC.total * 1).toLocaleString("en-US", {
                             style: "currency",
                             currency: "USD",
@@ -2251,7 +2260,14 @@ const AgregarRevTecFinanciero = () => {
               </div>
             </div>
             <br></br>
-            <div className="row" style={{ border: "1px solid #000", maxHeight: "240px", overflowY: "auto" }}>
+            <div
+              className="row"
+              style={{
+                border: "1px solid #000",
+                maxHeight: "240px",
+                overflowY: "auto",
+              }}
+            >
               <label style={{ color: "red" }}>PARTIDAD POR MANO DE OBRA </label>
               <div>
                 <br></br>
@@ -2375,7 +2391,7 @@ const AgregarRevTecFinanciero = () => {
       >
         <Modal.Header closeButton>
           <Modal.Title>
-            {selectedPartida ? "Editar Insumo" : "Añadir Insumo"}
+            {modoModal === "Crear" ? "Crear Partida" : "Editar Partida"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
