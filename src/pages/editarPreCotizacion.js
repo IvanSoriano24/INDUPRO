@@ -1000,21 +1000,13 @@ const EditarPreCotizacion = () => {
     });
     
     if (partidasSinInsumos.length > 0) {
-      console.warn("⚠️ Partidas sin insumos:", partidasSinInsumos);
-    } else {
-      console.log("✅ Todas las partidas tienen al menos un insumo.");
+      swal.fire({
+        icon: "warning",
+        title: "Faltan Datos",
+        text: "Hay Partidas sin Insumos:",
+      });
     }
-    
 
-    /*if (!listPartidas || listPartidas.length === 0) {
-          swal.fire({
-            icon: "warning",
-            title: "Faltan Datos",
-            text: "Debes seleccionar datos de insumos y/o mano de obra para continuar.",
-          });
-          return; // 🚨 DETIENE la ejecución aquí si faltan datos
-        }*/
-       return;
     const bitacora = collection(db, "BITACORA");
     const today = new Date();
     const ahora = new Date();
