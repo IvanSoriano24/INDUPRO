@@ -129,7 +129,7 @@ const Clientes = () => {
             <thead>
               <tr>
                 <th>Clave</th>
-                <th>Razón social</th>
+                <th>Razón Social</th>
                 <th>Calle</th>
                 <th>CP</th>
                 <th>Colonia</th>
@@ -138,7 +138,7 @@ const Clientes = () => {
                 <th>Estatus</th>
                 <th>Detalle</th>
                 <th>Editar</th>
-                <th>Agregar contacto</th>
+                <th>Agregar Contacto</th>
               </tr>
             </thead>
             <tbody>

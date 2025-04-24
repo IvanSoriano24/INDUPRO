@@ -5,7 +5,7 @@ const Home = () => {
     return (
         <>
         <Container>
-            <Row>
+            {/*<Row>
                 <Col xs="3" style={{ backgroundColor: 'rgba(219, 219, 219, 0.8)', textAlign:"center" }}>
                     <label>Cotizaciones Semanales</label>
                     <p></p>
@@ -31,7 +31,7 @@ const Home = () => {
                     </Col>
                     <Col xs="1"></Col>
                 <Col xs="1"></Col>
-            </Row>
+            </Row>*/}
         </Container>
         </>
     )

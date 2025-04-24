@@ -43,6 +43,7 @@ const AgregarParLevDiGAdicional = () => {
   const [docSig, setDocSig] = useState("");
   const [estatus, setEstatus] = useState("Activo");
   const navigate = useNavigate();
+  const [idMonday, setIdMonday] = useState("");
 
   const handleShowAgregar = () => setShowAgregar(true);
   const handleCloseAgregar = () => {
@@ -154,6 +155,15 @@ const AgregarParLevDiGAdicional = () => {
   /* ------------------------------------ - Editar Documento -------------------------------*/
   const updateContacto = async (e) => {
     e.preventDefault();
+    //ID GS
+    if (!idMonday || idMonday.length === 0) {
+      swal.fire({
+        icon: "warning",
+        title: "ID Invalido",
+        text: "Ingresa un ID GS valido.",
+      });
+      return; // 🚨 DETIENE la ejecución aquí si faltan datos
+    }
     const factoresRef = doc(db, "LEVDIGITAL", id);
     const datos = {
       cve_clie: cve_clie,
@@ -308,6 +318,20 @@ const AgregarParLevDiGAdicional = () => {
                 </div>
               </div>
             </div>
+            <div className="col-md-2">
+              <label className="form-label">ID GS: </label>
+              <div className="input-group mb-3">
+                <input
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="text"
+                  value={idMonday}
+                  onChange={(e) => setIdMonday(e.target.value)}
+                  className="form-control"
+                />
+              </div>
+            </div>
             <div className="col-md-4 ">
               <label className="form-label">Fecha de Elaboración</label>
               <div class="input-group mb-3">
@@ -384,10 +408,12 @@ const AgregarParLevDiGAdicional = () => {
               Agregar Partida
             </button>
           </div>
-          <div style={{
-                maxHeight: "240px", // 🔵 Puedes ajustar la altura como tú quieras
-                overflowY: "auto", // 🔵 Scroll vertical cuando se necesite
-              }}>
+          <div
+            style={{
+              maxHeight: "240px", // 🔵 Puedes ajustar la altura como tú quieras
+              overflowY: "auto", // 🔵 Scroll vertical cuando se necesite
+            }}
+          >
             <br></br>
             <table class="table">
               <thead>

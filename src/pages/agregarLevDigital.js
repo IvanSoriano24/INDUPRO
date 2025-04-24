@@ -223,6 +223,7 @@ const AgregarLevDigital = () => {
   const [modalDescripcion, setModalDescripcion] = useState("");
   const [modalObservacion, setModalObservacion] = useState("");
   const [modalCantidad, setModalCantidad] = useState("");
+  const [idMonday, setIdMonday] = useState("");
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = (item) => {
@@ -274,7 +275,7 @@ const AgregarLevDigital = () => {
   const navigate = useNavigate();
   const encabezadoCollection = collection(db, "LEVDIGITAL");
   const parLevDigCollection = collection(db, "PAR_LEVDIGITAL");
- const inputFileRef = useRef(null);
+  const inputFileRef = useRef(null);
   /* --------------------   Obtener los folios correspondiente  -------------------------- */
   useEffect(() => {
     const obtenerFolios = async () => {
@@ -345,6 +346,15 @@ const AgregarLevDigital = () => {
       return;
     }
 
+    //ID GS
+    if (!idMonday || idMonday.length === 0) {
+      swal.fire({
+        icon: "warning",
+        title: "ID Invalido",
+        text: "Ingresa un ID GS valido.",
+      });
+      return; // 🚨 DETIENE la ejecución aquí si faltan datos
+    }
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
@@ -585,7 +595,7 @@ const AgregarLevDigital = () => {
                 />
               </div>
             </div>
-            <div className="col-md-6">
+            <div className="col-md-4">
               <div className="mb-3">
                 <div class="input-group-append">
                   <label className="form-label">Cliente: </label>
@@ -615,7 +625,20 @@ const AgregarLevDigital = () => {
                 />
               </div>
             </div>
-
+            <div className="col-md-2">
+              <label className="form-label">ID GS: </label>
+              <div className="input-group mb-3">
+                <input
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="text"
+                  value={idMonday}
+                  onChange={(e) => setIdMonday(e.target.value)}
+                  className="form-control"
+                />
+              </div>
+            </div>
             <div className="col-md-4 ">
               <label className="form-label">Fecha de elaboración: </label>
               <div class="input-group mb-3">

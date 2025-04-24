@@ -116,7 +116,7 @@ const VisualizarCliente = () => {
                         <NavLink
                         onClick={()=>cambiarTab("2")}
                         className={(activeTab=="2" ? "activeTab baseTap": "baseTap")}
-                        >Información comercial</NavLink>
+                        >Información Comercial</NavLink>
                     </NavItem>
                 </Nav>
                 <TabContent activeTab={activeTab}>

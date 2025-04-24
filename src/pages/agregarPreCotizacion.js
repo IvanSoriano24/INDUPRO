@@ -278,7 +278,13 @@ const AgregarPreCotizacion = () => {
     if (
       Insumo == "Subcontratos" ||
       Insumo == "Viáticos" ||
-      Insumo == "Material"
+      Insumo == "Material" ||
+      Insumo == "S" ||
+      Insumo == "V" ||
+      Insumo == "M" ||
+      Insumo == "s" ||
+      Insumo == "v" ||
+      Insumo == "m"
     ) {
       return true;
     }
@@ -1528,7 +1534,7 @@ const AgregarPreCotizacion = () => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1>Convertir levantamiento digital a precotizacion</h1>
+          <h1>Convertir Levantamiento Digital a Precotizacion</h1>
           <div className="row">
             <div className="col-md-2">
               <div className="mb-3">
@@ -1567,7 +1573,7 @@ const AgregarPreCotizacion = () => {
               </div>
             </div>
             <div className="col-md-4 ">
-              <label className="form-label">CLIENTE</label>
+              <label className="form-label">Cliente</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -1602,6 +1608,7 @@ const AgregarPreCotizacion = () => {
                   value={idMonday}
                   onChange={(e) => setIdMonday(e.target.value)}
                   className="form-control"
+                  readOnly
                 />
               </div>
             </div>
