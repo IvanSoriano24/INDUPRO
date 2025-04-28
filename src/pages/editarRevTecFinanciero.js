@@ -71,7 +71,7 @@ const EditarRecTecFinanciero = () => {
         observacion: observacion,
       });
       setShow(false); // Cierra el modal
-      //getParLevDigital(); // Actualiza la tabla
+      // getParLevDigital(); // Actualiza la tabla
     }
   };
   const [idPartida, setIdPartida] = useState("");
@@ -101,7 +101,7 @@ const EditarRecTecFinanciero = () => {
   /* ---------------------------------------- LLAMADA A COLECCIONES ---------------------------------------- */
   const navigate = useNavigate();
   const { id } = useParams();
-const [idMonday, setIdMonday] = useState("");
+  const [idMonday, setIdMonday] = useState("");
   /* ---------------------JALAR INFORMACIÓN DE DOCUMENTO ANTERIOR ------------------------------------- */
   const getFactoresById = async (id) => {
     const factoresDOC = await getDoc(doc(db, "TECNICOFINANCIERO", id));
@@ -295,13 +295,8 @@ const [idMonday, setIdMonday] = useState("");
   /*   ---------------------------------- AGREGAR PARTIDAS DE INSUMOS ----------------------------- */
   /* ----------------------------------------------------AQUÍ ME QUEDE ---------------*/
 
-  const recolectarDatos = (
-    id,
-    noPartida,
-    descripcion,
-    observacion
-  ) => {
-    setSelectedPartida({ id, noPartida}); // Asegura que el número de partida está definido
+  const recolectarDatos = (id, noPartida, descripcion, observacion) => {
+    setSelectedPartida({ id, noPartida }); // Asegura que el número de partida está definido
     setCantidad(cantidad);
     setDescripcion(descripcion);
     setObservacion(observacion);
@@ -310,14 +305,14 @@ const [idMonday, setIdMonday] = useState("");
   };
 
   const editarPartida = async () => {
-    alert(idPartidaEdit);
-    const preCotizacionRef = doc(db, "ANALISIS_TOTALES", idPartidaEdit);
+    //const preCotizacionRef = doc(db, "ANALISIS_TOTALES", idPartidaEdit);
     const datos = {
       descripcion: descripcion,
       observacion: observacion,
     };
-    await updateDoc(preCotizacionRef, datos);
-    window.location.reload();
+    console.log(datos);
+    /*await updateDoc(preCotizacionRef, datos);
+    window.location.reload();*/
   };
 
   const recolectarDatosTotales = async (idTotales) => {
@@ -338,26 +333,26 @@ const [idMonday, setIdMonday] = useState("");
     setCostoFijoEdit(costoFijo)
     setUtilidadEdit(utilidad)*/
   };
-  const limpiarCampos = () =>{
+  const limpiarCampos = () => {
     setTot(false);
     setSelectedPartida(null);
     setCantidadTotalesEdit("");
     setCostoFijoEdit("");
     setUtilidadEdit("");
-  }
-const openModal = async (noPartida) => {
-  limpiarCampos();
-  try {
-    console.log("🔄 Abriendo modal para Insumos. No. Partida:", noPartida);
+  };
+  const openModal = async (noPartida) => {
+    limpiarCampos();
+    try {
+      console.log("🔄 Abriendo modal para Insumos. No. Partida:", noPartida);
 
-    // 🟢 Establecer el número de partida correctamente
-    //setSelectedPartida({ noPartida });
+      // 🟢 Establecer el número de partida correctamente
+      //setSelectedPartida({ noPartida });
 
-    setTot(true);
-  } catch (error) {
-    console.error("⚠️ Error al obtener los datos necesarios:", error);
-  }
-};
+      setTot(true);
+    } catch (error) {
+      console.error("⚠️ Error al obtener los datos necesarios:", error);
+    }
+  };
   const editarPartidaTotales = async () => {
     const preCotizacionRef = doc(db, "ANALISIS_TOTALES", idPartidaEdit);
     const subtotalPartida = insumosEdit + manoObraEdit;
@@ -385,7 +380,7 @@ const openModal = async (noPartida) => {
       utilidaEsperada: utilidaEsperada,
     };
     await updateDoc(preCotizacionRef, datos);
-    //window.location.href = window.location.href;
+    window.location.href = window.location.href;
   };
   return (
     <div className="container">
@@ -434,7 +429,6 @@ const openModal = async (noPartida) => {
                   onChange={(e) => setIdMonday(e.target.value)}
                   className="form-control"
                   readOnly
-                  
                 />
               </div>
             </div>
@@ -491,7 +485,7 @@ const openModal = async (noPartida) => {
             className="row"
             style={{ border: "1px solid #000", borderColor: "gray" }}
           >
-            <div className="col-md-2">
+            {/*<div className="col-md-2">
               <label className="form-label">No. Partida</label>
               <div class="input-group mb-3">
                 <input
@@ -533,17 +527,19 @@ const openModal = async (noPartida) => {
                   className="form-control"
                 />
               </div>
-            </div>
-            <div className="col-md-6 ">
+            </div>*/}
+            {/*<div className="col-md-6 ">
               <button className="btn btn-success" onClick={editarPartida}>
                 <CiCirclePlus />
                 Editar Partidas
               </button>
-            </div>
-            <div style={{
-                maxHeight: "240px", 
-                overflowY: "auto", 
-              }}>
+            </div>*/}
+            <div
+              style={{
+                maxHeight: "240px",
+                overflowY: "auto",
+              }}
+            >
               <br></br>
               <table class="table">
                 <thead>
@@ -641,34 +637,33 @@ const openModal = async (noPartida) => {
               </div>
             </div>*/}
             <div className="col-md-6 ">
-              <button
-                className="btn btn-success"
-                onClick={openModal}
-              >
+              <button className="btn btn-success" onClick={openModal}>
                 <CiCirclePlus />
                 Totales
               </button>
             </div>
             <br></br>
             <br></br>
-            <div style={{
-                maxHeight: "240px", 
-                overflowY: "auto", 
-              }}>
+            <div
+              style={{
+                maxHeight: "240px",
+                overflowY: "auto",
+              }}
+            >
               <br></br>
               <table class="table">
                 <thead>
                   <tr>
                     <th scope="col">No. Partida</th> {/*1*/}
                     <th scope="col">Cantidad</th> {/*2*/}
-                    <th scope="col">Insumo</th>          {/*3*/}           
-                    <th scope="col">Valor de insumos</th>   {/*4*/}                  
-                    <th scope="col">Indirecto</th>  {/*5*/}
+                    <th scope="col">Insumo</th> {/*3*/}
+                    <th scope="col">Valor de insumos</th> {/*4*/}
+                    <th scope="col">Indirecto</th> {/*5*/}
                     <th scope="col">Costo Integrado</th> {/*6*/} {/*AQUI*/}
                     <th scope="col">Factor utilidad</th> {/*9*/}
                     <th scope="col">Precio por Partida</th> {/*10*/}
-                    <th scope="col">Precio Unitario</th> 
-                    <th scope="col">Editar</th>
+                    <th scope="col">Precio Unitario</th>
+                    {/*<th scope="col">Editar</th>*/}
                   </tr>
                 </thead>
                 <tbody>
@@ -681,20 +676,33 @@ const openModal = async (noPartida) => {
                           style: "currency",
                           currency: "USD",
                         })}
-                      </td> {/*3*/}
+                      </td>{" "}
+                      {/*3*/}
                       <td style={{ textAlign: "right" }}>
-                        {((itemTotal.totalInsumo * 1) * itemTotal.cantidad).toLocaleString("en-US", {
+                        {(
+                          itemTotal.totalInsumo *
+                          1 *
+                          itemTotal.cantidad
+                        ).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
-                      </td> {/*4*/}
-                      <td style={{ textAlign: "center" }}>{itemTotal.costoFijoPorcentaje}%</td> {/*5*/}
+                      </td>{" "}
+                      {/*4*/}
+                      <td style={{ textAlign: "center" }}>
+                        {itemTotal.costoFijoPorcentaje}%
+                      </td>{" "}
+                      {/*5*/}
                       <td style={{ textAlign: "right" }}>
-                        {((1 + (itemTotal.costoFijoPorcentaje/100) ) * ((itemTotal.totalInsumo * 1) * itemTotal.cantidad)).toLocaleString("en-US", {
+                        {(
+                          (1 + itemTotal.costoFijoPorcentaje / 100) *
+                          (itemTotal.totalInsumo * 1 * itemTotal.cantidad)
+                        ).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
-                      </td> {/*6*/}
+                      </td>{" "}
+                      {/*6*/}
                       {/*<td style={{ textAlign: "right" }}>
                         {(itemTotal.costoUnitario * 1).toLocaleString("en-US", {
                           style: "currency",
@@ -706,28 +714,43 @@ const openModal = async (noPartida) => {
                           "en-US",
                           { style: "currency", currency: "USD" }
                         )}
-                      </td>*/} {/*8*/}
-                      <td style={{ textAlign: "center" }}>{itemTotal.utilidadPorcentaje}%</td> {/*9*/}
+                      </td>*/}{" "}
+                      {/*8*/}
+                      <td style={{ textAlign: "center" }}>
+                        {itemTotal.utilidadPorcentaje}%
+                      </td>{" "}
+                      {/*9*/}
                       <td style={{ textAlign: "right" }}>
-                        {(((1 + (itemTotal.costoFijoPorcentaje/100) ) * ((itemTotal.totalInsumo * 1) * itemTotal.cantidad)) / (1 - (itemTotal.utilidadPorcentaje/100))).toLocaleString(
-                          "en-US",
-                          { style: "currency", currency: "USD" }
-                        )}
-                      </td> {/*10*/}
+                        {(
+                          ((1 + itemTotal.costoFijoPorcentaje / 100) *
+                            (itemTotal.totalInsumo * 1 * itemTotal.cantidad)) /
+                          (1 - itemTotal.utilidadPorcentaje / 100)
+                        ).toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })}
+                      </td>{" "}
+                      {/*10*/}
                       <td style={{ textAlign: "right" }}>
-                        {(((1 + (itemTotal.costoFijoPorcentaje/100) ) * ((itemTotal.totalInsumo * 1) * itemTotal.cantidad)) / (1 - (itemTotal.utilidadPorcentaje/100))/itemTotal.cantidad).toLocaleString(
-                          "en-US",
-                          { style: "currency", currency: "USD" }
-                        )}
-                      </td> {/*11*/}
-                      <td>
+                        {(
+                          ((1 + itemTotal.costoFijoPorcentaje / 100) *
+                            (itemTotal.totalInsumo * 1 * itemTotal.cantidad)) /
+                          (1 - itemTotal.utilidadPorcentaje / 100) /
+                          itemTotal.cantidad
+                        ).toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })}
+                      </td>{" "}
+                      {/*11*/}
+                      {/*<td>
                         <button
                           className="btn btn-primary"
                           onClick={() => recolectarDatosTotales(itemTotal.id)}
                         >
                           <FaPencilAlt />
                         </button>
-                      </td>
+                      </td>*/}
                     </tr>
                   ))}
                 </tbody>
@@ -735,13 +758,15 @@ const openModal = async (noPartida) => {
             </div>
           </div>
           <br></br>
-          <div className="row" style={{ border: "1px solid #000"}}>
+          <div className="row" style={{ border: "1px solid #000" }}>
             <label style={{ color: "red" }}>Partidas por Insumo </label>
             <br></br>
-            <div style={{
-                maxHeight: "240px", 
-                overflowY: "auto", 
-              }}>
+            <div
+              style={{
+                maxHeight: "240px",
+                overflowY: "auto",
+              }}
+            >
               <br></br>
               <table class="table">
                 <thead>
@@ -781,12 +806,14 @@ const openModal = async (noPartida) => {
           </div>
           <br></br>
           <br></br>
-          <div className="row" style={{ border: "1px solid #000"}}>
+          <div className="row" style={{ border: "1px solid #000" }}>
             <label style={{ color: "red" }}>Partidas por Mano de Obra </label>
-            <div style={{
-                maxHeight: "240px", 
-                overflowY: "auto", 
-              }}>
+            <div
+              style={{
+                maxHeight: "240px",
+                overflowY: "auto",
+              }}
+            >
               <table class="table">
                 <thead>
                   <tr>
@@ -872,6 +899,7 @@ const openModal = async (noPartida) => {
           </Button>
         </Modal.Footer>
       </Modal>
+      {/*---------------------------------------------------------------------------------------------------*/}
       <Modal
         show={tot}
         onHide={closeTot}
@@ -886,38 +914,38 @@ const openModal = async (noPartida) => {
           <div className="mb-3">
             <label>Cantidad</label>
             <input
-                  placeholder=""
-                  aria-label=""
-                  aria-describedby="basic-addon1"
-                  type="number"
-                  value={cantidadTotalesEdit}
-                  onChange={(e) => setCantidadTotalesEdit(e.target.value)}
-                  className="form-control"
-                />
+              placeholder=""
+              aria-label=""
+              aria-describedby="basic-addon1"
+              type="number"
+              value={cantidadTotalesEdit}
+              onChange={(e) => setCantidadTotalesEdit(e.target.value)}
+              className="form-control"
+            />
           </div>
           <div className="mb-3">
             <label>Costo Indirecto</label>
             <input
-                  placeholder=""
-                  aria-label=""
-                  aria-describedby="basic-addon1"
-                  type="number"
-                  value={costoFijoEdit}
-                  onChange={(e) => setCostoFijoEdit(e.target.value)}
-                  className="form-control"
-                />
+              placeholder=""
+              aria-label=""
+              aria-describedby="basic-addon1"
+              type="number"
+              value={costoFijoEdit}
+              onChange={(e) => setCostoFijoEdit(e.target.value)}
+              className="form-control"
+            />
           </div>
           <div className="mb-3">
             <label>Utilidad </label>
             <input
-                  placeholder=""
-                  aria-label=""
-                  aria-describedby="basic-addon1"
-                  type="number"
-                  value={utilidadEdit}
-                  onChange={(e) => setUtilidadEdit(e.target.value)}
-                  className="form-control"
-                />
+              placeholder=""
+              aria-label=""
+              aria-describedby="basic-addon1"
+              type="number"
+              value={utilidadEdit}
+              onChange={(e) => setUtilidadEdit(e.target.value)}
+              className="form-control"
+            />
           </div>
         </Modal.Body>
         <Modal.Footer>
