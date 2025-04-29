@@ -429,7 +429,7 @@ const PersonalProyectos = () => {
                     setSalarioDiario(value >= 0 ? value : 0); // Si es negativo, lo establece en 0
                   }}
                   min="1"
-                  readOnly={isDetailMode}
+                  readOnly
                   
                 />
               </div>
@@ -444,7 +444,7 @@ const PersonalProyectos = () => {
                     setFactor(value >= 0 ? value : 0); // Si es negativo, lo establece en 0
                   }}
                   min="1"
-                  readOnly={isDetailMode}
+                  readOnly
                 />
               </div>
               <div className="col-md-4">
