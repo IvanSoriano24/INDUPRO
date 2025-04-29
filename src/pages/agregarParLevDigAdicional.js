@@ -83,6 +83,7 @@ const AgregarParLevDiGAdicional = () => {
   const [idCounter, setIdCounter] = useState(1); // Inicializamos el contador en 1
   const [editIndex, setEditIndex] = useState(null);
   const [noPartida, setNoPartida] = useState("");
+  const [noPartidaP, setNoPartidaP] = useState("");
   const [idPartida, setIdPartida] = useState("");
   const partidaAdicional = collection(db, "PAR_LEVDIGITAL");
 
@@ -259,20 +260,29 @@ const AgregarParLevDiGAdicional = () => {
     }
     // }
   };
-  const recolectarDatos = async (
+  const limpiarPartida = () => {
+    setDescripcion("");
+    setCantidad("");   // <- vacío para que en input aparezca vacío
+    setObservacion("");
+    setIdPartida("");
+    setNoPartidaP("");  // <- igual
+    setCve_levDig("");
+  };
+  
+  const recolectarDatos = (
     idPartida,
     cve_tecFin,
-    cantidad,
     noPartida,
+    cantidad,
     descripcion,
     observacion
   ) => {
-    //alert("CLAVE: " + cve_tecFin + "Y TAMBIEN NO PARTIDA: " + noPartida)
-    //alert("ID: " + idPartida);
+    limpiarPartida();
+
     setIdPartida(idPartida);
     setCve_levDig(cve_tecFin);
     setCantidad(cantidad);
-    setNoPartida(noPartida);
+    setNoPartidaP(noPartida);
     setDescripcion(descripcion);
     setObservacion(observacion);
     handleShow(); // Muestra el modal
@@ -446,7 +456,8 @@ const AgregarParLevDiGAdicional = () => {
                     <td>
                       <button
                         className="btn btn-primary"
-                        onClick={() =>
+                        onClick={(e) => {
+                          e.preventDefault();
                           recolectarDatos(
                             item.id,
                             item.cve_levDig,
@@ -454,8 +465,8 @@ const AgregarParLevDiGAdicional = () => {
                             item.cantidad,
                             item.descripcion,
                             item.observacion
-                          )
-                        }
+                          );
+                        }}
                       >
                         <FaPencilAlt />{" "}
                       </button>
@@ -556,7 +567,7 @@ const AgregarParLevDiGAdicional = () => {
             <input
               type="text"
               className="form-control"
-              value={noPartida}
+              value={noPartidaP}
               readOnly
             />
           </div>

@@ -80,6 +80,7 @@ const EditarPreCotizacion = () => {
   const [insumo, setInsumo] = useState("");
   const [no_subPartida, setNoSubPartida] = useState("");
   const [noPartidaPC, setNoPartidaPC] = useState();
+  const [noPartidaP, setNoPartidaP] = useState("");
   const [proveedor, setProveedor] = useState("");
   const [unidad, setUnidad] = useState("");
   const [docAnteriorPPC, setDocAnteriorPPC] = useState("");
@@ -170,6 +171,13 @@ const EditarPreCotizacion = () => {
   }, []); // 🔹 Eliminamos `factores` de las dependencias*/
 
   /*-------------------------------------------------------------------------------------------------------*/
+  const limpiarPartida = () => {
+    setDescripcion("");
+    setCantidad(0);
+    setObservacion("");
+    setIdPartida("");
+    setNoPartidaP(0);
+  };
   const recolectarDatos = (
     id,
     cve_levDig,
@@ -178,12 +186,18 @@ const EditarPreCotizacion = () => {
     descripcion,
     observacion
   ) => {
-    setSelectedPartida({ id, noPartida, cve_levDig }); // Asegura que el número de partida está definido
-    setCantidad(cantidad);
-    setDescripcion(descripcion);
-    setObservacion(observacion);
+    limpiarPartida();
+    console.log("Recolectando partida:", noPartida);
+
+    setNoPartidaP(noPartida ? String(noPartida).trim() : "N/A");
+    
+    setCantidad(cantidad || "");
+    setDescripcion(descripcion || "");
+    setObservacion(observacion || "");
     setIdPartida(id);
-    setShow(true); // Abrir el modal
+    //console.log("PartidaP: ", noPartidaP);
+    setShow(true);
+    console.log("PartidaP: ", noPartidaP);
   };
   const guardarEdicion = async () => {
     if (cantidad <= 0) {
@@ -349,8 +363,8 @@ const EditarPreCotizacion = () => {
       //if (clavesSAE.length === 0) {
       console.log("🔄 Cargando claves SAE antes de editar...");
       const responseInsumos = await axios.get(
-        //"http://localhost:5000/api/clave-sae"
-        "/api/clave-sae"
+        "http://localhost:5000/api/clave-sae"
+        //"/api/clave-sae"
       );
 
       // ✅ Transformamos la respuesta para tener claves limpias y legibles
@@ -515,8 +529,8 @@ const EditarPreCotizacion = () => {
       if (clavesSAE.length === 0) {
         console.log("🔄 Cargando claves SAE antes de editar...");
         const responseInsumos = await axios.get(
-          //"http://localhost:5000/api/clave-sae"
-          "/api/clave-sae"
+          "http://localhost:5000/api/clave-sae"
+          //"/api/clave-sae"
         );
 
         // ✅ Transformamos la respuesta para tener claves limpias y legibles
@@ -665,7 +679,7 @@ const EditarPreCotizacion = () => {
         ...par_preCotList.map((item) => item.noPartida),
         0
       );
-      setNoPartida(maxPartida + 1);
+      setNoPartidaPC(maxPartida + 1);
 
       console.log(
         "📌 Datos de PAR_PRECOTIZACION actualizados:",
@@ -1514,8 +1528,8 @@ const EditarPreCotizacion = () => {
                   aria-label=""
                   aria-describedby="basic-addon1"
                   type="text"
-                  value={noPartida}
-                  onChange={(e) => setNoPartida(e.target.value)}
+                  value={noPartidaPC}
+                  onChange={(e) => setNoPartidaPC(e.target.value)}
                   className="form-control"
                   readOnly
                 />
@@ -1586,16 +1600,20 @@ const EditarPreCotizacion = () => {
                       <td>
                         <button
                           className="btn btn-primary"
-                          onClick={() =>
-                            recolectarDatos(
-                              item.id,
-                              item.cve_levDig,
-                              item.noPartida,
-                              item.cantidad,
-                              item.descripcion,
-                              item.observacion
-                            )
-                          }
+                          onClick={() => {
+                            if (item.noPartida) {
+                              recolectarDatos(
+                                item.id,
+                                item.cve_levDig,
+                                item.noPartida,
+                                item.cantidad,
+                                item.descripcion,
+                                item.observacion
+                              );
+                            } else {
+                              alert("Esta partida no tiene número asignado."); // O muestra un error bonito
+                            }
+                          }}
                         >
                           <FaPencilAlt />{" "}
                         </button>
@@ -1784,7 +1802,7 @@ const EditarPreCotizacion = () => {
             <input
               type="text"
               className="form-control"
-              value={selectedPartida?.noPartida || ""}
+              value={String(noPartidaP || "")}
               readOnly
             />
           </div>
