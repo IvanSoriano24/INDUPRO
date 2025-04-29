@@ -1901,7 +1901,7 @@ const AgregarRevTecFinanciero = () => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1>Convertir Precotización a Análisis Técnico Financiero </h1>
+          <h1>Convertir Precotización {cve_precot} a Análisis Técnico Financiero {selectedFolio}{folioSiguiente} </h1>
           <form>
             <div className="row">
               <div className="col-md-2">

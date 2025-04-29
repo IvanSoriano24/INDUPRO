@@ -352,7 +352,6 @@ const AgregarPreCotizacion = () => {
     return true;
     //return Number.isInteger(Number(cantidad)) && cantidad !== "";
   };
-
   const insumoNombre = async (insumo) => {
     try {
       if(insumo === 'S' ||insumo === 's'){
@@ -372,8 +371,8 @@ const AgregarPreCotizacion = () => {
   const validarClaveSae = async (claveSae) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/claveValidacion/${claveSae}`
-        //`/api/claveValidacion/${claveSae}`
+        //`http://localhost:5000/api/claveValidacion/${claveSae}`
+        `/api/claveValidacion/${claveSae}`
       );
       const data = response.data;
       console.log(data);
@@ -1615,7 +1614,7 @@ const AgregarPreCotizacion = () => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1>Convertir Levantamiento Digital a Precotizacion</h1>
+          <h1>Convertir Levantamiento Digital {cve_levDig} a Precotizacion {selectedFolio}{folioSiguiente}</h1>
           <div className="row">
             <div className="col-md-2">
               <div className="mb-3">

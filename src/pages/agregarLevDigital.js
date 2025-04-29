@@ -570,7 +570,7 @@ const AgregarLevDigital = () => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1>Levantamiento Digital</h1>
+          <h1>Levantamiento Digital {selectedFolio}{folioSiguiente} </h1>
           <div className="row">
             <div className="col-md-2">
               <div className="mb-3">
