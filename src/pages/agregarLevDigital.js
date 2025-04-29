@@ -355,7 +355,7 @@ const AgregarLevDigital = () => {
       });
       return; // 🚨 DETIENE la ejecución aquí si faltan datos
     }
-   
+
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
@@ -417,9 +417,8 @@ const AgregarLevDigital = () => {
             idMonday: idMonday,
             fechaRegistro: formattedDate,
             fechaModificacion: formattedDate,
-            
           });
-          
+
           list.forEach(async (item) => {
             /*console.log(item.noPartida);
             console.log(item.cantidad);
@@ -499,6 +498,14 @@ const AgregarLevDigital = () => {
 
   const handleSubmit = (e) => {
     //e.preventDefault();
+    if (cantidad <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "La cantidad no puede ser menor o igual a 0.",
+      });
+      return;
+    }
     const newItem = {
       cve_levDig: cve_levDig,
       noPartida: noPartida,

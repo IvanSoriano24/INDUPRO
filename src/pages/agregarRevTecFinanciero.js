@@ -1278,7 +1278,27 @@ const AgregarRevTecFinanciero = () => {
       !cantidadTrabajadores ||
       !diasTrabajados
     ) {
-      alert("⚠️ Faltan datos para completar la operación.");
+      swal.fire({
+        icon: "warning",
+        title: "Error Datos",
+        text: "⚠️ Faltan datos para completar la operación.",
+      });
+      return;
+    }
+    if (cantidadTrabajadores <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "La cantidad de trabajadores no puede ser menor o igual a 0.",
+      });
+      return;
+    }
+    if (diasTrabajados <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Dias",
+        text: "Los dias trabajados no pueden ser menor o igual a 0.",
+      });
       return;
     }
     try {
@@ -1507,6 +1527,14 @@ const AgregarRevTecFinanciero = () => {
     }
   };
   const guardarEdicion = async () => {
+    if (cantidad <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "La cantidad no puede ser menor o igual a 0.",
+      });
+      return;
+    }
     if (idPartida) {
       const partidaRef = doc(db, "PAR_PRECOTIZACION", idPartida);
       await updateDoc(partidaRef, {
@@ -2584,7 +2612,7 @@ const AgregarRevTecFinanciero = () => {
               </div>
               <div className="col-md-5">
                 <div className="mb-3">
-                  <label className="form-label">TRABAJADOR</label>
+                  <label className="form-label">Trabajador</label>
                   <select
                     id="selectTrabajador"
                     className="form-control"
@@ -2592,7 +2620,7 @@ const AgregarRevTecFinanciero = () => {
                     onChange={(e) => setSelectedTrabajador(e.target.value)}
                   >
                     <option value="" disabled>
-                      SELECCIONA UN TRABAJADOR
+                      Selecciona un Trabajador
                     </option>
                     {manoObra.map((trabajador, index) => (
                       <option key={index} value={trabajador}>
@@ -2605,7 +2633,7 @@ const AgregarRevTecFinanciero = () => {
             </div>
             <div className="row">
               <div className="col-md-3">
-                <label className="form-label">CANTIDAD DE PERSONAL</label>
+                <label className="form-label">Cantidad de Personal</label>
                 <div className="input-group mb-3">
                   <input
                     type="number"
@@ -2613,11 +2641,12 @@ const AgregarRevTecFinanciero = () => {
                     onChange={(e) => setCantidadTrabajadores(e.target.value)}
                     className="form-control"
                     placeholder="Cantidad"
+                    min="1"
                   />
                 </div>
               </div>
               <div className="col-md-3">
-                <label className="form-label">DÍAS TRABAJADOS</label>
+                <label className="form-label">Días Trabajados</label>
                 <div className="input-group mb-3">
                   <input
                     type="number"
@@ -2625,6 +2654,7 @@ const AgregarRevTecFinanciero = () => {
                     onChange={(e) => setDiasTrabajados(e.target.value)}
                     className="form-control"
                     placeholder="Días"
+                    min="1"
                   />
                 </div>
               </div>

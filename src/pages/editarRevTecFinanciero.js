@@ -63,15 +63,18 @@ const EditarRecTecFinanciero = () => {
   };
 
   const [selectedPartida, setSelectedPartida] = useState(null);
+
   const guardarEdicion = async () => {
     if (idPartida) {
       const partidaRef = doc(db, "ANALISIS_TOTALES", idPartida);
+      console.log(partidaRef);
       await updateDoc(partidaRef, {
         descripcion: descripcion,
         observacion: observacion,
       });
       setShow(false); // Cierra el modal
       // getParLevDigital(); // Actualiza la tabla
+      window.location.reload();
     }
   };
   const [idPartida, setIdPartida] = useState("");
@@ -201,6 +204,7 @@ const EditarRecTecFinanciero = () => {
         id: doc.id,
       }));
       par_levDigList1.sort((a, b) => a.noPartidaATF - b.noPartidaATF);
+      console.log("Analisis: ", par_levDigList1);
       setTotalesDoc(par_levDigList1);
     } catch (error) {
       console.error("Error fetching PAR_LEVDIGITAL data:", error);
@@ -300,7 +304,7 @@ const EditarRecTecFinanciero = () => {
     setCantidad(cantidad);
     setDescripcion(descripcion);
     setObservacion(observacion);
-
+    setIdPartida(id);
     setShow(true); // Abrir el modal
   };
 

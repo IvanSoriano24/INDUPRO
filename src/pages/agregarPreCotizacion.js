@@ -698,6 +698,14 @@ const AgregarPreCotizacion = () => {
   };*/
   const agregarPartidaAdicional = async (e) => {
     e.preventDefault();
+    if (cantidadPartida <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "La cantidad no puede ser menor o igual a 0.",
+      });
+      return;
+    }
     if (folioSiguiente !== 0) {
       try {
         const bitacora = collection(db, "BITACORA");
@@ -951,8 +959,8 @@ const AgregarPreCotizacion = () => {
       //if (clavesSAE.length === 0) {
       console.log("🔄 Cargando claves SAE antes de editar...");
       const responseInsumos = await axios.get(
-        //"http://localhost:5000/api/clave-sae"
-        "/api/clave-sae"
+        "http://localhost:5000/api/clave-sae"
+        //"/api/clave-sae"
       );
 
       // ✅ Transformamos la respuesta para tener claves limpias y legibles
@@ -1041,6 +1049,22 @@ const AgregarPreCotizacion = () => {
     setShowAddModal(true);
   };
   const handleSaveManoObra = () => {
+    if (cantidadTrabajadores <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "La cantidad de trabajadores no puede ser menor o igual a 0.",
+      });
+      return;
+    }
+    if (diasTrabajados <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Dias",
+        text: "Los dias trabajados no puede ser menor o igual a 0.",
+      });
+      return;
+    }
     const nuevoRegistro = {
       noPartidaMO: noPartidaMO,
       personal:
@@ -1267,8 +1291,8 @@ const AgregarPreCotizacion = () => {
   const recolectarDatos = async (
     idPartida,
     cve_tecFin,
-    cantidad,
     noPartida,
+    cantidad,
     descripcion,
     observacion
   ) => {
@@ -1283,6 +1307,14 @@ const AgregarPreCotizacion = () => {
     handleShow(); // Muestra el modal
   };
   const guardarEdicion = async () => {
+    if (cantidad <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "La cantidad no puede ser menor o igual a 0.",
+      });
+      return;
+    }
     if (idPartida) {
       const partidaRef = doc(db, "PAR_LEVDIGITAL", idPartida);
       await updateDoc(partidaRef, {
@@ -1784,7 +1816,7 @@ const AgregarPreCotizacion = () => {
                   {par_levDigital.map((item, index) => (
                     <tr key={index}>
                       <td>{item.noPartida}</td>
-                      <td style={{ textAlign: "right" }}>{item.cantidad}</td>
+                      <td >{item.cantidad}</td>
                       <td>{item.descripcion}</td>
                       <td>{item.observacion}</td>
                       <td>
@@ -2336,6 +2368,7 @@ const AgregarPreCotizacion = () => {
                     onChange={(e) => setCantidadTrabajadores(e.target.value)}
                     className="form-control"
                     placeholder="Cantidad"
+                    min="1"
                   />
                 </div>
               </div>
@@ -2348,6 +2381,7 @@ const AgregarPreCotizacion = () => {
                     onChange={(e) => setDiasTrabajados(e.target.value)}
                     className="form-control"
                     placeholder="Días"
+                    min="1"
                   />
                 </div>
               </div>

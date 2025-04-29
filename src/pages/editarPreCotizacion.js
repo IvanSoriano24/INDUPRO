@@ -186,6 +186,14 @@ const EditarPreCotizacion = () => {
     setShow(true); // Abrir el modal
   };
   const guardarEdicion = async () => {
+    if (cantidad <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "La cantidad no puede ser menor o igual a 0.",
+      });
+      return;
+    }
     if (idPartida) {
       const partidaRef = doc(db, "PAR_PRECOTIZACION", idPartida);
       await updateDoc(partidaRef, {
@@ -550,6 +558,22 @@ const EditarPreCotizacion = () => {
       !diasTrabajados
     ) {
       alert("⚠️ Faltan datos para completar la operación.");
+      return;
+    }
+    if (cantidadTrabajadores <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "La cantidad de trabajadores no puede ser menor o igual a 0.",
+      });
+      return;
+    }
+    if (diasTrabajados <= 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "Los dias trabajados no pueden ser menor o igual a 0.",
+      });
       return;
     }
 

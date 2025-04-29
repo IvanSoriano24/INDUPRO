@@ -18,7 +18,7 @@ import { TabContent, TabPane, Nav, NavItem, NavLink } from "reactstrap";
 import { FaCircleQuestion, FaCirclePlus } from "react-icons/fa6";
 import { HiDocumentPlus } from "react-icons/hi2";
 import { IoSearchSharp } from "react-icons/io5";
-import swal from "sweetalert";
+import swal from "sweetalert2";
 import { CiCirclePlus } from "react-icons/ci";
 import { MdDelete } from "react-icons/md";
 import { FaPencilAlt } from "react-icons/fa";
@@ -278,6 +278,14 @@ const AgregarParLevDiGAdicional = () => {
     handleShow(); // Muestra el modal
   };
   const guardarEdicion = async () => {
+    if (cantidad <= 0) {
+          swal.fire({
+            icon: "warning",
+            title: "Error Cantidad",
+            text: "La cantidad no puede ser menor o igual a 0.",
+          });
+          return;
+        }
     if (idPartida) {
       const partidaRef = doc(db, "PAR_LEVDIGITAL", idPartida);
       await updateDoc(partidaRef, {
