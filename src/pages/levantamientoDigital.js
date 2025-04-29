@@ -52,6 +52,7 @@ const LevantamientoDigital = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalList.push({ ...combinedData, id: levDigitalDoc.id });
+        levDigitalList.sort((a, b) => a.cve_levDig - b.cve_levDig);
       }
     }
 
@@ -90,6 +91,7 @@ const LevantamientoDigital = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalListB.push({ ...combinedData, id: levDigitalDoc.id });
+        levDigitalListB.sort((a, b) => a.cve_levDig - b.cve_levDig);
       }
     }
 
@@ -128,6 +130,7 @@ const LevantamientoDigital = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalListC.push({ ...combinedData, id: levDigitalDoc.id });
+        levDigitalListC.sort((a, b) => a.cve_levDig - b.cve_levDig);
       }
     }
 
@@ -141,8 +144,8 @@ const LevantamientoDigital = () => {
   return (
     <div className="panel">
       <div className="row">
-        <div className="col-md-10 ">
-          <div className="mb-3">
+         {/*<div className="col-md-10 ">
+         <div className="mb-3">
             <input
               placeholder="Buscar Por Clave"
               aria-label=""
@@ -160,7 +163,7 @@ const LevantamientoDigital = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>*/}
         <div className="col-md-4 ">
           <div className="mb-3">
             <div class="input-group-append">

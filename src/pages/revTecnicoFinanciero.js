@@ -53,6 +53,7 @@ const RevTecnicoFinanciero = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalList.push({ ...combinedData, id: levDigitalDoc.id });
+        levDigitalList.sort((a, b) => a.cve_tecFin - b.cve_tecFin);
       }
     }
 
@@ -91,6 +92,7 @@ const RevTecnicoFinanciero = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalListB.push({ ...combinedData, id: levDigitalDoc.id });
+        levDigitalListB.sort((a, b) => a.cve_tecFin - b.cve_tecFin);
       }
     }
 
@@ -128,6 +130,7 @@ const RevTecnicoFinanciero = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalListC.push({ ...combinedData, id: levDigitalDoc.id });
+        levDigitalListC.sort((a, b) => a.cve_tecFin - b.cve_tecFin);
       }
     }
 
@@ -140,7 +143,7 @@ const RevTecnicoFinanciero = () => {
 
   return (
     <div className="panel">
-      <div className="row">
+      {/*<div className="row">
         <div className="col-md-10 ">
           <div className="mb-3">
             <input
@@ -161,7 +164,7 @@ const RevTecnicoFinanciero = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div>*/}
       <Nav tabs>
         <NavItem>
           <NavLink

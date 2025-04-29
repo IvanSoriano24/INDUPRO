@@ -363,8 +363,8 @@ const EditarPreCotizacion = () => {
       //if (clavesSAE.length === 0) {
       console.log("🔄 Cargando claves SAE antes de editar...");
       const responseInsumos = await axios.get(
-        "http://localhost:5000/api/clave-sae"
-        //"/api/clave-sae"
+        //"http://localhost:5000/api/clave-sae"
+        "/api/clave-sae"
       );
 
       // ✅ Transformamos la respuesta para tener claves limpias y legibles
@@ -529,8 +529,8 @@ const EditarPreCotizacion = () => {
       if (clavesSAE.length === 0) {
         console.log("🔄 Cargando claves SAE antes de editar...");
         const responseInsumos = await axios.get(
-          "http://localhost:5000/api/clave-sae"
-          //"/api/clave-sae"
+          //"http://localhost:5000/api/clave-sae"
+          "/api/clave-sae"
         );
 
         // ✅ Transformamos la respuesta para tener claves limpias y legibles
@@ -571,7 +571,11 @@ const EditarPreCotizacion = () => {
       !cantidadTrabajadores ||
       !diasTrabajados
     ) {
-      alert("⚠️ Faltan datos para completar la operación.");
+      swal.fire({
+        icon: "warning",
+        title: "Falntan datos",
+        text: "⚠️ Faltan datos para completar la operación.",
+      });
       return;
     }
     if (cantidadTrabajadores <= 0) {
@@ -2047,7 +2051,7 @@ const EditarPreCotizacion = () => {
               </div>
               <div className="col-md-5">
                 <div className="mb-3">
-                  <label className="form-label">TRABAJADOR</label>
+                  <label className="form-label">Trabajador</label>
                   <select
                     id="selectTrabajador"
                     className="form-control"
@@ -2055,7 +2059,7 @@ const EditarPreCotizacion = () => {
                     onChange={(e) => setSelectedTrabajador(e.target.value)}
                   >
                     <option value="" disabled>
-                      SELECCIONA UN TRABAJADOR
+                      Selecciona un Trabajador
                     </option>
                     {manoObra.map((trabajador, index) => (
                       <option key={index} value={trabajador}>
@@ -2068,7 +2072,7 @@ const EditarPreCotizacion = () => {
             </div>
             <div className="row">
               <div className="col-md-3">
-                <label className="form-label">CANTIDAD DE PERSONAL</label>
+                <label className="form-label">Cantidad de Personal</label>
                 <div className="input-group mb-3">
                   <input
                     type="number"
@@ -2076,11 +2080,12 @@ const EditarPreCotizacion = () => {
                     onChange={(e) => setCantidadTrabajadores(e.target.value)}
                     className="form-control"
                     placeholder="Cantidad"
+                    min="1"
                   />
                 </div>
               </div>
               <div className="col-md-3">
-                <label className="form-label">DÍAS TRABAJADOS</label>
+                <label className="form-label">Días Trabajados</label>
                 <div className="input-group mb-3">
                   <input
                     type="number"
@@ -2088,6 +2093,7 @@ const EditarPreCotizacion = () => {
                     onChange={(e) => setDiasTrabajados(e.target.value)}
                     className="form-control"
                     placeholder="Días"
+                    min="1"
                   />
                 </div>
               </div>

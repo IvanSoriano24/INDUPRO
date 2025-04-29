@@ -442,7 +442,7 @@ const AgregarLevDigital = () => {
               estatusPartida: "Activa",
             });
           });
-          //navigate("/levantamientoDigital");
+          navigate("/levantamientoDigital");
         } else {
           alert("Selecciona un folio valido");
         }

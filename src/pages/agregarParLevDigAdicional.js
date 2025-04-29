@@ -262,13 +262,12 @@ const AgregarParLevDiGAdicional = () => {
   };
   const limpiarPartida = () => {
     setDescripcion("");
-    setCantidad("");   // <- vacío para que en input aparezca vacío
+    setCantidad("");  
     setObservacion("");
     setIdPartida("");
-    setNoPartidaP("");  // <- igual
+    setNoPartidaP("");  
     setCve_levDig("");
   };
-  
   const recolectarDatos = (
     idPartida,
     cve_tecFin,
@@ -277,8 +276,7 @@ const AgregarParLevDiGAdicional = () => {
     descripcion,
     observacion
   ) => {
-    limpiarPartida();
-
+    //limpiarPartida();
     setIdPartida(idPartida);
     setCve_levDig(cve_tecFin);
     setCantidad(cantidad);
@@ -458,6 +456,7 @@ const AgregarParLevDiGAdicional = () => {
                         className="btn btn-primary"
                         onClick={(e) => {
                           e.preventDefault();
+                          limpiarPartida();
                           recolectarDatos(
                             item.id,
                             item.cve_levDig,

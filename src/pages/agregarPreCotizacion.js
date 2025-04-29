@@ -160,6 +160,17 @@ const AgregarPreCotizacion = () => {
       const reader = new FileReader();
       //reader.onload = (e) => {
       reader.onload = async (e) => {
+
+        swal.fire({
+          title: "Procesando archivo...",
+          text: "Por favor espera mientras se valida el contenido.",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => {
+            swal.showLoading();
+          },
+        });
+
         setSelectedFile(file); // Guardar el archivo en el estado
 
         const data = new Uint8Array(e.target.result);
@@ -177,7 +188,7 @@ const AgregarPreCotizacion = () => {
         for (let index = 0; index < jsonData.slice(1).length; index++) {
           const row = jsonData.slice(1)[index];
           const noPartida = String(row[0] || 0).trim();
-          const insumo = String(row[1] || "").trim();
+          const insumoOriginal  = String(row[1] || "").trim();
           const unidad = String(row[2] || "").trim();
           const claveSae = String(row[3] || "").trim();
           const proveedor = String(row[4] || "").trim();
@@ -188,11 +199,17 @@ const AgregarPreCotizacion = () => {
 
           const filaExcel = index + 2; // Recuerda que empieza en fila 2
 
-          // 🔵 Validar cada campo y agregar mensajes específicos
-          if (!validarInsumo(insumo)) {
+          if (!validarNoPartida(noPartida, par_levDigital)) {
             isValid = false;
             partidasConError.push(
-              `Error en la fila ${filaExcel}: Insumo no válido (${insumo})`
+              `Error en la fila ${filaExcel}: No. de partida no existe en la base de datos (${noPartida})`
+            );
+          }
+          // 🔵 Validar cada campo y agregar mensajes específicos
+          if (!validarInsumo(insumoOriginal)) {
+            isValid = false;
+            partidasConError.push(
+              `Error en la fila ${filaExcel}: Insumo no válido (${insumoOriginal})`
             );
           }
 
@@ -209,7 +226,6 @@ const AgregarPreCotizacion = () => {
               `Error en la fila ${filaExcel}: La cantidad debe ser mayor o igual a 0`
             );
           }
-
           if (!validarCosto(costoCotizado)) {
             isValid = false;
             partidasConError.push(
@@ -225,11 +241,14 @@ const AgregarPreCotizacion = () => {
             );
           }
 
-          prevPartida = parseInt(noPartida);
+          const nombreInsumo = await insumoNombre(insumoOriginal);
 
+          //console.log(nombreInsumo);
+          prevPartida = parseInt(noPartida);
+          
           filteredData.push({
             noPartida,
-            insumo,
+            insumo: nombreInsumo,
             unidad,
             claveSae,
             proveedor,
@@ -240,6 +259,7 @@ const AgregarPreCotizacion = () => {
           });
         }
 
+        swal.close();
         // 🔵 Mostrar los errores
         if (!isValid) {
           swal.fire({
@@ -266,6 +286,7 @@ const AgregarPreCotizacion = () => {
         setListPartidas(transformado);
         setList([...list, ...filteredData]);
         setExcelData([]);
+        console.log(filteredData);
       };
 
       //reader.readAsArrayBuffer(selectedFile);
@@ -273,6 +294,17 @@ const AgregarPreCotizacion = () => {
     } else {
       alert("Por favor, selecciona un archivo.");
     }
+  };
+  const validarNoPartida = (noPartida, par_levDigital) => {
+    if (!noPartida) {
+      return false; // No hay número de partida
+    }
+  
+    const existePartida = par_levDigital.some(
+      (partida) => String(partida.noPartida).trim() === String(noPartida).trim()
+    );
+  
+    return existePartida;
   };
   const validarInsumo = (Insumo) => {
     if (
@@ -320,11 +352,28 @@ const AgregarPreCotizacion = () => {
     return true;
     //return Number.isInteger(Number(cantidad)) && cantidad !== "";
   };
+
+  const insumoNombre = async (insumo) => {
+    try {
+      if(insumo === 'S' ||insumo === 's'){
+        return 'Subcontratos';
+      }
+      if(insumo === 'M' ||insumo === 'm'){
+        return 'Material';
+      }
+      if(insumo === 'V' ||insumo === 'v'){
+        return 'Viáticos';
+      }
+    } catch (error) {
+      return false;
+    
+    }
+  };
   const validarClaveSae = async (claveSae) => {
     try {
       const response = await axios.get(
-        //`http://localhost:5000/api/claveValidacion/${claveSae}`
-        `/api/claveValidacion/${claveSae}`
+        `http://localhost:5000/api/claveValidacion/${claveSae}`
+        //`/api/claveValidacion/${claveSae}`
       );
       const data = response.data;
       console.log(data);
@@ -575,7 +624,6 @@ const AgregarPreCotizacion = () => {
     // Cleanup: Nos desuscribimos si cve_levDig cambia o el componente se desmonta
     return unsubscribe;
   };
-
   useEffect(() => {
     if (!cve_levDig) return;
 
@@ -959,8 +1007,8 @@ const AgregarPreCotizacion = () => {
       //if (clavesSAE.length === 0) {
       console.log("🔄 Cargando claves SAE antes de editar...");
       const responseInsumos = await axios.get(
-        "http://localhost:5000/api/clave-sae"
-        //"/api/clave-sae"
+        //"http://localhost:5000/api/clave-sae"
+        "/api/clave-sae"
       );
 
       // ✅ Transformamos la respuesta para tener claves limpias y legibles
@@ -2162,30 +2210,6 @@ const AgregarPreCotizacion = () => {
           </div>
           {/* Columna para Línea en la misma fila */}
           <div className="row mb-6">
-            {/* Columna para Línea en la misma fila */}
-            {/*EXCEL*/}
-            {/*<div className="col-md-10">
-              <div className="mb-3">
-                <input
-                  type="file"
-                  accept=".xlsx, .xls"
-                  onChange={handleFileUpload}
-                  className="form-control"
-                />
-                <button
-                  className="btn btn-primary mt-2"
-                  onClick={processExcelFile}
-                >
-                  Procesar Archivo
-                </button>
-                <button
-                  className="btn btn-success mt-2 ms-2"
-                  onClick={handleAddFromExcel}
-                >
-                  Agregar Partidas
-                </button>
-              </div>
-            </div>*/}
             {/* Fila 2: Proveedor, Descripcion */}
             <div className="row mb-6">
               <div className="col-md-6">
@@ -2220,22 +2244,6 @@ const AgregarPreCotizacion = () => {
                       menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                     }}
                   />
-                  {/*<select
-                    className="form-control"
-                    value={claveSae}
-                    onChange={(e) => setClaveSae(e.target.value)}
-                  >
-                    <option value="">Seleccionar...</option>
-                    {Array.isArray(clavesSAE) && clavesSAE.length > 0 ? (
-                      clavesSAE.map((item, index) => (
-                        <option key={index} value={item.clave}>
-                          {item.descripcion}
-                        </option>
-                      ))
-                    ) : (
-                      <option disabled>No hay claves disponibles</option>
-                    )}
-                  </select>*/}
                 </div>
               </div>
               <div className="col-md-6">

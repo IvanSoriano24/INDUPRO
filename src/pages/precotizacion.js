@@ -52,6 +52,7 @@ const Precotizacion = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalList.push({ ...combinedData, id: levDigitalDoc.id });
+        levDigitalList.sort((a, b) => a.cve_precot - b.cve_precot);
       }
     }
 
@@ -90,6 +91,7 @@ const Precotizacion = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalListB.push({ ...combinedData, id: levDigitalDoc.id });
+        levDigitalListB.sort((a, b) => a.cve_precot - b.cve_precot);
       }
     }
 
@@ -99,8 +101,8 @@ const Precotizacion = () => {
   useEffect(() => {
     getLevDigitalBloqueadas(); // Cambiado a "getClientes"
   }, []);
-   /* -------------------------------------------------------- CANCELADAS ---------------------------------------------------- */
-   const getLevDigitalCanceladas = async () => {
+  /* -------------------------------------------------------- CANCELADAS ---------------------------------------------------- */
+  const getLevDigitalCanceladas = async () => {
     const levDigitalListC = [];
     const levDigitalCollection = collection(db, "PRECOTIZACION");
     const levDigital = query(
@@ -127,6 +129,7 @@ const Precotizacion = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalListC.push({ ...combinedData, id: levDigitalDoc.id });
+        levDigitalListC.sort((a, b) => a.cve_precot - b.cve_precot);
       }
     }
 
@@ -139,7 +142,7 @@ const Precotizacion = () => {
 
   return (
     <div className="panel">
-      <div className="row">
+      {/*<div className="row">
         <div className="col-md-10 ">
           <div className="mb-3">
             <input
@@ -160,7 +163,7 @@ const Precotizacion = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div>*/}
       <Nav tabs>
         <NavItem>
           <NavLink

@@ -348,6 +348,7 @@ const PersonalProyectos = () => {
                   className="form-control"
                   value={salarioDiario}
                   onChange={(e) => setSalarioDiario(e.target.value)}
+                  readOnly
                 />
               </div>
               <div className="col-md-4">
@@ -357,6 +358,7 @@ const PersonalProyectos = () => {
                   className="form-control"
                   value={factor}
                   onChange={(e) => setFactor(e.target.value)}
+                  readOnly
                 />
               </div>
               <div className="col-md-4">
