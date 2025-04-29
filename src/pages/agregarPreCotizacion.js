@@ -2032,6 +2032,7 @@ const AgregarPreCotizacion = () => {
               className="form-control"
               value={cantidad}
               onChange={(e) => setCantidad(e.target.value)}
+              min="0"
             />
           </div>
           <div className="mb-3">
