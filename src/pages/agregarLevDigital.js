@@ -789,6 +789,7 @@ const AgregarLevDigital = () => {
                   value={cantidad}
                   onChange={(e) => setCantidad(e.target.value)}
                   className="form-control"
+                  min="1"
                   required
                 />
               </div>
@@ -915,7 +916,7 @@ const AgregarLevDigital = () => {
               className="form-control"
               value={modalCantidad}
               onChange={(e) => setModalCantidad(e.target.value)}
-              min="0"
+              min="1"
             />
           </div>
           <div className="mb-3">

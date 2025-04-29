@@ -1771,7 +1771,7 @@ const EditarPreCotizacion = () => {
               className="form-control"
               value={cantidad}
               onChange={(e) => setCantidad(e.target.value)}
-              min="0"
+              min="1"
             />
           </div>
           <div className="mb-3">
@@ -1950,7 +1950,7 @@ const EditarPreCotizacion = () => {
                     className="form-control"
                     value={cantidad}
                     onChange={(e) => setCantidad(e.target.value)}
-                    min="0"
+                    min="1"
                   />
                 </div>
               </div>
@@ -1962,7 +1962,7 @@ const EditarPreCotizacion = () => {
                     className="form-control"
                     value={costoCotizado}
                     onChange={(e) => setCostoCotizado(e.target.value)}
-                    min="0"
+                    min="1"
                   />
                 </div>
               </div>

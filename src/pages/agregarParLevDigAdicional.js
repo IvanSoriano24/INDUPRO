@@ -171,6 +171,7 @@ const AgregarParLevDiGAdicional = () => {
       fechaElaboracion: fechaElaboracion,
       fechaInicio: fechaInicio,
       fechaFin: fechaFin,
+      idMonday: idMonday,
     };
     await updateDoc(factoresRef, datos);
 
@@ -500,6 +501,7 @@ const AgregarParLevDiGAdicional = () => {
               className="form-control"
               value={cantidad}
               onChange={(e) => setCantidad(e.target.value)}
+              min="1"
             />
           </div>
           <div className="mb-3">
@@ -557,7 +559,7 @@ const AgregarParLevDiGAdicional = () => {
               className="form-control"
               value={cantidad}
               onChange={(e) => setCantidad(e.target.value)}
-              min="0"
+              min="1"
             />
           </div>
           <div className="mb-3">
