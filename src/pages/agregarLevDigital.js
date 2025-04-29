@@ -355,6 +355,7 @@ const AgregarLevDigital = () => {
       });
       return; // 🚨 DETIENE la ejecución aquí si faltan datos
     }
+   
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
@@ -413,9 +414,12 @@ const AgregarLevDigital = () => {
             estatus: estatus,
             docAnt: docAnt,
             docSig: docSig,
+            idMonday: idMonday,
             fechaRegistro: formattedDate,
             fechaModificacion: formattedDate,
+            
           });
+          
           list.forEach(async (item) => {
             /*console.log(item.noPartida);
             console.log(item.cantidad);
@@ -439,7 +443,7 @@ const AgregarLevDigital = () => {
               estatusPartida: "Activa",
             });
           });
-          navigate("/levantamientoDigital");
+          //navigate("/levantamientoDigital");
         } else {
           alert("Selecciona un folio valido");
         }

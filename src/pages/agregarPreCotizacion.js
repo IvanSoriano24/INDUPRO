@@ -528,6 +528,7 @@ const AgregarPreCotizacion = () => {
       setFechaElaboracion(factoresDOC.data().fechaElaboracion);
       setFechaInicio(factoresDOC.data().fechaInicio);
       setFechaFin(factoresDOC.data().fechaFin);
+      setIdMonday(factoresDOC.data().idMonday);
     } else {
       console.log("El personals no existe");
     }
