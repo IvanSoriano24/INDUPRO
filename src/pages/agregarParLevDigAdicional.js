@@ -125,7 +125,7 @@ const AgregarParLevDiGAdicional = () => {
   };
   const handleShow = () => setShow(true);
   const infoCliente = () => {
-    swal({
+    swal.fire({
       title: "Ayuda del sistema",
       text: " El campo cliente te permite ingresar la razón social del cliente. A medida que escribes, el sistema sugiere opciones basadas en clientes existentes. Este campo no se puede modificar ya que con ello se garantiza el seguimiento del documento. ",
       icon: "info",
@@ -133,7 +133,7 @@ const AgregarParLevDiGAdicional = () => {
     });
   };
   const infoFechaElaboracion = () => {
-    swal({
+    swal.fire({
       title: "Ayuda del sistema",
       text: " La fecha de elaboración es la fecha en la que se creó el documento y por defecto muestra la fecha de hoy. Sin embargo, es posible modificarla según sea necesario. ",
       icon: "info",
@@ -141,7 +141,7 @@ const AgregarParLevDiGAdicional = () => {
     });
   };
   const infoFechaInicio = () => {
-    swal({
+    swal.fire({
       title: "Ayuda del sistema",
       text: " La fecha de inicio representa el día planificado para comenzar el proyecto. Es importante destacar que esta fecha debe ser igual o posterior a la fecha de elaboración del documento. ",
       icon: "info",
@@ -149,7 +149,7 @@ const AgregarParLevDiGAdicional = () => {
     });
   };
   const infoFechaFin = () => {
-    swal({
+    swal.fire({
       title: "Ayuda del sistema",
       text: " La fecha de fin indica el día previsto para concluir el proyecto. Es esencial tener en cuenta que esta fecha debe ser igual o posterior a la fecha de elaboración del documento y también mayor que la fecha de inicio programada.",
       icon: "info",

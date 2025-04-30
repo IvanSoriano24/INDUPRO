@@ -1528,7 +1528,7 @@ const EditarPreCotizacion = () => {
   };
 
   const editarPar_Precotizacion = (id, noPartida) => {
-    swal({
+    swal.fire({
       title: "Editar partida:",
       text: `Número de partida: ${noPartida}\nID: ${id}`,
       content: {
@@ -1544,10 +1544,10 @@ const EditarPreCotizacion = () => {
       },
     }).then((value) => {
       if (value) {
-        swal(`You typed: ${value}`);
+        swal.fire(`You typed: ${value}`);
         // Aquí puedes realizar acciones con el valor ingresado por el usuario
       } else {
-        swal("Operación cancelada");
+        swal.fire("Operación cancelada");
       }
     });
   };

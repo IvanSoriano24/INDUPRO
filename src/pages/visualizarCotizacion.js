@@ -86,16 +86,19 @@ const VisualizarCotizacion = () => {
           where("cve_tecFin", "==", cve_tecFin)
         )
       );
-      //par_preCotList
-      const par_preCotList = data.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
+  
+      const par_preCotList = data.docs
+        .map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }))
+        .sort((a, b) => Number(a.noPartidaATF) - Number(b.noPartidaATF)); // 🔧 Orden numérico
+  
       setParCotizacionLista(par_preCotList);
     } catch (error) {
-      console.error("Error fetching PAR_LEVDIGITAL data:", error);
+      console.error("Error fetching PAR_COTIZACION data:", error);
     }
-  };
+  };  
 
   useEffect(() => {
     getParPreCot();
@@ -674,7 +677,7 @@ const VisualizarCotizacion = () => {
       console.log("🔄 Cargando proveedores antes de editar...");
       const responseClientes = await axios.get(
         //"http://localhost:5000/api/cliente"
-        "/api/proveedores"
+        "/api/cliente"
       );
       listaClientes = responseClientes.data;
       setClientes(listaClientes);
