@@ -351,6 +351,7 @@ const EditarRecTecFinanciero = () => {
       
       setCostoFijoEdit(item.costoFijoPorcentaje);
       setUtilidadEdit(item.utilidadPorcentaje);
+      setIdPartidaEdit(item.id);
 
       // 🟢 Establecer el número de partida correctamente
       //setSelectedPartida({ noPartida });
@@ -374,17 +375,18 @@ const EditarRecTecFinanciero = () => {
     const utilidaEsperada = precioXpartidaC - costoFactorizadoC;
 
     const datos = {
-      cantidad: parseInt(cantidadTotalesEdit),
-      valorInsumos: valorInsumos,
-      costoXpartida: parseInt(cantidadTotalesEdit) * subtotalPartida,
+      //cantidad: parseInt(cantidadTotalesEdit),
+      //valorInsumos: valorInsumos,
+      //costoXpartida: parseInt(cantidadTotalesEdit) * subtotalPartida,
       factorajePorcentaje: factorajeEdit,
       costoFijoPorcentaje: costoFijoEdit,
-      factorIndirectoPorcentaje: factorIndirectoPor,
-      costoUnitario: costoUnitarioC,
-      costoFactorizado: costoFactorizadoC,
+      utilidadPorcentaje: utilidadEdit,
+      //factorIndirectoPorcentaje: factorIndirectoPor,
+      //costoUnitario: costoUnitarioC,
+      //costoFactorizado: costoFactorizadoC,
       utilidadPorcentaje: parseInt(utilidadEdit),
-      precioXpartida: precioXpartidaC,
-      utilidaEsperada: utilidaEsperada,
+      //precioXpartida: precioXpartidaC,
+      //utilidaEsperada: utilidaEsperada,
     };
     await updateDoc(preCotizacionRef, datos);
     window.location.href = window.location.href;
@@ -750,7 +752,7 @@ const EditarRecTecFinanciero = () => {
                         })}
                       </td>{" "}
                       {/*11*/}
-                      <td>
+                      <td style={{ textAlign: "center" }}>
                         <button
                           className="btn btn-primary"
                           onClick={() => openModal(itemTotal.id, itemTotal)}
@@ -922,19 +924,6 @@ const EditarRecTecFinanciero = () => {
           <Modal.Title>Totales</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className="mb-3">
-            <label>Cantidad</label>
-            <input
-              placeholder=""
-              aria-label=""
-              aria-describedby="basic-addon1"
-              type="number"
-              value={cantidadTotalesEdit}
-              onChange={(e) => setCantidadTotalesEdit(e.target.value)}
-              className="form-control"
-              min="1"
-            />
-          </div>
           <div className="mb-3">
             <label>Costo Indirecto</label>
             <input
