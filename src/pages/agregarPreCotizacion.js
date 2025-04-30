@@ -161,7 +161,6 @@ const AgregarPreCotizacion = () => {
       const reader = new FileReader();
       //reader.onload = (e) => {
       reader.onload = async (e) => {
-
         swal.fire({
           title: "Procesando archivo...",
           text: "Por favor espera mientras se valida el contenido.",
@@ -355,18 +354,17 @@ const AgregarPreCotizacion = () => {
   };
   const insumoNombre = async (insumo) => {
     try {
-      if (insumo === 'S' || insumo === 's') {
-        return 'Subcontratos';
+      if (insumo === "S" || insumo === "s") {
+        return "Subcontratos";
       }
-      if (insumo === 'M' || insumo === 'm') {
-        return 'Material';
+      if (insumo === "M" || insumo === "m") {
+        return "Material";
       }
-      if (insumo === 'V' || insumo === 'v') {
-        return 'Viáticos';
+      if (insumo === "V" || insumo === "v") {
+        return "Viáticos";
       }
     } catch (error) {
       return false;
-
     }
   };
   const validarClaveSae = async (claveSae) => {
@@ -714,7 +712,6 @@ const AgregarPreCotizacion = () => {
   };
   /* -------------------------------------------------------------------------------------------------------------------------------- */
   const agregarPartida = async () => {
-    
     setShowPartida(true);
   };
   const agregarPartidaAdicional = async (e) => {
@@ -1176,21 +1173,21 @@ const AgregarPreCotizacion = () => {
           insumos: insumoYaExiste
             ? insumosActualizados
             : [
-              ...item.insumos,
-              {
-                insumo,
-                cantidad,
-                unidad,
-                claveSae,
-                descripcionInsumo,
-                comentariosAdi,
-                costoCotizado,
-                proveedor: proveedorClave, // 🟢 Guarda sin espacios
-                categoria,
-                familia,
-                linea,
-              },
-            ],
+                ...item.insumos,
+                {
+                  insumo,
+                  cantidad,
+                  unidad,
+                  claveSae,
+                  descripcionInsumo,
+                  comentariosAdi,
+                  costoCotizado,
+                  proveedor: proveedorClave, // 🟢 Guarda sin espacios
+                  categoria,
+                  familia,
+                  linea,
+                },
+              ],
         };
       }
       return item;
@@ -1388,7 +1385,6 @@ const AgregarPreCotizacion = () => {
   /* --------------------------------------------------- - AGREGAR NUEVO DOCUMENTO --------------------------------------------------*/
   const addPreCotizacion = async (e) => {
     e.preventDefault();
-
     // Validación de fechas antes de continuar
     if (!fechaInicio || !fechaFin) {
       swal.fire({
@@ -1432,6 +1428,15 @@ const AgregarPreCotizacion = () => {
       });
       return;
     }
+    swal.fire({
+      title: "Procesando Solicitud...",
+      text: "Por favor espera mientras se valida el contenido.",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        swal.showLoading();
+      },
+    });
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
@@ -1577,8 +1582,20 @@ const AgregarPreCotizacion = () => {
           estatus: "Activo",
         });
       }
-
-      navigate("/precotizacion");
+      swal.close();
+      swal
+        .fire({
+          icon: "success",
+          title: "Guardado",
+          text: "PreCotizacion Guardada.",
+          timer: 1500, // Espera 1.5 segundos
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        })
+        .then(() => {
+          navigate("/precotizacion");
+        });
     } else {
       alert("Selecciona un folio válido");
     }
@@ -1588,7 +1605,11 @@ const AgregarPreCotizacion = () => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1>Convertir Levantamiento Digital {cve_levDig} a Precotizacion {selectedFolio}{folioSiguiente}</h1>
+          <h1>
+            Convertir Levantamiento Digital {cve_levDig} a Precotizacion{" "}
+            {selectedFolio}
+            {folioSiguiente}
+          </h1>
           <div className="row">
             <div className="col-md-2">
               <div className="mb-3">
@@ -1803,10 +1824,7 @@ const AgregarPreCotizacion = () => {
               </div>
             </div>*/}
             <div className="col-md-6 ">
-              <button
-                className="btn btn-success"
-                onClick={agregarPartida}
-              >
+              <button className="btn btn-success" onClick={agregarPartida}>
                 <CiCirclePlus />
                 Agregar Tarea
               </button>
@@ -1837,7 +1855,7 @@ const AgregarPreCotizacion = () => {
                   {par_levDigital.map((item, index) => (
                     <tr key={index}>
                       <td>{item.noPartida}</td>
-                      <td >{item.cantidad}</td>
+                      <td>{item.cantidad}</td>
                       <td>{item.descripcion}</td>
                       <td>{item.observacion}</td>
                       <td>
@@ -2058,7 +2076,9 @@ const AgregarPreCotizacion = () => {
             <button className="btn btn-success" onClick={addPreCotizacion}>
               <HiDocumentPlus /> Guardar Documento
             </button>
-            <Link to="/levantamientoDigital"><button className="btn btn-danger" >Regresar</button></Link>
+            <Link to="/levantamientoDigital">
+              <button className="btn btn-danger">Regresar</button>
+            </Link>
           </div>
         </div>
       </div>
@@ -2255,11 +2275,11 @@ const AgregarPreCotizacion = () => {
                     value={
                       claveSae
                         ? {
-                          value: claveSae,
-                          label:
-                            clavesSAE.find((prov) => prov.clave === claveSae)
-                              ?.descripcion || "",
-                        }
+                            value: claveSae,
+                            label:
+                              clavesSAE.find((prov) => prov.clave === claveSae)
+                                ?.descripcion || "",
+                          }
                         : null
                     }
                     onChange={(selectedOption) => {

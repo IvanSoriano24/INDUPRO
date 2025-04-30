@@ -838,9 +838,9 @@ const AgregarRevTecFinanciero = () => {
   /* ----------------------------------------------------------- - AGREGAR NUEVO DOCUMENTO -------------------------------------------------*/
   const addPreCotizacion = async (e) => {
     e.preventDefault();
-
     // Validación de fechas antes de continuar
     if (!fechaInicio || !fechaFin) {
+      
       swal.fire({
         icon: "warning",
         title: "Fechas incompletas",
@@ -850,6 +850,7 @@ const AgregarRevTecFinanciero = () => {
     }
     // Si listPartidas o listMano están vacíos, mostrar alerta y detener ejecución
     if (!par_PreCoti_insu || par_PreCoti_insu.length === 0) {
+      
       swal.fire({
         icon: "warning",
         title: "Faltan Datos",
@@ -866,6 +867,7 @@ const AgregarRevTecFinanciero = () => {
     });
 
     if (partidasSinInsumos.length > 0) {
+      
       swal.fire({
         icon: "warning",
         title: "Faltan Datos",
@@ -878,6 +880,15 @@ const AgregarRevTecFinanciero = () => {
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
     );
+    swal.fire({
+      title: "Procesando Solicitud...",
+      text: "Por favor espera mientras se valida el contenido.",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        swal.showLoading();
+      },
+    });
     if (!folioSnapshot.empty) {
       // Tomar el primer documento encontrado (suponiendo que hay uno)
       const folioDoc = folioSnapshot.docs[0];
@@ -1082,14 +1093,27 @@ const AgregarRevTecFinanciero = () => {
               ((sumaValorLider + sumarCalculoInsumoV) *
                 ((costoFijo + factoraje) / 100 + 1) *
                 parseInt(itemTotales.cantidad)) /
-              (1 - utilidad / 100) -
+                (1 - utilidad / 100) -
               (sumaValorLider + sumarCalculoInsumoV) *
-              ((costoFijo + factoraje) / 100 + 1) *
-              parseInt(itemTotales.cantidad),
+                ((costoFijo + factoraje) / 100 + 1) *
+                parseInt(itemTotales.cantidad),
           });
         });
       }
-      navigate("/revTecnicoFinanciero");
+      swal.close();
+      swal
+        .fire({
+          icon: "success",
+          title: "Guardado",
+          text: "Levantamiento Digital Guardado.",
+          timer: 1500, // Espera 1.5 segundos
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        })
+        .then(() => {
+          navigate("/revTecnicoFinanciero");
+        });
     } else {
       alert("Selecciona un folio valido");
     }
@@ -1901,7 +1925,11 @@ const AgregarRevTecFinanciero = () => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1>Convertir Precotización {cve_precot} a Análisis Técnico Financiero {selectedFolio}{folioSiguiente} </h1>
+          <h1>
+            Convertir Precotización {cve_precot} a Análisis Técnico Financiero{" "}
+            {selectedFolio}
+            {folioSiguiente}{" "}
+          </h1>
           <form>
             <div className="row">
               <div className="col-md-2">
@@ -2056,7 +2084,7 @@ const AgregarRevTecFinanciero = () => {
               className="row"
               style={{ border: "1px solid #000", borderColor: "gray" }}
             >
-              <div className="col-md-2">
+              <div className="col-md-1">
                 <label className="form-label">No. Partida</label>
                 <div class="input-group mb-3">
                   <input
@@ -2071,7 +2099,7 @@ const AgregarRevTecFinanciero = () => {
                   />
                 </div>
               </div>
-              <div className="col-md-5 ">
+              <div className="col-md-3 ">
                 <label className="form-label">Descripción</label>
                 <div class="input-group mb-3">
                   <textarea
@@ -2085,7 +2113,7 @@ const AgregarRevTecFinanciero = () => {
                   />
                 </div>
               </div>
-              <div className="col-md-5 ">
+              <div className="col-md-3 ">
                 <label className="form-label">Observaciones</label>
                 <div class="input-group mb-3">
                   <textarea
@@ -2099,7 +2127,7 @@ const AgregarRevTecFinanciero = () => {
                   />
                 </div>
               </div>
-              <div className="col-md-6 ">
+              <div className="col-md-3">
                 <button
                   className="btn btn-success"
                   onClick={agregarPartidaAdicional}
@@ -2350,7 +2378,9 @@ const AgregarRevTecFinanciero = () => {
               <button className="btn btn-success" onClick={addPreCotizacion}>
                 <HiDocumentPlus /> Guardar Documento
               </button>
-              <Link to="/precotizacion"><button className="btn btn-danger" >Regresar</button></Link>
+              <Link to="/precotizacion">
+                <button className="btn btn-danger">Regresar</button>
+              </Link>
             </div>
           </form>
         </div>
@@ -2492,11 +2522,11 @@ const AgregarRevTecFinanciero = () => {
                     value={
                       claveSae
                         ? {
-                          value: claveSae,
-                          label:
-                            clavesSAE.find((prov) => prov.clave === claveSae)
-                              ?.descripcion || "",
-                        }
+                            value: claveSae,
+                            label:
+                              clavesSAE.find((prov) => prov.clave === claveSae)
+                                ?.descripcion || "",
+                          }
                         : null
                     }
                     onChange={(selectedOption) => {

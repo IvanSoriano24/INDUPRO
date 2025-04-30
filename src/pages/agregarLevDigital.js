@@ -160,8 +160,9 @@ const AgregarLevDigital = () => {
           if (parseInt(noPartida) !== prevPartida + 1) {
             isValid = false;
             swal.fire({
-              text: `El número de partida no es secuencial en la fila ${index + 2
-                }.`,
+              text: `El número de partida no es secuencial en la fila ${
+                index + 2
+              }.`,
               icon: "error",
             });
             //alert(`El número de partida no es secuencial en la fila ${index + 2}.`);
@@ -171,8 +172,9 @@ const AgregarLevDigital = () => {
           if (!Number.isInteger(Number(cantidad)) || cantidad === "") {
             isValid = false;
             swal.fire({
-              text: `La cantidad no es un número entero en la fila ${index + 2
-                }.`,
+              text: `La cantidad no es un número entero en la fila ${
+                index + 2
+              }.`,
               icon: "error",
             });
             //alert(`La cantidad no es un número entero en la fila ${index + 2}.`);
@@ -224,7 +226,16 @@ const AgregarLevDigital = () => {
   const [idMonday, setIdMonday] = useState("");
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
+  /*const limpiarCampos = () =>{
+    setModalNoPartida("");
+    //setCve_levDig("");
+    setModalCantidad("");
+    setNoPartida("");
+    setModalDescripcion("");
+    setModalObservacion("");
+  }; */
   const handleShow = (item) => {
+    //limpiarCampos();
     setModalNoPartida(item.noPartida);
     setModalCantidad(item.cantidad);
     setModalDescripcion(item.descripcion);
@@ -240,11 +251,11 @@ const AgregarLevDigital = () => {
       prevList.map((item) =>
         item.noPartida === modalNoPartida // Asegúrate de que modalNoPartida tiene el valor correcto
           ? {
-            ...item,
-            cantidad: modalCantidad,
-            descripcion: modalDescripcion,
-            observacion: modalObservacion,
-          }
+              ...item,
+              cantidad: modalCantidad,
+              descripcion: modalDescripcion,
+              observacion: modalObservacion,
+            }
           : item
       )
     );
@@ -335,6 +346,7 @@ const AgregarLevDigital = () => {
 
   const addEncabezado = async (e) => {
     e.preventDefault();
+
     if (!fechaInicio || !fechaFin) {
       swal.fire({
         icon: "warning",
@@ -353,11 +365,19 @@ const AgregarLevDigital = () => {
       });
       return; // 🚨 DETIENE la ejecución aquí si faltan datos
     }
-
+    if (!descripcion || descripcion.length === 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Descripcion Invalida",
+        text: "Ingresa una descripcion valida.",
+      });
+      return; // 🚨 DETIENE la ejecución aquí si faltan datos
+    }
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
     );
+
     if (!folioSnapshot.empty) {
       if (!clienteSeleccionado) {
         swal.fire({
@@ -373,6 +393,15 @@ const AgregarLevDigital = () => {
           "La lista está vacía. Por favor, agregue elementos antes de continuar."
         );
       } else {
+        swal.fire({
+          title: "Procesando Solicitud...",
+          text: "Por favor espera mientras se valida el contenido.",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => {
+            swal.showLoading();
+          },
+        });
         if (folioSiguiente != 0) {
           // Tomar el primer documento encontrado (suponiendo que hay uno)
           const folioDoc = folioSnapshot.docs[0];
@@ -440,7 +469,20 @@ const AgregarLevDigital = () => {
               estatusPartida: "Activa",
             });
           });
-          navigate("/levantamientoDigital");
+          swal.close();
+          swal
+            .fire({
+              icon: "success",
+              title: "Guardado",
+              text: "Levantamiento Digital Guardado.",
+              timer: 1500, // Espera 1.5 segundos
+              showConfirmButton: false,
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+            })
+            .then(() => {
+              navigate("/levantamientoDigital");
+            });
         } else {
           alert("Selecciona un folio valido");
         }
@@ -568,7 +610,10 @@ const AgregarLevDigital = () => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1>Levantamiento Digital {selectedFolio}{folioSiguiente} </h1>
+          <h1>
+            Levantamiento Digital {selectedFolio}
+            {folioSiguiente}{" "}
+          </h1>
           <div className="row">
             <div className="col-md-2">
               <div className="mb-3">
@@ -590,7 +635,6 @@ const AgregarLevDigital = () => {
                 </select>
               </div>
             </div>
-
             <div className="col-md-4">
               <div className="mb-3">
                 <label className="form-label">Folio siguiente: </label>
@@ -604,8 +648,8 @@ const AgregarLevDigital = () => {
                 />
               </div>
             </div>
-            <div className="col-md-4">
-              <div className="mb-3">
+            <div className="col-md-3">
+              <div className="mb-3 ">
                 <div class="input-group-append">
                   <label className="form-label">Cliente: </label>
                   &nbsp; &nbsp;
@@ -626,6 +670,7 @@ const AgregarLevDigital = () => {
                     <TextField
                       {...params}
                       label="Cliente"
+                      size="small"
                       variant="outlined"
                       fullWidth
                     />
@@ -634,7 +679,7 @@ const AgregarLevDigital = () => {
                 />
               </div>
             </div>
-            <div className="col-md-2">
+            <div className="col-md-3">
               <label className="form-label">ID GS: </label>
               <div className="input-group mb-3">
                 <input
@@ -765,7 +810,7 @@ const AgregarLevDigital = () => {
               </div>
             </div>
 
-            <div className="col-md-2">
+            <div className="col-md-1">
               <label className="form-label">No. Partida:</label>
               <div className="input-group mb-3">
                 <input
@@ -779,8 +824,7 @@ const AgregarLevDigital = () => {
                 />
               </div>
             </div>
-
-            <div className="col-md-3">
+            <div className="col-md-2">
               <label className="form-label">Cantidad:</label>
               <label className="form-label" style={{ color: "red" }}>
                 {" "}
@@ -800,7 +844,7 @@ const AgregarLevDigital = () => {
               </div>
             </div>
 
-            <div className="col-md-5">
+            <div className="col-md-3">
               <label className="form-label">Descripción:</label>
               <label className="form-label" style={{ color: "red" }}>
                 {" "}
@@ -819,7 +863,7 @@ const AgregarLevDigital = () => {
               </div>
             </div>
 
-            <div className="col-md-5">
+            <div className="col-md-3">
               <label className="form-label">Observaciones:</label>
               <div className="input-group mb-3">
                 <textarea
@@ -833,7 +877,7 @@ const AgregarLevDigital = () => {
               </div>
             </div>
 
-            <div className="col-md-6">
+            <div className="col-md-3">
               <button className="btn btn-success" onClick={handleSubmit}>
                 <CiCirclePlus />
                 Agregar tarea
@@ -893,9 +937,10 @@ const AgregarLevDigital = () => {
             <button className="btn btn-success" onClick={addEncabezado}>
               <HiDocumentPlus /> Guardar
             </button>
-            <Link to="/levantamientoDigital"><button className="btn btn-danger" >Regresar</button></Link>
+            <Link to="/levantamientoDigital">
+              <button className="btn btn-danger">Regresar</button>
+            </Link>
           </div>
-
         </div>
       </div>
       <Modal

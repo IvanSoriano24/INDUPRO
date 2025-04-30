@@ -201,6 +201,7 @@ const RevTecnicoFinanciero = () => {
                   <thead>
                     <tr>
                       <th style={{ padding: "10px" }}>Folio</th>
+                      <th style={{ padding: "10px" }}>ID GS</th>
                       <th style={{ padding: "10px" }}>Cliente</th>
                       <th style={{ padding: "10px" }}>Estatus</th>
                       <th style={{ padding: "10px" }}>Fecha</th>
@@ -213,6 +214,7 @@ const RevTecnicoFinanciero = () => {
                     {levDigital.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_tecFin}</td>
+                        <td>{levDigitalItem.idMonday}</td>
                         <td>{levDigitalItem.cliente.razonSocial}</td>
                         <td>{levDigitalItem.estatus}</td>
                         <td>{levDigitalItem.fechaElaboracion}</td>
@@ -258,6 +260,7 @@ const RevTecnicoFinanciero = () => {
                   <thead>
                     <tr>
                       <th style={{ padding: "10px" }}>Folio</th>
+                      <th style={{ padding: "10px" }}>ID GS</th>
                       <th style={{ padding: "10px" }}>Cliente</th>
                       <th style={{ padding: "10px" }}>Estatus</th>
                       <th style={{ padding: "10px" }}>Fecha</th>
@@ -273,6 +276,7 @@ const RevTecnicoFinanciero = () => {
                     {levDigitalB.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_tecFin}</td>
+                        <td>{levDigitalItem.idMonday}</td>
                         <td>{levDigitalItem.cliente.razonSocial}</td>
                         <td>{levDigitalItem.estatus}</td>
                         <td>{levDigitalItem.fechaElaboracion}</td>
@@ -303,6 +307,7 @@ const RevTecnicoFinanciero = () => {
                   <thead>
                     <tr>
                       <th style={{ padding: "10px" }}>Folio</th>
+                      <th style={{ padding: "10px" }}>ID GS</th>
                       <th style={{ padding: "10px" }}>Cliente</th>
                       <th style={{ padding: "10px" }}>Estatus</th>
                       <th style={{ padding: "10px" }}>Fecha</th>
@@ -318,6 +323,7 @@ const RevTecnicoFinanciero = () => {
                     {levDigitalC.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_tecFin}</td>
+                        <td>{levDigitalItem.idMonday}</td>
                         <td>{levDigitalItem.cliente.razonSocial}</td>
                         <td>{levDigitalItem.estatus}</td>
                         <td>{levDigitalItem.fechaElaboracion}</td>

@@ -47,12 +47,42 @@ const AgregarParLevDiGAdicional = () => {
 
   const handleShowAgregar = () => setShowAgregar(true);
   const handleCloseAgregar = () => {
-    setCantidad("");
+    limpiarPartida();
+    setCantidad(0);
     setDescripcion("");
     setObservacion("");
     setShowAgregar(false);
   };
-
+  /*const limpiarCampos = () =>{
+    setModalNoPartida("");
+    //setCve_levDig("");
+    setModalCantidad("");
+    setNoPartida("");
+    setModalDescripcion("");
+    setModalObservacion("");
+  }; */
+  const limpiarPartida = () => {
+    setCantidad("");
+    setDescripcion("");
+    setObservacion("");
+  };
+  const recolectarDatos = (
+    idPartida,
+    cve_tecFin,
+    noPartida,
+    cantidad,
+    descripcion,
+    observacion
+  ) => {
+    limpiarPartida();
+    setIdPartida(idPartida);
+    //setCve_levDig(cve_tecFin);
+    setCantidad(cantidad);
+    setNoPartidaP(noPartida);
+    setDescripcion(descripcion);
+    setObservacion(observacion);
+    handleShow(); // Muestra el modal
+  };
   const { id } = useParams();
 
   const getFactoresById = async (id) => {
@@ -89,7 +119,10 @@ const AgregarParLevDiGAdicional = () => {
 
   const [show, setShow] = useState(false);
 
-  const handleClose = () => setShow(false);
+  const handleClose = () => {
+    setShow(false);
+    limpiarPartida();
+  };
   const handleShow = () => setShow(true);
   const infoCliente = () => {
     swal({
@@ -157,6 +190,15 @@ const AgregarParLevDiGAdicional = () => {
   /* ------------------------------------ - Editar Documento -------------------------------*/
   const updateContacto = async (e) => {
     e.preventDefault();
+    swal.fire({
+      title: "Procesando Solicitud...",
+      text: "Por favor espera mientras se valida el contenido.",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        swal.showLoading();
+      },
+    });
     //ID GS
     if (!idMonday || idMonday.length === 0) {
       swal.fire({
@@ -176,7 +218,20 @@ const AgregarParLevDiGAdicional = () => {
     };
     await updateDoc(factoresRef, datos);
 
-    navigate("/levantamientoDigital");
+    swal.close();
+    swal
+      .fire({
+        icon: "success",
+        title: "Guardado",
+        text: "Levantamiento Digital Guardado.",
+        timer: 1500, // Espera 1.5 segundos
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      })
+      .then(() => {
+        navigate("/levantamientoDigital");
+      });
   };
 
   const agregarPartidaAdicional = async (e) => {
@@ -260,32 +315,16 @@ const AgregarParLevDiGAdicional = () => {
     }
     // }
   };
-  const limpiarPartida = () => {
-    setDescripcion("");
-    setCantidad("");
-    setObservacion("");
-    setIdPartida("");
-    setNoPartidaP("");
-    setCve_levDig("");
-  };
-  const recolectarDatos = (
-    idPartida,
-    cve_tecFin,
-    noPartida,
-    cantidad,
-    descripcion,
-    observacion
-  ) => {
-    //limpiarPartida();
-    setIdPartida(idPartida);
-    setCve_levDig(cve_tecFin);
-    setCantidad(cantidad);
-    setNoPartidaP(noPartida);
-    setDescripcion(descripcion);
-    setObservacion(observacion);
-    handleShow(); // Muestra el modal
-  };
   const guardarEdicion = async () => {
+    swal.fire({
+      title: "Procesando Solicitud...",
+      text: "Por favor espera mientras se valida el contenido.",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        swal.showLoading();
+      },
+    });
     if (cantidad <= 0) {
       swal.fire({
         icon: "warning",
@@ -301,8 +340,17 @@ const AgregarParLevDiGAdicional = () => {
         descripcion: descripcion,
         observacion: observacion,
       });
-      setShow(false); // Cierra el modal
-      getParLevDigital(); // Actualiza la tabla
+      swal.close();
+      swal
+        .fire({
+          icon: "success",
+          title: "Guardado",
+          text: "Partida Guardada.",
+        })
+        .then(() => {
+          setShow(false); // Cierra el modal
+          getParLevDigital(); // Actualiza la tabla
+        });
     }
   };
 
@@ -426,6 +474,7 @@ const AgregarParLevDiGAdicional = () => {
               Agregar Partida
             </button>
           </div>
+
           <div
             style={{
               maxHeight: "240px", // 🔵 Puedes ajustar la altura como tú quieras
@@ -491,7 +540,9 @@ const AgregarParLevDiGAdicional = () => {
           <button className="btn btn-success" onClick={updateContacto}>
             <HiDocumentPlus /> Guardar
           </button>
-          <Link to="/levantamientoDigital"><button className="btn btn-danger" >Regresar</button></Link>
+          <Link to="/levantamientoDigital">
+            <button className="btn btn-danger">Regresar</button>
+          </Link>
         </div>
       </div>
       {/* Modal para agregar partida */}

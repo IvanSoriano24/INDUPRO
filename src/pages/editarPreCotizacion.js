@@ -201,7 +201,18 @@ const EditarPreCotizacion = () => {
     console.log("PartidaP: ", noPartidaP);
   };
   const guardarEdicion = async () => {
+    swal.fire({
+      title: "Procesando Solicitud...",
+      text: "Por favor espera mientras se valida el contenido.",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        swal.showLoading();
+      },
+    });
+
     if (cantidad <= 0) {
+      swal.close();
       swal.fire({
         icon: "warning",
         title: "Error Cantidad",
@@ -216,8 +227,18 @@ const EditarPreCotizacion = () => {
         descripcion: descripcion,
         observacion: observacion,
       });
-      setShow(false); // Cierra el modal
-      //getParLevDigital(); // Actualiza la tabla
+      swal.close();
+
+      swal
+        .fire({
+          icon: "success",
+          title: "Guardado",
+          text: "Partida Guardada.",
+        })
+        .then(() => {
+          setShow(false); // Cierra el modal
+          //getParLevDigital(); // Actualiza la tabla
+        });
     } else {
       alert("Fallo");
     }
@@ -825,7 +846,6 @@ const EditarPreCotizacion = () => {
             fechaModificacion: new Date().toLocaleDateString(),
           });
           //await addDoc(parPrecotizacionInsumos, filteredData);
-
         }
 
         swal.close();
@@ -1143,7 +1163,6 @@ const EditarPreCotizacion = () => {
 
   const updateEncabezado = async (e) => {
     e.preventDefault();
-
     const partidasSinInsumos = par_preCot.filter((partida) => {
       const tieneInsumos = par_PreCoti_insu.some(
         (insumo) => Number(insumo.noPartidaPC) === Number(partida.noPartida)
@@ -1159,7 +1178,15 @@ const EditarPreCotizacion = () => {
       });
       return;
     }
-
+    swal.fire({
+      title: "Procesando Solicitud...",
+      text: "Por favor espera mientras se valida el contenido.",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        swal.showLoading();
+      },
+    });
     const bitacora = collection(db, "BITACORA");
     const today = new Date();
     const ahora = new Date();
@@ -1185,7 +1212,21 @@ const EditarPreCotizacion = () => {
       idMonday: idMonday,
     };
     await updateDoc(preCotRef, datos);
-    navigate("/precotizacion");
+    swal.close();
+
+    swal
+      .fire({
+        icon: "success",
+        title: "Guardado",
+        text: "Precotizacion Guardado.",
+        timer: 1500, // Espera 1.5 segundos
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      })
+      .then(() => {
+        navigate("/precotizacion");
+      });
   };
 
   const agregarPartidaAdicional = async (e) => {
@@ -1634,7 +1675,7 @@ const EditarPreCotizacion = () => {
             className="row"
             style={{ border: "1px solid #000", borderColor: "gray" }}
           >
-            <div className="col-md-2">
+            <div className="col-md-1">
               <label className="form-label">No. Partida</label>
               <div class="input-group mb-3">
                 <input
@@ -1649,7 +1690,7 @@ const EditarPreCotizacion = () => {
                 />
               </div>
             </div>
-            <div className="col-md-5 ">
+            <div className="col-md-3 ">
               <label className="form-label">Descripción</label>
               <div class="input-group mb-3">
                 <textarea
@@ -1663,7 +1704,7 @@ const EditarPreCotizacion = () => {
                 />
               </div>
             </div>
-            <div className="col-md-5 ">
+            <div className="col-md-3 ">
               <label className="form-label">Observaciones</label>
               <div class="input-group mb-3">
                 <textarea
@@ -1677,7 +1718,9 @@ const EditarPreCotizacion = () => {
                 />
               </div>
             </div>
-            <div className="col-md-6 ">
+            <br></br>
+            <br></br>
+            <div className="col-md-3 ">
               <button
                 className="btn btn-success"
                 onClick={agregarPartidaAdicional}
@@ -1923,7 +1966,9 @@ const EditarPreCotizacion = () => {
             <button className="btn btn-success" onClick={updateEncabezado}>
               <HiDocumentPlus /> Editar Documento
             </button>
-            <Link to="/precotizacion"><button className="btn btn-danger" >Regresar</button></Link>
+            <Link to="/precotizacion">
+              <button className="btn btn-danger">Regresar</button>
+            </Link>
           </div>
         </div>
       </div>
@@ -2065,11 +2110,11 @@ const EditarPreCotizacion = () => {
                     value={
                       claveSae
                         ? {
-                          value: claveSae,
-                          label:
-                            clavesSAE.find((prov) => prov.clave === claveSae)
-                              ?.descripcion || "",
-                        }
+                            value: claveSae,
+                            label:
+                              clavesSAE.find((prov) => prov.clave === claveSae)
+                                ?.descripcion || "",
+                          }
                         : null
                     }
                     onChange={(selectedOption) => {
