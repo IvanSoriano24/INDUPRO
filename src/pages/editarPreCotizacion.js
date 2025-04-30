@@ -825,7 +825,7 @@ const EditarPreCotizacion = () => {
             fechaModificacion: new Date().toLocaleDateString(),
           });
           //await addDoc(parPrecotizacionInsumos, filteredData);
-          
+
         }
 
         swal.close();
@@ -1918,9 +1918,13 @@ const EditarPreCotizacion = () => {
           </div>
 
           <br></br>
-          <button className="btn btn-success" onClick={updateEncabezado}>
-            <HiDocumentPlus /> Editar Documento
-          </button>
+
+          <div className="buttons-container">
+            <button className="btn btn-success" onClick={updateEncabezado}>
+              <HiDocumentPlus /> Editar Documento
+            </button>
+            <Link to="/precotizacion"><button className="btn btn-danger" >Regresar</button></Link>
+          </div>
         </div>
       </div>
       {/*---------------------------------------------------------------------------------------------------*/}
@@ -2061,11 +2065,11 @@ const EditarPreCotizacion = () => {
                     value={
                       claveSae
                         ? {
-                            value: claveSae,
-                            label:
-                              clavesSAE.find((prov) => prov.clave === claveSae)
-                                ?.descripcion || "",
-                          }
+                          value: claveSae,
+                          label:
+                            clavesSAE.find((prov) => prov.clave === claveSae)
+                              ?.descripcion || "",
+                        }
                         : null
                     }
                     onChange={(selectedOption) => {

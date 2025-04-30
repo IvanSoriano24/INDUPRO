@@ -344,10 +344,13 @@ const EditarRecTecFinanciero = () => {
     setCostoFijoEdit("");
     setUtilidadEdit("");
   };
-  const openModal = async (noPartida) => {
+  const openModal = async (noPartida, item) => {
+    console.log(item);
     limpiarCampos();
     try {
-      console.log("🔄 Abriendo modal para Insumos. No. Partida:", noPartida);
+      
+      setCostoFijoEdit(item.costoFijoPorcentaje);
+      setUtilidadEdit(item.utilidadPorcentaje);
 
       // 🟢 Establecer el número de partida correctamente
       //setSelectedPartida({ noPartida });
@@ -640,12 +643,12 @@ const EditarRecTecFinanciero = () => {
                 />
               </div>
             </div>*/}
-            <div className="col-md-6 ">
+            {/*<div className="col-md-6 ">
               <button className="btn btn-success" onClick={openModal}>
                 <CiCirclePlus />
                 Totales
               </button>
-            </div>
+            </div>*/}
             <br></br>
             <br></br>
             <div
@@ -667,7 +670,7 @@ const EditarRecTecFinanciero = () => {
                     <th scope="col">Factor utilidad</th> {/*9*/}
                     <th scope="col">Precio por Partida</th> {/*10*/}
                     <th scope="col">Precio Unitario</th>
-                    {/*<th scope="col">Editar</th>*/}
+                    <th scope="col">Editar Factores</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -747,14 +750,14 @@ const EditarRecTecFinanciero = () => {
                         })}
                       </td>{" "}
                       {/*11*/}
-                      {/*<td>
+                      <td>
                         <button
                           className="btn btn-primary"
-                          onClick={() => recolectarDatosTotales(itemTotal.id)}
+                          onClick={() => openModal(itemTotal.id, itemTotal)}
                         >
                           <FaPencilAlt />
                         </button>
-                      </td>*/}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -853,6 +856,10 @@ const EditarRecTecFinanciero = () => {
                 </tbody>
               </table>
             </div>
+          </div>
+          <br></br>
+          <div className="buttons-container">
+            <Link to="/revTecnicoFinanciero"><button className="btn btn-danger" >Regresar</button></Link>
           </div>
         </div>
       </div>

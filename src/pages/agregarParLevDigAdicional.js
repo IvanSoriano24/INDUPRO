@@ -262,10 +262,10 @@ const AgregarParLevDiGAdicional = () => {
   };
   const limpiarPartida = () => {
     setDescripcion("");
-    setCantidad("");  
+    setCantidad("");
     setObservacion("");
     setIdPartida("");
-    setNoPartidaP("");  
+    setNoPartidaP("");
     setCve_levDig("");
   };
   const recolectarDatos = (
@@ -287,13 +287,13 @@ const AgregarParLevDiGAdicional = () => {
   };
   const guardarEdicion = async () => {
     if (cantidad <= 0) {
-          swal.fire({
-            icon: "warning",
-            title: "Error Cantidad",
-            text: "La cantidad no puede ser menor o igual a 0.",
-          });
-          return;
-        }
+      swal.fire({
+        icon: "warning",
+        title: "Error Cantidad",
+        text: "La cantidad no puede ser menor o igual a 0.",
+      });
+      return;
+    }
     if (idPartida) {
       const partidaRef = doc(db, "PAR_LEVDIGITAL", idPartida);
       await updateDoc(partidaRef, {
@@ -487,9 +487,12 @@ const AgregarParLevDiGAdicional = () => {
           </div>
         </div>
         <p></p>
-        <button className="btn btn-success" onClick={updateContacto}>
-          <HiDocumentPlus /> Guardar
-        </button>
+        <div className="buttons-container">
+          <button className="btn btn-success" onClick={updateContacto}>
+            <HiDocumentPlus /> Guardar
+          </button>
+          <Link to="/levantamientoDigital"><button className="btn btn-danger" >Regresar</button></Link>
+        </div>
       </div>
       {/* Modal para agregar partida */}
       <Modal

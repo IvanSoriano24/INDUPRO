@@ -1082,10 +1082,10 @@ const AgregarRevTecFinanciero = () => {
               ((sumaValorLider + sumarCalculoInsumoV) *
                 ((costoFijo + factoraje) / 100 + 1) *
                 parseInt(itemTotales.cantidad)) /
-                (1 - utilidad / 100) -
+              (1 - utilidad / 100) -
               (sumaValorLider + sumarCalculoInsumoV) *
-                ((costoFijo + factoraje) / 100 + 1) *
-                parseInt(itemTotales.cantidad),
+              ((costoFijo + factoraje) / 100 + 1) *
+              parseInt(itemTotales.cantidad),
           });
         });
       }
@@ -2345,9 +2345,13 @@ const AgregarRevTecFinanciero = () => {
             </div>
 
             <br></br>
-            <button className="btn btn-success" onClick={addPreCotizacion}>
-              <HiDocumentPlus /> GUARDAR DOCUMENTO
-            </button>
+
+            <div className="buttons-container">
+              <button className="btn btn-success" onClick={addPreCotizacion}>
+                <HiDocumentPlus /> Guardar Documento
+              </button>
+              <Link to="/precotizacion"><button className="btn btn-danger" >Regresar</button></Link>
+            </div>
           </form>
         </div>
       </div>
@@ -2488,11 +2492,11 @@ const AgregarRevTecFinanciero = () => {
                     value={
                       claveSae
                         ? {
-                            value: claveSae,
-                            label:
-                              clavesSAE.find((prov) => prov.clave === claveSae)
-                                ?.descripcion || "",
-                          }
+                          value: claveSae,
+                          label:
+                            clavesSAE.find((prov) => prov.clave === claveSae)
+                              ?.descripcion || "",
+                        }
                         : null
                     }
                     onChange={(selectedOption) => {

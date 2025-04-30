@@ -614,7 +614,7 @@ const calcularCotizacion = async () => {
     };
     await updateDoc(preCotizacionRef, datos);
   };
-  
+
   const asegurarCotizacion = () => {
     swal({
       title: "Estás seguro de aprobar la cotización?",
@@ -966,9 +966,12 @@ const calcularCotizacion = async () => {
               {/*************************************************************/}
             </tbody>
           </table>
-          <button className="btn btn-success" onClick={asegurarCotizacion}>
-            <FaCheckCircle /> Aprobar Cotización
-          </button>
+          <div className="buttons-container">
+            <button className="btn btn-success" onClick={asegurarCotizacion}>
+              <FaCheckCircle /> Aprobar Cotización
+            </button>
+            <Link to="/revTecnicoFinanciero"><button className="btn btn-danger" >Regresar</button></Link>
+          </div>
         </div>
       </div>
     </div>

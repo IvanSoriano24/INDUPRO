@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   collection,
   addDoc,
@@ -160,9 +160,8 @@ const AgregarLevDigital = () => {
           if (parseInt(noPartida) !== prevPartida + 1) {
             isValid = false;
             swal.fire({
-              text: `El número de partida no es secuencial en la fila ${
-                index + 2
-              }.`,
+              text: `El número de partida no es secuencial en la fila ${index + 2
+                }.`,
               icon: "error",
             });
             //alert(`El número de partida no es secuencial en la fila ${index + 2}.`);
@@ -172,9 +171,8 @@ const AgregarLevDigital = () => {
           if (!Number.isInteger(Number(cantidad)) || cantidad === "") {
             isValid = false;
             swal.fire({
-              text: `La cantidad no es un número entero en la fila ${
-                index + 2
-              }.`,
+              text: `La cantidad no es un número entero en la fila ${index + 2
+                }.`,
               icon: "error",
             });
             //alert(`La cantidad no es un número entero en la fila ${index + 2}.`);
@@ -242,11 +240,11 @@ const AgregarLevDigital = () => {
       prevList.map((item) =>
         item.noPartida === modalNoPartida // Asegúrate de que modalNoPartida tiene el valor correcto
           ? {
-              ...item,
-              cantidad: modalCantidad,
-              descripcion: modalDescripcion,
-              observacion: modalObservacion,
-            }
+            ...item,
+            cantidad: modalCantidad,
+            descripcion: modalDescripcion,
+            observacion: modalObservacion,
+          }
           : item
       )
     );
@@ -891,9 +889,13 @@ const AgregarLevDigital = () => {
             </div>
           </div>
           <p></p>
-          <button className="btn btn-success" onClick={addEncabezado}>
-            <HiDocumentPlus /> Guardar
-          </button>
+          <div className="buttons-container">
+            <button className="btn btn-success" onClick={addEncabezado}>
+              <HiDocumentPlus /> Guardar
+            </button>
+            <Link to="/levantamientoDigital"><button className="btn btn-danger" >Regresar</button></Link>
+          </div>
+
         </div>
       </div>
       <Modal

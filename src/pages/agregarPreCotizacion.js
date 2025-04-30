@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom"; //Link
+import { useNavigate, useParams, Link } from "react-router-dom"; //Link
 import {
   collection,
   addDoc,
@@ -27,7 +27,7 @@ import { ModalTitle, Modal, Button } from "react-bootstrap";
 import axios from "axios";
 import Select from "react-select";
 import * as XLSX from "xlsx";
-import { Link, animateScroll as scroll } from "react-scroll";
+import { animateScroll as scroll } from "react-scroll";
 
 const AgregarPreCotizacion = () => {
   const [partida_levDi, setPartida_levDig] = useState("");
@@ -127,6 +127,7 @@ const AgregarPreCotizacion = () => {
 
   //const proveedores = ["Proveedor 1", "Proveedor 2", "Proveedor 3", "Proveedor 4"];
   const [show, setShow] = useState(false);
+  const [showPartida, setShowPartida] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -188,7 +189,7 @@ const AgregarPreCotizacion = () => {
         for (let index = 0; index < jsonData.slice(1).length; index++) {
           const row = jsonData.slice(1)[index];
           const noPartida = String(row[0] || 0).trim();
-          const insumoOriginal  = String(row[1] || "").trim();
+          const insumoOriginal = String(row[1] || "").trim();
           const unidad = String(row[2] || "").trim();
           const claveSae = String(row[3] || "").trim();
           const proveedor = String(row[4] || "").trim();
@@ -245,7 +246,7 @@ const AgregarPreCotizacion = () => {
 
           //console.log(nombreInsumo);
           prevPartida = parseInt(noPartida);
-          
+
           filteredData.push({
             noPartida,
             insumo: nombreInsumo,
@@ -299,11 +300,11 @@ const AgregarPreCotizacion = () => {
     if (!noPartida) {
       return false; // No hay número de partida
     }
-  
+
     const existePartida = par_levDigital.some(
       (partida) => String(partida.noPartida).trim() === String(noPartida).trim()
     );
-  
+
     return existePartida;
   };
   const validarInsumo = (Insumo) => {
@@ -354,18 +355,18 @@ const AgregarPreCotizacion = () => {
   };
   const insumoNombre = async (insumo) => {
     try {
-      if(insumo === 'S' ||insumo === 's'){
+      if (insumo === 'S' || insumo === 's') {
         return 'Subcontratos';
       }
-      if(insumo === 'M' ||insumo === 'm'){
+      if (insumo === 'M' || insumo === 'm') {
         return 'Material';
       }
-      if(insumo === 'V' ||insumo === 'v'){
+      if (insumo === 'V' || insumo === 'v') {
         return 'Viáticos';
       }
     } catch (error) {
       return false;
-    
+
     }
   };
   const validarClaveSae = async (claveSae) => {
@@ -712,37 +713,10 @@ const AgregarPreCotizacion = () => {
     }
   };
   /* -------------------------------------------------------------------------------------------------------------------------------- */
-  /*const agregarPartidaAdicional = async (e) => {
-    e.preventDefault();
-    if (folioSiguiente != 0) {
-      const bitacora = collection(db, "BITACORA");
-      const today = new Date();
-      const ahora = new Date();
-      const hora = ahora.getHours();
-      const minuto = ahora.getMinutes();
-      const segundo = ahora.getSeconds();
-      const formattedDate = today.toLocaleDateString(); // Opcional: Puedes pasar opciones de formato
-      const horaFormateada = `${hora}:${minuto}:${segundo}`;
-      await addDoc(bitacora, {
-        cve_Docu: cve_levDig,
-        tiempo: horaFormateada,
-        fechaRegistro: formattedDate,
-        tipoDocumento: "Registro de partidas",
-        noPartida: noPartida,
-      });
-      await addDoc(partida_levDig, {
-        cve_levDig: cve_levDig,
-        noPartida: noPartida,
-        cantidad: cantidadPartida,
-        descripcion: descripcion,
-        observacion: observacion,
-        estatusPartida: "Activa",
-      });
-      window.location.reload();
-    } else {
-      alert("Antes debes seleccionar el folio de Pre-cotización ");
-    }
-  };*/
+  const agregarPartida = async () => {
+    
+    setShowPartida(true);
+  };
   const agregarPartidaAdicional = async (e) => {
     e.preventDefault();
     if (cantidadPartida <= 0) {
@@ -1202,21 +1176,21 @@ const AgregarPreCotizacion = () => {
           insumos: insumoYaExiste
             ? insumosActualizados
             : [
-                ...item.insumos,
-                {
-                  insumo,
-                  cantidad,
-                  unidad,
-                  claveSae,
-                  descripcionInsumo,
-                  comentariosAdi,
-                  costoCotizado,
-                  proveedor: proveedorClave, // 🟢 Guarda sin espacios
-                  categoria,
-                  familia,
-                  linea,
-                },
-              ],
+              ...item.insumos,
+              {
+                insumo,
+                cantidad,
+                unidad,
+                claveSae,
+                descripcionInsumo,
+                comentariosAdi,
+                costoCotizado,
+                proveedor: proveedorClave, // 🟢 Guarda sin espacios
+                categoria,
+                familia,
+                linea,
+              },
+            ],
         };
       }
       return item;
@@ -1769,7 +1743,7 @@ const AgregarPreCotizacion = () => {
             className="row"
             style={{ border: "1px solid #000", borderColor: "gray" }}
           >
-            <div className="col-md-2">
+            {/*<div className="col-md-2">
               <label className="form-label">No. Partida</label>
               <div class="input-group mb-3">
                 <input
@@ -1783,8 +1757,8 @@ const AgregarPreCotizacion = () => {
                   readOnly
                 />
               </div>
-            </div>
-            <div className="col-md-3 ">
+            </div>*/}
+            {/*<div className="col-md-3 ">
               <label className="form-label">Cantidad</label>
               <div class="input-group mb-3">
                 <input
@@ -1798,9 +1772,9 @@ const AgregarPreCotizacion = () => {
                   min="1"
                 />
               </div>
-            </div>
+            </div>*/}
             <p></p>
-            <div className="col-md-5 ">
+            {/*<div className="col-md-5 ">
               <label className="form-label">Descripción</label>
               <div class="input-group mb-3">
                 <textarea
@@ -1813,8 +1787,8 @@ const AgregarPreCotizacion = () => {
                   className="form-control"
                 />
               </div>
-            </div>
-            <div className="col-md-5 ">
+            </div>*/}
+            {/*<div className="col-md-5 ">
               <label className="form-label">Observaciones</label>
               <div class="input-group mb-3">
                 <textarea
@@ -1827,11 +1801,11 @@ const AgregarPreCotizacion = () => {
                   className="form-control"
                 />
               </div>
-            </div>
+            </div>*/}
             <div className="col-md-6 ">
               <button
                 className="btn btn-success"
-                onClick={agregarPartidaAdicional}
+                onClick={agregarPartida}
               >
                 <CiCirclePlus />
                 Agregar Tarea
@@ -2080,11 +2054,70 @@ const AgregarPreCotizacion = () => {
             </table>
           </div>
           <br></br>
-          <button className="btn btn-success" onClick={addPreCotizacion}>
-            <HiDocumentPlus /> GUARDAR DOCUMENTO
-          </button>
+          <div className="buttons-container">
+            <button className="btn btn-success" onClick={addPreCotizacion}>
+              <HiDocumentPlus /> Guardar Documento
+            </button>
+            <Link to="/levantamientoDigital"><button className="btn btn-danger" >Regresar</button></Link>
+          </div>
         </div>
       </div>
+      <Modal
+        show={showPartida}
+        onHide={handleClose}
+        dialogClassName="lg"
+        centered
+        scrollable
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Agregar Partida</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="mb-3">
+            <label>No. Partida</label>
+            <input
+              type="text"
+              className="form-control"
+              value={noPartida}
+              readOnly
+            />
+          </div>
+          <div className="mb-3">
+            <label>Cantidad</label>
+            <input
+              type="number"
+              className="form-control"
+              value={cantidad}
+              onChange={(e) => setCantidad(e.target.value)}
+              min="1"
+            />
+          </div>
+          <div className="mb-3">
+            <label>Descripción</label>
+            <textarea
+              className="form-control"
+              value={descripcion}
+              onChange={(e) => setDescripcion(e.target.value)}
+            />
+          </div>
+          <div className="mb-3">
+            <label>Observaciones</label>
+            <textarea
+              className="form-control"
+              value={observacion}
+              onChange={(e) => setObservacion(e.target.value)}
+            />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={agregarPartidaAdicional}>
+            Agregar
+          </Button>
+        </Modal.Footer>
+      </Modal>
       <Modal
         show={show}
         onHide={handleClose}
@@ -2222,11 +2255,11 @@ const AgregarPreCotizacion = () => {
                     value={
                       claveSae
                         ? {
-                            value: claveSae,
-                            label:
-                              clavesSAE.find((prov) => prov.clave === claveSae)
-                                ?.descripcion || "",
-                          }
+                          value: claveSae,
+                          label:
+                            clavesSAE.find((prov) => prov.clave === claveSae)
+                              ?.descripcion || "",
+                        }
                         : null
                     }
                     onChange={(selectedOption) => {
