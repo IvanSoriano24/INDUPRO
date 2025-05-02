@@ -110,12 +110,16 @@ const Cotizacion = () => {
   }, []);
 
 
-  /*const levDigitalFiltrado = levDigital.filter(item =>
-    item.cve_levDig.toString().includes(searchTerm)
+  const levDigitalFiltrado = levDigital.filter(item =>
+    item.cve_tecFin.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.idMonday?.toString().toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
   const levDigitalBFiltrado = levDigitalB.filter(item =>
-    item.cve_levDig.toString().includes(searchTerm)
-  );*/
+    item.cve_tecFin.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.idMonday?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
 
   return (
     <div className="panel">
@@ -178,8 +182,7 @@ const Cotizacion = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/*{levDigitalFiltrado.map((levDigitalItem) => (*/}
-                    {levDigital.map((levDigitalItem) => (
+                    {levDigitalFiltrado.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_tecFin}</td>
                         <td>{levDigitalItem.idMonday}</td>
@@ -233,8 +236,7 @@ const Cotizacion = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/*{levDigitalBFiltrado.map((levDigitalItem) => (*/}
-                    {levDigital.map((levDigitalItem) => (
+                    {levDigitalBFiltrado.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_tecFin}</td>
                         <td>{levDigitalItem.idMonday}</td>

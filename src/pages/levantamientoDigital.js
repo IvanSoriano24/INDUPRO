@@ -142,16 +142,20 @@ const LevantamientoDigital = () => {
   }, []);
 
   const levDigitalFiltrado = levDigital.filter(item =>
-    item.cve_levDig.toString().includes(searchTerm)
+    item.cve_levDig.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.idMonday?.toString().toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
   const levDigitalBFiltrado = levDigitalB.filter(item =>
-    item.cve_levDig.toString().includes(searchTerm)
+    item.cve_levDig.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.idMonday?.toString().toLowerCase().includes(searchTerm.toLowerCase())
   );
   
   const levDigitalCFiltrado = levDigitalC.filter(item =>
-    item.cve_levDig.toString().includes(searchTerm)
+    item.cve_levDig.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.idMonday?.toString().toLowerCase().includes(searchTerm.toLowerCase())
   );
-    
+  
   return (
     <div className="panel">
       <div className="row">

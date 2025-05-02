@@ -143,16 +143,20 @@ const RevTecnicoFinanciero = () => {
   }, []);
 
   const levDigitalFiltrado = levDigital.filter(item =>
-    item.cve_levDig.toString().includes(searchTerm)
+    item.cve_tecFin.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.idMonday?.toString().toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
   const levDigitalBFiltrado = levDigitalB.filter(item =>
-    item.cve_levDig.toString().includes(searchTerm)
+    item.cve_tecFin.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.idMonday?.toString().toLowerCase().includes(searchTerm.toLowerCase())
   );
   
   const levDigitalCFiltrado = levDigitalC.filter(item =>
-    item.cve_levDig.toString().includes(searchTerm)
+    item.cve_tecFin.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.idMonday?.toString().toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  
   return (
     <div className="panel">
       <div className="row">
@@ -223,8 +227,7 @@ const RevTecnicoFinanciero = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/*{levDigitalFiltrado.map((levDigitalItem) => (*/}
-                    {levDigital.map((levDigitalItem) => (
+                    {levDigitalFiltrado.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_tecFin}</td>
                         <td>{levDigitalItem.idMonday}</td>
@@ -286,8 +289,7 @@ const RevTecnicoFinanciero = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/*{levDigitalBFiltrado.map((levDigitalItem) => (*/}
-                    {levDigitalB.map((levDigitalItem) => (
+                    {levDigitalBFiltrado.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_tecFin}</td>
                         <td>{levDigitalItem.idMonday}</td>
@@ -334,8 +336,7 @@ const RevTecnicoFinanciero = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/*{levDigitalCFiltrado.map((levDigitalItem) => (*/}
-                    {levDigitalC.map((levDigitalItem) => (
+                    {levDigitalCFiltrado.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_tecFin}</td>
                         <td>{levDigitalItem.idMonday}</td>
