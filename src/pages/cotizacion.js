@@ -30,6 +30,7 @@ const Cotizacion = () => {
 
   const [levDigital, setLevDigital] = useState([]);
   const [levDigitalB, setLevDigitalB] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   /* ------------------------------------------------------ ACTIVAS ------------------------------- */
   const getLevDigital = async () => {
     const levDigitalList = [];
@@ -108,17 +109,25 @@ const Cotizacion = () => {
     getLevDigitalBloqueadas(); // Cambiado a "getClientes"
   }, []);
 
+
+  /*const levDigitalFiltrado = levDigital.filter(item =>
+    item.cve_levDig.toString().includes(searchTerm)
+  );
+  const levDigitalBFiltrado = levDigitalB.filter(item =>
+    item.cve_levDig.toString().includes(searchTerm)
+  );*/
+
   return (
     <div className="panel">
-      {/*<div className="row">
+      <div className="row">
         <div className="col-md-10 ">
           <div className="mb-3">
             <input
-              placeholder="BUSCAR POR CLAVE"
-              aria-label=""
-              aria-describedby="basic-addon1"
+              placeholder="Buscar por clave"
               type="text"
               className="form-control"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
@@ -131,7 +140,7 @@ const Cotizacion = () => {
             </div>
           </div>
         </div>
-      </div>*/}
+      </div>
       <Nav tabs>
         <NavItem>
           <NavLink
@@ -169,6 +178,7 @@ const Cotizacion = () => {
                     </tr>
                   </thead>
                   <tbody>
+                    {/*{levDigitalFiltrado.map((levDigitalItem) => (*/}
                     {levDigital.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_tecFin}</td>
@@ -223,7 +233,8 @@ const Cotizacion = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {levDigitalB.map((levDigitalItem) => (
+                    {/*{levDigitalBFiltrado.map((levDigitalItem) => (*/}
+                    {levDigital.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_tecFin}</td>
                         <td>{levDigitalItem.idMonday}</td>

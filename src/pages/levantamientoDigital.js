@@ -24,6 +24,8 @@ const LevantamientoDigital = () => {
   const [levDigital, setLevDigital] = useState([]);
   const [levDigitalB, setLevDigitalB] = useState([]);
   const [levDigitalC, setLevDigitalC] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+
   /* ------------------------------------------------------ ACTIVAS ------------------------------- */
   const getLevDigital = async () => {
     const levDigitalList = [];
@@ -133,25 +135,34 @@ const LevantamientoDigital = () => {
         levDigitalListC.sort((a, b) => a.cve_levDig - b.cve_levDig);
       }
     }
-
     setLevDigitalC(levDigitalListC);
   };
-
   useEffect(() => {
-    getLevDigitalCanceladas(); 
+    getLevDigitalCanceladas();
   }, []);
 
+  const levDigitalFiltrado = levDigital.filter(item =>
+    item.cve_levDig.toString().includes(searchTerm)
+  );
+  const levDigitalBFiltrado = levDigitalB.filter(item =>
+    item.cve_levDig.toString().includes(searchTerm)
+  );
+  
+  const levDigitalCFiltrado = levDigitalC.filter(item =>
+    item.cve_levDig.toString().includes(searchTerm)
+  );
+    
   return (
     <div className="panel">
       <div className="row">
-         {/*<div className="col-md-10 ">
-         <div className="mb-3">
+        <div className="col-md-10 ">
+          <div className="mb-3">
             <input
-              placeholder="Buscar Por Clave"
-              aria-label=""
-              aria-describedby="basic-addon1"
+              placeholder="Buscar por clave"
               type="text"
               className="form-control"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
@@ -163,7 +174,7 @@ const LevantamientoDigital = () => {
               </button>
             </div>
           </div>
-        </div>*/}
+        </div>
         <div className="col-md-4 ">
           <div className="mb-3">
             <div class="input-group-append">
@@ -227,7 +238,7 @@ const LevantamientoDigital = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {levDigital.map((levDigitalItem) => (
+                    {levDigitalFiltrado.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_levDig}</td>
                         <td>{levDigitalItem.idMonday}</td>
@@ -259,7 +270,6 @@ const LevantamientoDigital = () => {
             </div>
           </div>
         </TabPane>
-
         <TabPane tabId="2">
           <div className="container">
             <div className="row">
@@ -282,7 +292,7 @@ const LevantamientoDigital = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {levDigitalB.map((levDigitalItem) => (
+                    {levDigitalBFiltrado.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_levDig}</td>
                         <td>{levDigitalItem.idMonday}</td>
@@ -306,7 +316,6 @@ const LevantamientoDigital = () => {
             </div>
           </div>
         </TabPane>
-
         <TabPane tabId="3">
           <div className="container">
             <div className="row">
@@ -329,7 +338,7 @@ const LevantamientoDigital = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {levDigitalC.map((levDigitalItem) => (
+                    {levDigitalCFiltrado.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_levDig}</td>
                         <td>{levDigitalItem.idMonday}</td>
@@ -357,5 +366,4 @@ const LevantamientoDigital = () => {
     </div>
   );
 };
-
 export default LevantamientoDigital;

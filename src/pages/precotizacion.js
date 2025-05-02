@@ -24,6 +24,8 @@ const Precotizacion = () => {
   const [levDigital, setLevDigital] = useState([]);
   const [levDigitalB, setLevDigitalB] = useState([]);
   const [levDigitalC, setLevDigitalC] = useState([]);
+
+  const [searchTerm, setSearchTerm] = useState("");
   /* ------------------------------------------------------ ACTIVAS ------------------------------- */
   const getLevDigital = async () => {
     const levDigitalList = [];
@@ -140,17 +142,29 @@ const Precotizacion = () => {
     getLevDigitalCanceladas(); // Cambiado a "getClientes"
   }, []);
 
+  const levDigitalFiltrado = levDigital.filter(item =>
+    item.cve_levDig.toString().includes(searchTerm)
+  );
+  const levDigitalBFiltrado = levDigitalB.filter(item =>
+    item.cve_levDig.toString().includes(searchTerm)
+  );
+  
+  const levDigitalCFiltrado = levDigitalC.filter(item =>
+    item.cve_levDig.toString().includes(searchTerm)
+  );
+
+
   return (
     <div className="panel">
-      {/*<div className="row">
+      <div className="row">
         <div className="col-md-10 ">
           <div className="mb-3">
-            <input
-              placeholder="Buscar por Clave"
-              aria-label=""
-              aria-describedby="basic-addon1"
+          <input
+              placeholder="Buscar por clave"
               type="text"
               className="form-control"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
@@ -163,7 +177,7 @@ const Precotizacion = () => {
             </div>
           </div>
         </div>
-      </div>*/}
+      </div>
       <Nav tabs>
         <NavItem>
           <NavLink
@@ -215,6 +229,7 @@ const Precotizacion = () => {
                     </tr>
                   </thead>
                   <tbody>
+                    {/*{levDigitalFiltrado.map((levDigitalItem) => (*/}
                     {levDigital.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_precot}</td>
@@ -277,6 +292,7 @@ const Precotizacion = () => {
                     </tr>
                   </thead>
                   <tbody>
+                    {/*{levDigitalBFiltrado.map((levDigitalItem) => (*/}
                     {levDigitalB.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_precot}</td>
@@ -323,6 +339,7 @@ const Precotizacion = () => {
                     </tr>
                   </thead>
                   <tbody>
+                    {/*{levDigitalCFiltrado.map((levDigitalItem) => (*/}
                     {levDigitalC.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_precot}</td>
