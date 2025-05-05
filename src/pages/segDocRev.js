@@ -681,7 +681,10 @@ useEffect(() => {
                     <td>{item.unidad}</td>
                     <td>{item.insumo}</td>
                     <td>{item.cantidad}</td>
-                    <td>{item.costoCotizado}</td>
+                    <td style={{ textAlign: "right" }}>{item.costoCotizado.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })}</td>
                   </tr>
                 ))}
               </tbody>
