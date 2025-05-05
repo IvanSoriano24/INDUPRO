@@ -30,6 +30,7 @@ const Cotizacion = () => {
 
   const [levDigital, setLevDigital] = useState([]);
   const [levDigitalB, setLevDigitalB] = useState([]);
+  const [levDigitalA, setLevDigitalA] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   /* ------------------------------------------------------ ACTIVAS ------------------------------- */
   const getLevDigital = async () => {
@@ -108,7 +109,44 @@ const Cotizacion = () => {
   useEffect(() => {
     getLevDigitalBloqueadas(); // Cambiado a "getClientes"
   }, []);
+/* -------------------------------------------------------- ACEPTADAS ---------------------------------------------------- */
+const getLevDigitalAceptadas = async () => {
+  const levDigitalListA = [];
+  const levDigitalCollection = collection(db, "COTIZACION");
+  const levDigital = query(
+    levDigitalCollection,
+    "COTIZACION",
+    where("estatus", "==", "Aceptado")
+  );
+  const levDigitalSnapshot = await getDocs(levDigital);
 
+  for (const levDigitalDoc of levDigitalSnapshot.docs) {
+    const levDigitalData = levDigitalDoc.data();
+    const cveClie = levDigitalData.cve_clie;
+
+    // Obtener información del cliente
+    const clientesCollection = collection(db, "CLIENTES");
+    const clientesQuery = query(
+      clientesCollection,
+      where("cve_clie", "==", cveClie)
+    );
+    const clientesSnapshot = await getDocs(clientesQuery);
+
+    if (!clientesSnapshot.empty) {
+      const clienteData = clientesSnapshot.docs[0].data();
+      // Combinar información de LEVDIGITAL y CLIENTES
+      const combinedData = { ...levDigitalData, cliente: clienteData };
+      levDigitalListA.push({ ...combinedData, id: levDigitalDoc.id });
+      levDigitalListA.sort((a, b) => a.cve_tecFin - b.cve_tecFin);
+    }
+  }
+
+  setLevDigitalA(levDigitalListA);
+};
+
+useEffect(() => {
+  getLevDigitalAceptadas(); // Cambiado a "getClientes"
+}, []);
 
   const levDigitalFiltrado = levDigital.filter(item =>
     item.cve_tecFin.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -116,6 +154,11 @@ const Cotizacion = () => {
   );
   
   const levDigitalBFiltrado = levDigitalB.filter(item =>
+    item.cve_tecFin.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.idMonday?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const levDigitalAFiltrado = levDigitalA.filter(item =>
     item.cve_tecFin.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.idMonday?.toString().toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -160,6 +203,14 @@ const Cotizacion = () => {
             className={activeTab == "2" ? "activeTab baseTap" : "baseTap"}
           >
             Canceladas
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink
+            onClick={() => cambiarTab("3")}
+            className={activeTab == "3" ? "activeTab baseTap" : "baseTap"}
+          >
+            Aceptadas
           </NavLink>
         </NavItem>
       </Nav>
@@ -237,6 +288,53 @@ const Cotizacion = () => {
                   </thead>
                   <tbody>
                     {levDigitalBFiltrado.map((levDigitalItem) => (
+                      <tr key={levDigitalItem.id}>
+                        <td>{levDigitalItem.cve_tecFin}</td>
+                        <td>{levDigitalItem.idMonday}</td>
+                        <td>{levDigitalItem.cliente.razonSocial}</td>
+                        <td>{levDigitalItem.estatus}</td>
+                        <td>{levDigitalItem.fechaElaboracion}</td>
+                        <td>
+                          <Link
+                            to={`/segDocCot/${levDigitalItem.id}`}
+                            className="btn btn-light"
+                            style={{ textAlign: "center" }}
+                          >
+                            <HiDocumentMagnifyingGlass />
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </TabPane>
+
+        <TabPane tabId="3">
+          <div className="container">
+            <div className="row">
+              <div className="col">
+                <br />
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th style={{ padding: "10px" }}>Folio</th>
+                      <th style={{ padding: "10px" }}>ID GS</th>
+                      <th style={{ padding: "10px" }}>Cliente</th>
+                      <th style={{ padding: "10px" }}>Estatus</th>
+                      <th style={{ padding: "10px" }}>Fecha</th>
+                      <th style={{ padding: "7px" }}>
+                        Seguimiento de Documento
+                        <button>
+                          <FaCircleQuestion />
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {levDigitalAFiltrado.map((levDigitalItem) => (
                       <tr key={levDigitalItem.id}>
                         <td>{levDigitalItem.cve_tecFin}</td>
                         <td>{levDigitalItem.idMonday}</td>

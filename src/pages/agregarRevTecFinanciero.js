@@ -1802,18 +1802,6 @@ const AgregarRevTecFinanciero = () => {
                     },
                   ],
                 },
-                {
-                  width: "50%",
-                  stack: [
-                    {
-                      text: "No: " + cve_precot,
-                      fontSize: 12,
-                      bold: true,
-                      alignment: "right",
-                      margin: [0, 0, 0, 4],
-                    },
-                  ],
-                },
               ],
             },
             {
@@ -1839,6 +1827,7 @@ const AgregarRevTecFinanciero = () => {
               layout: {
                 fillColor: (rowIndex) => (rowIndex === 0 ? "#eeeeee" : null),
               },
+              layout: "noBorders",
             },
             {
               text: "INSUMOS", // 🔵 TÍTULO para la segunda tabla
@@ -1866,6 +1855,7 @@ const AgregarRevTecFinanciero = () => {
               layout: {
                 fillColor: (rowIndex) => (rowIndex === 0 ? "#eeeeee" : null),
               },
+              layout: "noBorders",
             },
             {
               text: "Mano de Obra", // 🔵 TÍTULO para la segunda tabla
@@ -1889,6 +1879,7 @@ const AgregarRevTecFinanciero = () => {
               layout: {
                 fillColor: (rowIndex) => (rowIndex === 0 ? "#eeeeee" : null),
               },
+              layout: "noBorders",
             },
           ],
           styles: {
@@ -2324,7 +2315,7 @@ const AgregarRevTecFinanciero = () => {
                 overflowY: "auto",
               }}
             >
-              <label style={{ color: "red" }}>PARTIDAD POR MANO DE OBRA </label>
+              <label style={{ color: "red" }}>Partida por Mano de Obra </label>
               <div>
                 <br></br>
                 <table class="table">

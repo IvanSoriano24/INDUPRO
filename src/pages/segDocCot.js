@@ -554,7 +554,7 @@ console.log("DATS: ", cveATF);
                     color:
                       estatus === "Cancelado"
                         ? "red"
-                        : estatus === "Bloqueado"
+                        : estatus === "Aceptado"
                         ? "green"
                         : "black",
                   }}
@@ -565,7 +565,7 @@ console.log("DATS: ", cveATF);
                     color:
                       estatus === "Cancelado"
                         ? "red"
-                        : estatus === "Bloqueado"
+                        : estatus === "Aceptado"
                         ? "green"
                         : "black",
                   }}
@@ -578,7 +578,7 @@ console.log("DATS: ", cveATF);
                     color:
                       estatus === "Cancelado"
                         ? "red"
-                        : estatus === "Bloqueado"
+                        : estatus === "Aceptado"
                         ? "green"
                         : "black",
                   }}

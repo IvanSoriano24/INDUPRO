@@ -21,11 +21,13 @@ import pdfFonts from "pdfmake/build/vfs_fonts";
 import encabezadoPDF from "../imagenes/GS-ENCABEZADO-2.PNG";
 import { VscFilePdf } from "react-icons/vsc";
 import { FaFileDownload } from "react-icons/fa";
+import swal from "sweetalert2";
 import axios from "axios";
-import swal from "sweetalert";
 import { ModalTitle, Modal, Button } from "react-bootstrap";
 import Select from "react-select";
 import { FaDatabase } from "react-icons/fa";
+import { NumerosALetras } from "numero-a-letras";
+import { FaCheckCircle } from "react-icons/fa";
 
 const VisualizarCotizacion = () => {
   const [cve_tecFin, setCve_tecFin] = useState("");
@@ -86,19 +88,19 @@ const VisualizarCotizacion = () => {
           where("cve_tecFin", "==", cve_tecFin)
         )
       );
-  
+
       const par_preCotList = data.docs
         .map((doc) => ({
           ...doc.data(),
           id: doc.id,
         }))
         .sort((a, b) => Number(a.noPartidaATF) - Number(b.noPartidaATF)); // 🔧 Orden numérico
-  
+
       setParCotizacionLista(par_preCotList);
     } catch (error) {
       console.error("Error fetching PAR_COTIZACION data:", error);
     }
-  };  
+  };
 
   useEffect(() => {
     getParPreCot();
@@ -137,7 +139,7 @@ const VisualizarCotizacion = () => {
         // Crear un lienzo HTML5
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-
+        const enLetras = NumerosALetras(total);
         // Establecer las dimensiones del lienzo para que coincidan con las de la imagen
         canvas.width = img.width;
         canvas.height = img.height;
@@ -161,6 +163,10 @@ const VisualizarCotizacion = () => {
             style: "currency",
             currency: "USD",
           }), // Formatea costoCotizado,,
+        ]);
+
+        const numPartida = parCotizacionLista.map((itemTotales) => [
+          itemTotales.noPartidaATF,
         ]);
 
         // Define el contenido del documento PDF
@@ -193,12 +199,12 @@ const VisualizarCotizacion = () => {
                 {
                   width: "50%",
                   stack: [
-                    {
+                    /* {
                       text: "No. Cotización: " + cve_tecFin,
                       fontSize: 12,
                       bold: true,
                       alignment: "right",
-                    },
+                    },*/
                     {
                       text:
                         "\n" +
@@ -219,21 +225,38 @@ const VisualizarCotizacion = () => {
               fontSize: 9,
               bold: true,
             },
-            {
-              margin: [0, 10, 0, 0],
-              table: {
-                headerRows: 1,
-                widths: ["auto", "*", "auto"],
-                body: [
-                  [
-                    "No. Partida",
-                    "Descripción",
-                    "Importe",
-                  ],
-                  ...tableBody20, // Agregar filas de la tabla basadas en la lista temporal
-                ],
-              },
-            },
+            ...parCotizacionLista
+              .map((item) => [
+                {
+                  text: "Partida: " + item.noPartidaATF,
+                  fontSize: 12,
+                  bold: true,
+                  alignment: "left",
+                  margin: [0, 10, 0, 0],
+                },
+                {
+                  margin: [0, 5, 0, 0],
+                  table: {
+                    headerRows: 1,
+                    widths: ["*"],
+                    body: [["Descripción"], [item.descripcion]],
+                  },
+                  layout: "noBorders",
+                },
+                {
+                  text:
+                    "Importe: " +
+                    item.totalPartida.toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    }),
+                  fontSize: 14,
+                  bold: true,
+                  alignment: "right",
+                  margin: [0, 10, 0, 0],
+                },
+              ])
+              .flat(),
             {
               text:
                 "\n" +
@@ -268,6 +291,13 @@ const VisualizarCotizacion = () => {
                   currency: "USD",
                 }),
               fontSize: 12,
+              bold: true,
+              alignment: "right",
+            },
+            {
+              margin: [0, 3, 0, 0],
+              text: enLetras.toUpperCase(),
+              fontSize: 10,
               bold: true,
               alignment: "right",
             },
@@ -327,18 +357,17 @@ const VisualizarCotizacion = () => {
           fechaElaboracion
         ).toLocaleDateString("es-ES");
         // Construir datos para la tabla dinámica
-
         const tableBody20 = parCotizacionLista.map((itemTotales) => [
           itemTotales.cve_tecFin,
-          itemTotales.noPartidaATF,
+          //itemTotales.noPartidaATF,
           itemTotales.descripcion,
-          itemTotales.observacion,
+          //itemTotales.observacion,
           itemTotales.totalPartida.toLocaleString("en-US", {
             style: "currency",
             currency: "USD",
           }), // Formatea costoCotizado,,
         ]);
-
+        const enLetras = NumerosALetras(total);
         // Define el contenido del documento PDF
         const documentDefinition = {
           header: {
@@ -369,12 +398,12 @@ const VisualizarCotizacion = () => {
                 {
                   width: "50%",
                   stack: [
-                    {
+                    /*{
                       text: "No. Cotización: " + cve_tecFin,
                       fontSize: 12,
                       bold: true,
                       alignment: "right",
-                    },
+                    },*/
                     {
                       text:
                         "\n" +
@@ -395,23 +424,37 @@ const VisualizarCotizacion = () => {
               fontSize: 9,
               bold: true,
             },
-            {
-              margin: [0, 10, 0, 0],
-              table: {
-                headerRows: 1,
-                widths: ["auto", "auto", "*", "auto", "auto"],
-                body: [
-                  [
-                    "Clave de documento",
-                    "No. Partida",
-                    "Descripción",
-                    "Observación",
-                    "Importe",
-                  ],
-                  ...tableBody20, // Agregar filas de la tabla basadas en la lista temporal
-                ],
-              },
-            },
+            ...parCotizacionLista
+              .map((item) => [
+                {
+                  text: "Partida: " + item.noPartidaATF,
+                  fontSize: 12,
+                  bold: true,
+                  alignment: "left",
+                  margin: [0, 10, 0, 0],
+                },
+                {
+                  margin: [0, 5, 0, 0],
+                  table: {
+                    headerRows: 1,
+                    widths: ["*"],
+                    body: [["Descripción"], [item.descripcion]],
+                  },
+                },
+                {
+                  text:
+                    "Importe: " +
+                    item.totalPartida.toLocaleString("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    }),
+                  fontSize: 14,
+                  bold: true,
+                  alignment: "right",
+                  margin: [0, 10, 0, 0],
+                },
+              ])
+              .flat(),
             {
               text:
                 "\n" +
@@ -450,6 +493,13 @@ const VisualizarCotizacion = () => {
               alignment: "right",
             },
             {
+              margin: [0, 3, 0, 0],
+              text: enLetras.toUpperCase(),
+              fontSize: 10,
+              bold: true,
+              alignment: "right",
+            },
+            {
               margin: [0, 7, 0, 0],
               text: "Condición comercial ",
               fontSize: 12,
@@ -477,9 +527,94 @@ const VisualizarCotizacion = () => {
       console.error("Error al abrir el PDF:", error);
     }
   };
+  const mostrarAlerta = (cve_tecFin) => {
+    swal.fire({
+      title: "¿Estás seguro de aceptar?",
+      text: "Una vez aceptado el documento no podrás hacer uso de él.",
+      icon: "warning",
+      showCancelButton: true, // ✅ muestra botón de cancelar
+      confirmButtonText: "Aceptar",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,  // ✅ opcional: pone "Cancelar" a la izquierda
+    }).then((result) => {
+      if (result.isConfirmed) {
+        aceptarCotizacion(cve_tecFin);
+      } else if (result.dismiss === swal.DismissReason.cancel) {
+        swal.fire("Cancelado", "No se acepto la cotizacion.", "info");
+      }
+    });
+  };
+  
+  const aceptarCotizacion = async (cve_tecFin) => {
+    try {
+      swal.fire({
+            title: "Procesando Solicitud...",
+            text: "Por favor espera mientras se valida el contenido.",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+              swal.showLoading();
+            },
+          });
+      const q = query(
+        collection(db, "COTIZACION"),
+        where("cve_tecFin", "==", cve_tecFin)
+      );
+      const querySnapshot = await getDocs(q);
+      const bitacora = collection(db, "BITACORA");
+      const today = new Date();
+      const ahora = new Date();
+      const hora = ahora.getHours();
+      const minuto = ahora.getMinutes();
+      const segundo = ahora.getSeconds();
+      const formattedDate = today.toLocaleDateString(); // Opcional: Puedes pasar opciones de formato
+      const horaFormateada = `${hora}:${minuto}:${segundo}`;
+
+      await addDoc(bitacora, {
+        cve_Docu: cve_tecFin,
+        tiempo: horaFormateada,
+        fechaRegistro: formattedDate,
+        tipoDocumento: "Aceptacion de Cotizacion",
+        noPartida: "N/A",
+      });
+      // Si se encuentra un documento que coincide con los identificadores proporcionados, actualiza su estatus
+      if (!querySnapshot.empty) {
+        const docSnap = querySnapshot.docs[0]; // Suponiendo que solo hay un documento que coincide con los criterios de consulta
+
+        const factoresRef = doc(db, "COTIZACION", docSnap.id);
+
+        // Actualiza el estatus del documento
+        const datos = {
+          estatus: "Aceptado",
+        };
+        await updateDoc(factoresRef, datos);
+        // Obtener el documento COTIZACION por cve_tecFin
+        // No se recomienda recargar la página; en su lugar, puedes manejar la actualización del estado localmente
+        swal.close();
+        swal
+          .fire({
+            icon: "success",
+            title: "Guardado",
+            text: "Cotizacion Guardada.",
+            timer: 1500, // Espera 1.5 segundos
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+          })
+          .then(() => {
+            navigate("/cotizacion");
+          });
+      } else {
+        console.log(
+          "No se encontró ningún documento que coincida con los identificadores proporcionados."
+        );
+      }
+    } catch (error) {
+      console.error("Error al actualizar el estatus:", error);
+    }
+  };
   /******************************************** SAE  *****************************************************************/
   const addSae = async () => {
-
     console.log("Cliente:", cliente);
 
     const { folioSiguiente } = (
@@ -624,10 +759,12 @@ const VisualizarCotizacion = () => {
 
     await axios.post(
       //"http://localhost:5000/api/guardarPartidas", {
-      "/api/guardarPartidas", {
-      data: dataPartidas,
-    });
-    
+      "/api/guardarPartidas",
+      {
+        data: dataPartidas,
+      }
+    );
+
     //const partidas = response.data;
 
     const IMP_TOT4 = data.reduce((sum, partida, index) => {
@@ -661,7 +798,7 @@ const VisualizarCotizacion = () => {
       dataCotizacion
     );
 
-   const { nuevoFolio } = (
+    const { nuevoFolio } = (
       await axios.get(
         //"http://localhost:5000/api/actualizarFolio"
         "/api/actualizarFolio"
@@ -715,17 +852,17 @@ const VisualizarCotizacion = () => {
         }
       }
     `;
-  
+
     try {
       const response = await fetch("https://api.monday.com/v2", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: apiKey
+          Authorization: apiKey,
         },
-        body: JSON.stringify({ query })
+        body: JSON.stringify({ query }),
       });
-  
+
       const data = await response.json();
       console.log("Respuesta de Monday:", data);
       return data;
@@ -733,7 +870,7 @@ const VisualizarCotizacion = () => {
       console.error("Error al actualizar el status en Monday:", error);
       throw error;
     }
-  };  
+  };
   return (
     <div className="container">
       <div className="row">
@@ -783,7 +920,7 @@ const VisualizarCotizacion = () => {
                   value={idMonday}
                   onChange={(e) => setIdMonday(e.target.value)}
                   className="form-control"
-                  readOnly                  
+                  readOnly
                 />
               </div>
             </div>
@@ -837,7 +974,13 @@ const VisualizarCotizacion = () => {
             className="row"
             style={{ border: "1px solid #000", borderColor: "gray" }}
           >
-            <div>
+            <div
+              style={{
+                border: "1px solid #000",
+                maxHeight: "550px",
+                overflowY: "auto",
+              }}
+            >
               <br></br>
               <table class="table">
                 <thead>
@@ -881,7 +1024,14 @@ const VisualizarCotizacion = () => {
           </button>
           &nbsp; &nbsp;
           <button className="btn btn-success" onClick={handleOpenModal}>
-            <FaDatabase  /> Mandar a SAE
+            <FaDatabase /> Mandar a SAE
+          </button>
+          &nbsp; &nbsp;
+          <button
+            className="btn btn-success"
+            onClick={() => mostrarAlerta(cve_tecFin)}
+          >
+            <FaCheckCircle /> Aceptar Cotizacion
           </button>
         </div>
       </div>

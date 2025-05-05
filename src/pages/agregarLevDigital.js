@@ -365,14 +365,6 @@ const AgregarLevDigital = () => {
       });
       return; // 🚨 DETIENE la ejecución aquí si faltan datos
     }
-    if (!descripcion || descripcion.length === 0) {
-      swal.fire({
-        icon: "warning",
-        title: "Descripcion Invalida",
-        text: "Ingresa una descripcion valida.",
-      });
-      return; // 🚨 DETIENE la ejecución aquí si faltan datos
-    }
     // Obtener el documento de la colección FOLIOS con el nombre del folio
     const folioSnapshot = await getDocs(
       query(collection(db, "FOLIOS"), where("folio", "==", selectedFolio))
@@ -546,6 +538,14 @@ const AgregarLevDigital = () => {
       });
       return;
     }
+    if (!descripcion || descripcion.length === 0) {
+      swal.fire({
+        icon: "warning",
+        title: "Descripcion Invalida",
+        text: "Ingresa una descripcion valida.",
+      });
+      return; // 🚨 DETIENE la ejecución aquí si faltan datos
+    }
     const newItem = {
       cve_levDig: cve_levDig,
       noPartida: noPartida,
@@ -615,6 +615,37 @@ const AgregarLevDigital = () => {
             {folioSiguiente}{" "}
           </h1>
           <div className="row">
+          <div className="col-md-3">
+              <div className="mb-3 ">
+                <div class="input-group-append">
+                  <label className="form-label">Cliente: </label>
+                  {/*&nbsp; &nbsp;
+                  <button
+                    class="btn btn-outline-secondary"
+                    onClick={infoCliente}
+                    type="button"
+                  >
+                    <FaCircleQuestion />
+                  </button>*/}
+                </div>
+                <Autocomplete
+                  className="form-control"
+                  options={clientes}
+                  getOptionLabel={(cliente) => cliente.razonSocial}
+                  onChange={(event, value) => setClienteSeleccionado(value)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Cliente"
+                      size="small"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                  required
+                />
+              </div>
+            </div>
             <div className="col-md-2">
               <div className="mb-3">
                 <label className="form-label">Folio</label>
@@ -645,37 +676,6 @@ const AgregarLevDigital = () => {
                   value={`${selectedFolio}${folioSiguiente}`}
                   onChange={(e) => setCve_levDig(e.target.value)}
                   readOnly
-                />
-              </div>
-            </div>
-            <div className="col-md-3">
-              <div className="mb-3 ">
-                <div class="input-group-append">
-                  <label className="form-label">Cliente: </label>
-                  &nbsp; &nbsp;
-                  <button
-                    class="btn btn-outline-secondary"
-                    onClick={infoCliente}
-                    type="button"
-                  >
-                    <FaCircleQuestion />
-                  </button>
-                </div>
-                <Autocomplete
-                  className="form-control"
-                  options={clientes}
-                  getOptionLabel={(cliente) => cliente.razonSocial}
-                  onChange={(event, value) => setClienteSeleccionado(value)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Cliente"
-                      size="small"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  )}
-                  required
                 />
               </div>
             </div>
