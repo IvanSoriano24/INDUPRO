@@ -94,6 +94,8 @@ const SegDocRev = () => {
   const [par_levDigital, setPar_levDigital] = useState([]);
   const [par_preCot, setPar_preCot] = useState([]);
   const [par_rev, setPar_rev] = useState([]);
+  const [par_rev_Insu, setPar_rev_Insumo] = useState([]);
+  const [par_rev_Mo, setPar_rev_Mo] = useState([]);
   const [noPartida, setNoPartida] = useState("");
   const partidaAdicional = collection(db, "PAR_LEVDIGITAL");
 
@@ -126,6 +128,68 @@ const SegDocRev = () => {
   useEffect(() => {
     getParLevDigital();
   }, [cve_tecFin]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
+  /************************/
+  
+  const getParLevDigital_Insumo = async () => {
+    try {
+      const data = await getDocs(
+        query(
+          collection(db, "PAR_TECFIN_INSU"),
+          where("cve_tecFin", "==", cve_tecFin)
+        )
+      );
+
+      const par_levDigList = data.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      par_levDigList.sort((a, b) => a.noPartida - b.noPartida);
+      //console.log("Lista: ", par_levDigList);
+      setPar_rev_Insumo(par_levDigList);
+      const maxPartida = Math.max(
+        ...par_levDigList.map((item) => item.noPartida),
+        0
+      );
+      setNoPartida(maxPartida + 1);
+    } catch (error) {
+      console.error("Error fetching PAR_TECFINANCIERO data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getParLevDigital_Insumo();
+  }, [cve_tecFin]);
+  /********/
+  
+  const getParLevDigital_Mo = async () => {
+    try {
+      const data = await getDocs(
+        query(
+          collection(db, "PAR_TECFIN_MO"),
+          where("cve_tecFin", "==", cve_tecFin)
+        )
+      );
+
+      const par_levDigList = data.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      par_levDigList.sort((a, b) => a.noPartida - b.noPartida);
+      //console.log("Lista: ", par_levDigList);
+      setPar_rev_Mo(par_levDigList);
+      const maxPartida = Math.max(
+        ...par_levDigList.map((item) => item.noPartida),
+        0
+      );
+      setNoPartida(maxPartida + 1);
+    } catch (error) {
+      console.error("Error fetching PAR_TECFINANCIERO data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getParLevDigital_Mo();
+  }, [cve_tecFin]);
 /*****************************************************PRECOT*****************************************************/
 const estatusPC =
 precotizacionList.length > 0
@@ -580,6 +644,7 @@ useEffect(() => {
           </div>
           <div>
             <br></br>
+            <p>Partidas</p>
             <table class="table">
               <thead>
                 <tr>
@@ -594,6 +659,48 @@ useEffect(() => {
                     <td>{item.noPartida}</td>
                     <td>{item.descripcion}</td>
                     <td>{item.observacion}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p>Insumos</p>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">No. PARTIDA</th>
+                  <th scope="col">Unidad</th>
+                  <th scope="col">Insumo</th>
+                  <th scope="col">Cantidad</th>
+                  <th scope="col">Costo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {par_rev_Insu.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.noPartidaATF}</td>
+                    <td>{item.unidad}</td>
+                    <td>{item.insumo}</td>
+                    <td>{item.cantidad}</td>
+                    <td>{item.costoCotizado}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p>Mano de Obra</p>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">No. PARTIDA</th>
+                  <th scope="col">Personal</th>
+                  <th scope="col">Dias Trabajados</th>
+                </tr>
+              </thead>
+              <tbody>
+                {par_rev_Mo.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.noPartidaMO}</td>
+                    <td>{item.personal}</td>
+                    <td>{item.diasTrabajados}</td>
                   </tr>
                 ))}
               </tbody>

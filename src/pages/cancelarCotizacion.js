@@ -128,6 +128,7 @@ const CancelarCotizacion = () => {
         )
       );
 
+console.log("datsos: ", cve_tecFin)
       const par_levDigList1 = data.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,

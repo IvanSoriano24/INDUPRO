@@ -153,10 +153,10 @@ const VisualizarCotizacion = () => {
         // Construir datos para la tabla dinámica
 
         const tableBody20 = parCotizacionLista.map((itemTotales) => [
-          itemTotales.cve_tecFin,
+          //itemTotales.cve_tecFin,
           itemTotales.noPartidaATF,
           itemTotales.descripcion,
-          itemTotales.observacion,
+          //itemTotales.observacion,
           itemTotales.totalPartida.toLocaleString("en-US", {
             style: "currency",
             currency: "USD",
@@ -223,13 +223,11 @@ const VisualizarCotizacion = () => {
               margin: [0, 10, 0, 0],
               table: {
                 headerRows: 1,
-                widths: ["auto", "auto", "*", "auto", "auto"],
+                widths: ["auto", "*", "auto"],
                 body: [
                   [
-                    "Clave de documento",
                     "No. Partida",
                     "Descripción",
-                    "Observación",
                     "Importe",
                   ],
                   ...tableBody20, // Agregar filas de la tabla basadas en la lista temporal

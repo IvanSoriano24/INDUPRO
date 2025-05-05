@@ -93,6 +93,8 @@ const SegDocRev = () => {
   const [par_levDigital, setPar_levDigital] = useState([]);
   const [par_preCot, setPar_preCot] = useState([]);
   const [par_rev, setPar_rev] = useState([]);
+  const [par_rev_Insu, setPar_rev_Insumo] = useState([]);
+  const [par_rev_Mo, setPar_rev_Mo] = useState([]);
   const [noPartida, setNoPartida] = useState("");
   const partidaAdicional = collection(db, "PAR_LEVDIGITAL");
 
@@ -111,6 +113,7 @@ const SegDocRev = () => {
       }));
       par_levDigList.sort((a, b) => a.noPartidaATF - b.noPartidaATF);
       setPar_rev(par_levDigList);
+      console.log("par_levDigList: ", par_levDigList);
       const maxPartida = Math.max(
         ...par_levDigList.map((item) => item.noPartidaATF),
         0
@@ -124,48 +127,47 @@ const SegDocRev = () => {
   useEffect(() => {
     getParLevDigital();
   }, [cve_tecFin]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
-/********************************************************REV*****************************************************/
-const estatusATF =
-analsisTFList.length > 0
-  ? analsisTFList[0].estatus
-  : "No hay documentos de precotización";
+  /********************************************************REV*****************************************************/
+  const estatusATF =
+    analsisTFList.length > 0
+      ? analsisTFList[0].estatus
+      : "No hay documentos de precotización";
 
-const docSigATF =
-analsisTFList.length > 0
-  ? analsisTFList[0].docSig
-  : "No hay documentos de precotización";
+  const docSigATF =
+    analsisTFList.length > 0
+      ? analsisTFList[0].docSig
+      : "No hay documentos de precotización";
   const docAntATF =
-analsisTFList.length > 0
-  ? analsisTFList[0].docAnt
-  : "No hay documentos de precotización";
+    analsisTFList.length > 0
+      ? analsisTFList[0].docAnt
+      : "No hay documentos de precotización";
   const cveATF =
-analsisTFList.length > 0
-  ? analsisTFList[0].cve_tecFin
-  : "No hay documentos de precotización";
+    analsisTFList.length > 0
+      ? analsisTFList[0].cve_tecFin
+      : "No hay documentos de precotización";
 
-const getAnalis = async () => {
-try {
-  const data = await getDocs(
-    query(
-      collection(db, "TECNICOFINANCIERO"),
-      where("docSig", "==", cve_tecFin)
-    )
-  );
-  const par_levDigList = data.docs.map((doc) => ({
-    ...doc.data(),
-    id: doc.id,
-  }));
-  setAnalsisTFList(par_levDigList);
-} catch (error) {
-  console.error("Error fetching LEVDIGITAL data:", error);
-}
-};
+  const getAnalis = async () => {
+    try {
+      const data = await getDocs(
+        query(
+          collection(db, "TECNICOFINANCIERO"),
+          where("docSig", "==", cve_tecFin)
+        )
+      );
+      const par_levDigList = data.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setAnalsisTFList(par_levDigList);
+    } catch (error) {
+      console.error("Error fetching LEVDIGITAL data:", error);
+    }
+  };
 
-useEffect(() => {
-getAnalis();
-}, [cve_tecFin]);
+  useEffect(() => {
+    getAnalis();
+  }, [cve_tecFin]);
   const mostrarAnalisTecnico = () => {
-
     swal({
       title: "Seguimiento de documento",
       text:
@@ -185,7 +187,7 @@ getAnalis();
     });
   };
 
-/********************************************************REV*****************************************************/
+  /********************************************************REV*****************************************************/
   const mostrarCotizacion = () => {
     swal({
       title: "Seguimiento de documento",
@@ -205,126 +207,182 @@ getAnalis();
       buttons: "Aceptar",
     });
   };
-/********************************************************COTIZACION*****************************************************/
-/*****************************************************PRECOT*****************************************************/
-const estatusPC =
-precotizacionList.length > 0
-  ? precotizacionList[0].estatus
-  : "No hay documentos de precotización";
-const docAntPC =
-precotizacionList.length > 0
-  ? precotizacionList[0].docAnt
-  : "No hay documentos de precotización";
-const docSigPC =
-precotizacionList.length > 0
-  ? precotizacionList[0].docSig
-  : "No hay documentos de precotización";
-
-const getPreCotAnalisis = async () => {
-try {
-  console.log("cve_precot: ", docAntATF);
-  const data = await getDocs(
-    query(
-      collection(db, "PRECOTIZACION"),
-      where("cve_precot", "==", docAntATF)
-    )
-  );
-  const par_levDigList = data.docs.map((doc) => ({
-    ...doc.data(),
-    id: doc.id,
-  }));
-  setPrecotizacionList(par_levDigList);
-} catch (error) {
-  console.error("Error fetching PRECOTIZACION data:", error);
-}
-};
-
-useEffect(() => {
-getPreCotAnalisis();
-}, [docAntATF]);
-
-const mostrarPreCotizacion = () => {
-const cvePrecot =
-  precotizacionList.length > 0
-    ? precotizacionList[0].cve_precot
-    : "No hay documentos de precotización";
-
-swal({
-  title: "Seguimiento de documento",
-  text:
-    "Documento consultado: " +
-    cvePrecot +
-    "\n" +
-    "Documento anterior: " +
-    docAntPC +
-    "\n" +
-    "Documento siguiente: " +
-    docSigPC +
-    "\n" +
-    "Estatus: " +
-    estatusPC, //AQUI
-  icon: "info",
-  buttons: "Aceptar",
-});
-};
-/*****************************************************PRECOT*****************************************************/
-/*****************************************************LEV*****************************************************/
-const estatusLev =
-levList.length > 0
-  ? levList[0].estatus
-  : "No hay documentos de precotización";
-
-const docSigLev =
-levList.length > 0
-  ? levList[0].docSig
-  : "No hay documentos de precotización";
-
-const getLev = async () => {
-try {
-  const data = await getDocs(
-    query(
-      collection(db, "LEVDIGITAL"),
-      where("cve_levDig", "==", docAntPC)
-    )
-  );
-  const par_levDigList = data.docs.map((doc) => ({
-    ...doc.data(),
-    id: doc.id,
-  }));
-  setLevList(par_levDigList);
-} catch (error) {
-  console.error("Error fetching LEVDIGITAL data:", error);
-}
-};
-
-useEffect(() => {
-getLev();
-}, [docAntPC]);
-
-const mostrarAlerta = () => {
-  const cveLev =
-  levList.length > 0
-      ? levList[0].cve_levDig
+  /********************************************************COTIZACION*****************************************************/
+  /*****************************************************PRECOT*****************************************************/
+  const estatusPC =
+    precotizacionList.length > 0
+      ? precotizacionList[0].estatus
       : "No hay documentos de precotización";
-  swal({
-    title: "Seguimiento de documento",
-    text:
-      "Documento consultado: " +
-      cveLev +
-      "\n" +
-      "Documento anterior: " +
-      "N/A" +
-      "\n" +
-      "Documento siguiente: " +
-      docSigLev +
-      "\n" +
-      "Estatus: " +
-      estatusLev,
-    icon: "info",
-    buttons: "Aceptar",
-  });
-};
-/*****************************************************LEV*****************************************************/
+  const docAntPC =
+    precotizacionList.length > 0
+      ? precotizacionList[0].docAnt
+      : "No hay documentos de precotización";
+  const docSigPC =
+    precotizacionList.length > 0
+      ? precotizacionList[0].docSig
+      : "No hay documentos de precotización";
+
+  const getPreCotAnalisis = async () => {
+    try {
+      console.log("cve_precot: ", docAntATF);
+      const data = await getDocs(
+        query(
+          collection(db, "PRECOTIZACION"),
+          where("cve_precot", "==", docAntATF)
+        )
+      );
+      const par_levDigList = data.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setPrecotizacionList(par_levDigList);
+    } catch (error) {
+      console.error("Error fetching PRECOTIZACION data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getPreCotAnalisis();
+  }, [docAntATF]);
+
+  const mostrarPreCotizacion = () => {
+    const cvePrecot =
+      precotizacionList.length > 0
+        ? precotizacionList[0].cve_precot
+        : "No hay documentos de precotización";
+
+    swal({
+      title: "Seguimiento de documento",
+      text:
+        "Documento consultado: " +
+        cvePrecot +
+        "\n" +
+        "Documento anterior: " +
+        docAntPC +
+        "\n" +
+        "Documento siguiente: " +
+        docSigPC +
+        "\n" +
+        "Estatus: " +
+        estatusPC, //AQUI
+      icon: "info",
+      buttons: "Aceptar",
+    });
+  };
+  /*****************************************************PRECOT*****************************************************/
+  /*****************************************************LEV*****************************************************/
+  const estatusLev =
+    levList.length > 0
+      ? levList[0].estatus
+      : "No hay documentos de precotización";
+
+  const docSigLev =
+    levList.length > 0
+      ? levList[0].docSig
+      : "No hay documentos de precotización";
+
+  const getLev = async () => {
+    try {
+      const data = await getDocs(
+        query(collection(db, "LEVDIGITAL"), where("cve_levDig", "==", docAntPC))
+      );
+      const par_levDigList = data.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setLevList(par_levDigList);
+    } catch (error) {
+      console.error("Error fetching LEVDIGITAL data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getLev();
+  }, [docAntPC]);
+
+  const mostrarAlerta = () => {
+    const cveLev =
+      levList.length > 0
+        ? levList[0].cve_levDig
+        : "No hay documentos de precotización";
+    swal({
+      title: "Seguimiento de documento",
+      text:
+        "Documento consultado: " +
+        cveLev +
+        "\n" +
+        "Documento anterior: " +
+        "N/A" +
+        "\n" +
+        "Documento siguiente: " +
+        docSigLev +
+        "\n" +
+        "Estatus: " +
+        estatusLev,
+      icon: "info",
+      buttons: "Aceptar",
+    });
+  };
+  /*****************************************************LEV*****************************************************/
+  /***************************************************************************************************************/
+  const getParLevDigital_Insu = async () => {
+    try {
+      const data = await getDocs(
+        query(
+          collection(db, "PAR_TECFIN_INSU"),
+          where("cve_tecFin", "==", cveATF)
+        )
+      );
+console.log("DATS: ", cveATF);
+      const par_levDigList = data.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      par_levDigList.sort((a, b) => a.noPartidaATF - b.noPartidaATF);
+      setPar_rev_Insumo(par_levDigList);
+      console.log("par_levDigList: ", par_levDigList);
+      const maxPartida = Math.max(
+        ...par_levDigList.map((item) => item.noPartidaATF),
+        0
+      );
+      setNoPartida(maxPartida + 1);
+    } catch (error) {
+      console.error("Error fetching PAR_TECFINANCIERO data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getParLevDigital_Insu();
+  }, [cveATF]);
+  /***************************************************************************************************************/
+  const getParLevDigital_Mo = async () => {
+    try {
+      const data = await getDocs(
+        query(
+          collection(db, "PAR_TECFIN_MO"),
+          where("cve_tecFin", "==", cveATF)
+        )
+      );
+      const par_levDigList = data.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      par_levDigList.sort((a, b) => a.noPartidaATF - b.noPartidaATF);
+      setPar_rev_Mo(par_levDigList);
+      const maxPartida = Math.max(
+        ...par_levDigList.map((item) => item.noPartidaATF),
+        0
+      );
+      setNoPartida(maxPartida + 1);
+    } catch (error) {
+      console.error("Error fetching PAR_TECFINANCIERO data:", error);
+    }
+  };
+
+  useEffect(() => {
+    getParLevDigital_Mo();
+  }, [cveATF]);
+  /**************************************************************************************************************/
   return (
     <div className="container">
       <div className="row">
@@ -349,21 +407,23 @@ const mostrarAlerta = () => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusLev === "Cancelado"
-                    ? "red"
-                    : estatusLev === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusLev === "Cancelado"
+                        ? "red"
+                        : estatusLev === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusLev === "Cancelado"
-                    ? "red"
-                    : estatusLev === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusLev === "Cancelado"
+                        ? "red"
+                        : estatusLev === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   Levantamiento
@@ -371,11 +431,12 @@ const mostrarAlerta = () => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusLev === "Cancelado"
-                    ? "red"
-                    : estatusLev === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusLev === "Cancelado"
+                        ? "red"
+                        : estatusLev === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   digital
@@ -394,21 +455,23 @@ const mostrarAlerta = () => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusPC  === "Cancelado"
-                    ? "red"
-                    : estatusPC === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusPC === "Cancelado"
+                        ? "red"
+                        : estatusPC === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusPC  === "Cancelado"
-                    ? "red"
-                    : estatusPC === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusPC === "Cancelado"
+                        ? "red"
+                        : estatusPC === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   Pre
@@ -416,11 +479,12 @@ const mostrarAlerta = () => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusPC  === "Cancelado"
-                    ? "red"
-                    : estatusPC === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusPC === "Cancelado"
+                        ? "red"
+                        : estatusPC === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   Cotización
@@ -439,21 +503,23 @@ const mostrarAlerta = () => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusATF === "Cancelado"
-                    ? "red"
-                    : estatusATF === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusATF === "Cancelado"
+                        ? "red"
+                        : estatusATF === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusATF === "Cancelado"
-                    ? "red"
-                    : estatusATF === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusATF === "Cancelado"
+                        ? "red"
+                        : estatusATF === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   Análsis ténico
@@ -461,11 +527,12 @@ const mostrarAlerta = () => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusATF === "Cancelado"
-                    ? "red"
-                    : estatusATF === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusATF === "Cancelado"
+                        ? "red"
+                        : estatusATF === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   financiero
@@ -484,21 +551,23 @@ const mostrarAlerta = () => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatus === "Cancelado"
-                    ? "red"
-                    : estatus === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatus === "Cancelado"
+                        ? "red"
+                        : estatus === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatus === "Cancelado"
-                    ? "red"
-                    : estatus === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatus === "Cancelado"
+                        ? "red"
+                        : estatus === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   Cotización
@@ -506,11 +575,12 @@ const mostrarAlerta = () => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatus === "Cancelado"
-                    ? "red"
-                    : estatus === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatus === "Cancelado"
+                        ? "red"
+                        : estatus === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   terminada
@@ -591,6 +661,7 @@ const mostrarAlerta = () => {
           </div>
           <div>
             <br></br>
+            <p>Partidas</p>
             <table class="table">
               <thead>
                 <tr>
@@ -605,6 +676,53 @@ const mostrarAlerta = () => {
                     <td>{item.noPartidaATF}</td>
                     <td>{item.descripcion}</td>
                     <td>{item.observacion}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p>Insumos</p>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">No. PARTIDA</th>
+                  <th scope="col">Unidad</th>
+                  <th scope="col">Insumo</th>
+                  <th scope="col">Cantidad</th>
+                  <th scope="col">Costo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {par_rev_Insu.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.noPartidaATF}</td>
+                    <td>{item.unidad}</td>
+                    <td>{item.insumo}</td>
+                    <td>{item.cantidad}</td>
+                    <td>
+                      {item.costoCotizado.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p>Mano de Obra</p>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">No. PARTIDA</th>
+                  <th scope="col">Personal</th>
+                  <th scope="col">Dias Trabajados</th>
+                </tr>
+              </thead>
+              <tbody>
+                {par_rev_Mo.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.noPartidaMO}</td>
+                    <td>{item.personal}</td>
+                    <td>{item.diasTrabajados}</td>
                   </tr>
                 ))}
               </tbody>
