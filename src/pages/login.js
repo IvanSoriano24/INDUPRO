@@ -1,24 +1,34 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
 import swal from "sweetalert";
 import GSSOLUCIONESLOGO from "../imagenes/GS-SOLUCIONES-LOGO.png";
 import { Container } from "reactstrap";
-import { db, auth, signInWithEmailAndPassword } from "../firebaseConfig/firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";  // Importa funciones de Firestore
+import {
+  db,
+  auth,
+  signInWithEmailAndPassword,
+} from "../firebaseConfig/firebase";
+import { collection, getDocs, query, where } from "firebase/firestore"; // Importa funciones de Firestore
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
-  const [username, setUsername] = useState('');  // Para el campo "usuario"
-  const [password, setPassword] = useState('');  // Para el campo "Contraseña"
+  const [username, setUsername] = useState(""); // Para el campo "usuario"
+  const [password, setPassword] = useState(""); // Para el campo "Contraseña"
   const [error, setError] = useState(null);
-  const navigate = useNavigate();  // Hook para redirigir
-  
+  const [showPassword, setShowPassword] = useState(false);
+
+  const navigate = useNavigate(); // Hook para redirigir
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const q = query(collection(db, "USURIOS"), where("usuario", "==", username));
+      const q = query(
+        collection(db, "USURIOS"),
+        where("usuario", "==", username)
+      );
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
@@ -26,13 +36,13 @@ const Login = () => {
         const userData = userDoc.data();
 
         if (userData.Contraseña === password) {
-          sessionStorage.setItem('isAuthenticated', 'true');
-          sessionStorage.setItem('userRole', userData.rol); // Guarda el rol
-          sessionStorage.setItem('userName', userData.Nombre); 
+          sessionStorage.setItem("isAuthenticated", "true");
+          sessionStorage.setItem("userRole", userData.rol); // Guarda el rol
+          sessionStorage.setItem("userName", userData.Nombre);
           swal("Inicio Correcto", {
             icon: "success",
           });
-          navigate('/');  // Redirige al home
+          navigate("/"); // Redirige al home
           window.location.reload();
         } else {
           swal("Contraseña incorrecta", {
@@ -63,11 +73,16 @@ const Login = () => {
           maxWidth: "400px",
           backgroundColor: "#f8f9fa",
           borderRadius: "8px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)"
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
         }}
       >
         <div className="text-center mb-4">
-          <img src={GSSOLUCIONESLOGO} width="150" height="150" alt="GS Soluciones Logo" />
+          <img
+            src={GSSOLUCIONESLOGO}
+            width="150"
+            height="150"
+            alt="GS Soluciones Logo"
+          />
         </div>
         <h2 className="text-center mb-4">InduPro</h2>
         <form onSubmit={handleLogin}>
@@ -84,16 +99,34 @@ const Login = () => {
 
           <Form.Group className="mb-3" controlId="formBasicPassword">
             <Form.Label>Password</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Ingrese su Contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div style={{ position: "relative" }}>
+              <Form.Control
+                type={showPassword ? "text" : "password"}
+                placeholder="Ingrese su Contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{ paddingRight: "40px" }}
+              />
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  right: "10px",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                  color: "#888",
+                }}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
           </Form.Group>
-          {error && <p style={{ color: 'red' }}>{error}</p>}
-          <Button variant="primary" type="submit" className="w-100">Iniciar Sesion</Button>
+          {error && <p style={{ color: "red" }}>{error}</p>}
+          <Button variant="primary" type="submit" className="w-100">
+            Iniciar Sesion
+          </Button>
         </form>
       </div>
     </Container>
