@@ -389,28 +389,36 @@ const AgregarRevTecFinanciero = () => {
   /* --------------------- AGREGAR PARTIDAS DE PRE COTIZACIÓN ------------------------------------- */
   const agregarPartidaAdicional = async (e) => {
     e.preventDefault();
-    const bitacora = collection(db, "BITACORA");
-    const today = new Date();
-    const ahora = new Date();
-    const hora = ahora.getHours();
-    const minuto = ahora.getMinutes();
-    const segundo = ahora.getSeconds();
-    const formattedDate = today.toLocaleDateString(); // Opcional: Puedes pasar opciones de formato
-    const horaFormateada = `${hora}:${minuto}:${segundo}`;
-    await addDoc(bitacora, {
-      cve_Docu: selectedFolio + folioSiguiente.toString(),
-      tiempo: horaFormateada,
-      fechaRegistro: formattedDate,
-      tipoDocumento: "Registro de partidas",
-      noPartida: noPartida,
-    });
-    await addDoc(parPrecotizacion, {
-      cve_precot: cve_precot,
-      noPartida: noPartida,
-      descripcion: descripcion,
-      observacion: observacion,
-    });
-    window.location.reload();
+    if (descripcion) {
+      const bitacora = collection(db, "BITACORA");
+      const today = new Date();
+      const ahora = new Date();
+      const hora = ahora.getHours();
+      const minuto = ahora.getMinutes();
+      const segundo = ahora.getSeconds();
+      const formattedDate = today.toLocaleDateString(); // Opcional: Puedes pasar opciones de formato
+      const horaFormateada = `${hora}:${minuto}:${segundo}`;
+      await addDoc(bitacora, {
+        cve_Docu: selectedFolio + folioSiguiente.toString(),
+        tiempo: horaFormateada,
+        fechaRegistro: formattedDate,
+        tipoDocumento: "Registro de partidas",
+        noPartida: noPartida,
+      });
+      await addDoc(parPrecotizacion, {
+        cve_precot: cve_precot,
+        noPartida: noPartida,
+        descripcion: descripcion,
+        observacion: observacion,
+      });
+      window.location.reload();
+    } else {
+      swal.fire({
+        icon: "warning",
+        title: "Faltan Datos",
+        text: "La descripción es obligatorio.",
+      });
+    }
   };
 
   /* ------------------------------------ OBTENER TABLA DE INSUMOS -------------------------------*/
@@ -840,7 +848,6 @@ const AgregarRevTecFinanciero = () => {
     e.preventDefault();
     // Validación de fechas antes de continuar
     if (!fechaInicio || !fechaFin) {
-      
       swal.fire({
         icon: "warning",
         title: "Fechas incompletas",
@@ -850,7 +857,6 @@ const AgregarRevTecFinanciero = () => {
     }
     // Si listPartidas o listMano están vacíos, mostrar alerta y detener ejecución
     if (!par_PreCoti_insu || par_PreCoti_insu.length === 0) {
-      
       swal.fire({
         icon: "warning",
         title: "Faltan Datos",
@@ -867,7 +873,6 @@ const AgregarRevTecFinanciero = () => {
     });
 
     if (partidasSinInsumos.length > 0) {
-      
       swal.fire({
         icon: "warning",
         title: "Faltan Datos",
@@ -1105,7 +1110,7 @@ const AgregarRevTecFinanciero = () => {
         .fire({
           icon: "success",
           title: "Guardado",
-          text: "Levantamiento Digital Guardado.",
+          text: "Revision Tecnico Financiero Guardado.",
           timer: 1500, // Espera 1.5 segundos
           showConfirmButton: false,
           allowOutsideClick: false,
@@ -2101,6 +2106,7 @@ const AgregarRevTecFinanciero = () => {
                     value={descripcion}
                     onChange={(e) => setDescripcion(e.target.value)}
                     className="form-control"
+                    style={{ resize: "none" }}
                   />
                 </div>
               </div>
@@ -2115,10 +2121,13 @@ const AgregarRevTecFinanciero = () => {
                     value={observacion}
                     onChange={(e) => setObservacion(e.target.value)}
                     className="form-control"
+                    style={{ resize: "none" }}
                   />
                 </div>
               </div>
+              
               <div className="col-md-3">
+                <br></br>
                 <button
                   className="btn btn-success"
                   onClick={agregarPartidaAdicional}
@@ -2412,6 +2421,7 @@ const AgregarRevTecFinanciero = () => {
               className="form-control"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
+              style={{ resize: "none" }}
             />
           </div>
           <div className="mb-3">
@@ -2420,6 +2430,7 @@ const AgregarRevTecFinanciero = () => {
               className="form-control"
               value={observacion}
               onChange={(e) => setObservacion(e.target.value)}
+              style={{ resize: "none" }}
             />
           </div>
         </Modal.Body>

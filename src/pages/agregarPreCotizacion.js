@@ -1234,20 +1234,6 @@ const AgregarPreCotizacion = () => {
       setProveedor(proveedoresFiltrados[0]);
     }
   }, [linea]);
-  /*useEffect(() => {
-    // Verifica si los campos esenciales están llenos
-    if (insumo && unidad && linea) {
-      // Solo hacer la consulta cuando los campos están completos
-      axios
-        .get("https://us-central1-gscotiza-cd748.cloudfunctions.net/api/claves")
-        .then((response) => {
-          setClavesSAE(response.data); // Guardar las claves obtenidas en el estado
-        })
-        .catch((error) => {
-          console.error("Error al obtener las claves:", error);
-        });
-    }
-  }, [insumo, unidad, linea]); // Dependencias: se ejecuta cuando estos campos cambian*/
 
   const filtrarClavesPorLinea = (linea) => {
     return clavesSAE.filter((clave) => clave.LINEA === linea); // Ajusta a tu estructura
@@ -2336,7 +2322,7 @@ const AgregarPreCotizacion = () => {
               </div>
             </div>
             <div className="row mb-9">
-              <div className="col-md-2">
+              <div className="col-md-3">
                 <div className="mb-3">
                   <label>Cantidad</label>
                   <input

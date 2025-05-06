@@ -35,7 +35,6 @@ import pdfFonts from "pdfmake/build/vfs_fonts";
 import encabezadoPDF from "../imagenes/GS-ENCABEZADO-2.PNG";
 import swal from "sweetalert";
 import { Switch, FormControlLabel } from "@mui/material";
-import axios from "axios";
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 

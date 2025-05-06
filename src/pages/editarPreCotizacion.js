@@ -1256,7 +1256,11 @@ const EditarPreCotizacion = () => {
       });
       window.location.reload();
     } else {
-      alert("La descripción es obligatorio");
+      swal.fire({
+        icon: "warning",
+        title: "Faltan Datos",
+        text: "La descripción es obligatorio.",
+      });
     }
   };
   const agregarPartidaMOAdicional = async (e) => {
@@ -1701,6 +1705,7 @@ const EditarPreCotizacion = () => {
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
                   className="form-control"
+                  style={{ resize: 'none' }}
                 />
               </div>
             </div>
@@ -1715,12 +1720,14 @@ const EditarPreCotizacion = () => {
                   value={observacion}
                   onChange={(e) => setObservacion(e.target.value)}
                   className="form-control"
+                  style={{ resize: 'none' }}
                 />
               </div>
             </div>
             <br></br>
-            <br></br>
+            
             <div className="col-md-3 ">
+            <br></br>
               <button
                 className="btn btn-success"
                 onClick={agregarPartidaAdicional}
@@ -2009,6 +2016,7 @@ const EditarPreCotizacion = () => {
               className="form-control"
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
+              style={{ resize: 'none' }}
             />
           </div>
           <div className="mb-3">
@@ -2017,6 +2025,7 @@ const EditarPreCotizacion = () => {
               className="form-control"
               value={observacion}
               onChange={(e) => setObservacion(e.target.value)}
+              style={{ resize: 'none' }}
             />
           </div>
         </Modal.Body>
