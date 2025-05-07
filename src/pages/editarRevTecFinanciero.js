@@ -780,26 +780,26 @@ const EditarRecTecFinanciero = () => {
               <table class="table">
                 <thead>
                   <tr>
-                    <th scope="col">No. Partida</th>
-                    <th scope="col">Tipo de insumo</th>
-                    <th scope="col">Cantidad</th>
-                    <th scope="col">Costo</th>
-                    <th scope="col">Total sin Factores</th>
+                    <th scope="col" style={{ textAlign: "center" }}>No. Partida</th>
+                    <th scope="col" style={{ textAlign: "center" }}>Tipo de insumo</th>
+                    <th scope="col" style={{ textAlign: "center" }}>Cantidad</th>
+                    <th scope="col" style={{ textAlign: "center" }}>Costo</th>
+                    <th scope="col" style={{ textAlign: "center" }}>Total sin Factores</th>
                   </tr>
                 </thead>
                 <tbody>
                   {par_PreCoti_insu.map((itemPC, indexPC) => (
                     <tr key={indexPC}>
-                      <td>{itemPC.noPartidaATF}</td>
-                      <td>{itemPC.insumo}</td>
-                      <td>{itemPC.cantidad + " " + itemPC.unidad}</td>
-                      <td>
+                      <td style={{ textAlign: "center" }}>{itemPC.noPartidaATF}</td>
+                      <td style={{ textAlign: "center" }}>{itemPC.insumo}</td>
+                      <td style={{ textAlign: "center" }}>{itemPC.cantidad + " " + itemPC.unidad}</td>
+                      <td style={{ textAlign: "right" }}>
                         {(itemPC.costoCotizado * 1).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
                       </td>
-                      <td>
+                      <td style={{ textAlign: "right" }}>
                         {(
                           itemPC.cantidad * itemPC.costoCotizado
                         ).toLocaleString("en-US", {
@@ -838,7 +838,7 @@ const EditarRecTecFinanciero = () => {
                   {listMO.map((itemMO, indexMO) => (
                     <tr key={indexMO}>
                       <td>{itemMO.noPartidaMO}</td>
-                      <td>{itemMO.cantidadTrabajadores}</td>
+                      <td >{itemMO.cantidadTrabajadores}</td>
                       <td>{itemMO.personal}</td>
                       <td>{itemMO.diasTrabajados}</td>
                       {/*<td>
@@ -918,14 +918,13 @@ const EditarRecTecFinanciero = () => {
         onHide={closeTot}
         dialogClassName="lg"
         centered
-        scrollable
       >
         <Modal.Header closeButton>
           <Modal.Title>Totales</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className="mb-3">
-            <label>Costo Indirecto</label>
+            <label>Costo Indirecto (%)</label>
             <input
               placeholder=""
               aria-label=""
@@ -937,7 +936,7 @@ const EditarRecTecFinanciero = () => {
             />
           </div>
           <div className="mb-3">
-            <label>Utilidad </label>
+            <label>Utilidad (%)</label>
             <input
               placeholder=""
               aria-label=""

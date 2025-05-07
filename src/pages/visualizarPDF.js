@@ -35,7 +35,6 @@ import pdfFonts from "pdfmake/build/vfs_fonts";
 import encabezadoPDF from "../imagenes/GS-ENCABEZADO-2.PNG";
 import swal from "sweetalert";
 import { Switch, FormControlLabel } from "@mui/material";
-
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 const VisualizarPDF = () => {
@@ -633,6 +632,7 @@ const calcularCotizacion = async () => {
       }
     });
   };
+  
   /*****************************************************************************************************/
   const aplicarFactoraje = () => {
     setFactorajeAplicado(true);
@@ -702,12 +702,13 @@ const calcularCotizacion = async () => {
               <button
                 className="btn btn-secondary"
                 onClick={() => setFactorajeManual("")}
-                disabled={factorajeAplicado} // 👈 también deshabilita el botón
+                disabled={factorajeAplicado}
               >
                 Valores Originales
               </button>
-
+              &nbsp; &nbsp;
               {factorajeManual !== "" && (
+                
                 <button
                   className="btn btn-primary"
                   onClick={() => {
@@ -725,62 +726,27 @@ const calcularCotizacion = async () => {
                 </button>
               )}
             </div>
-
-            {/* Botón para restablecer valores */}
-            {/*<div className="col-md-6 mb-3 d-flex align-items-end">
-              <button
-                className="btn btn-secondary"
-                onClick={() => setFactorajeManual("")}
-              >
-                Valores Originales
-              </button>
-            </div>*/}
           </div>
-
-          {/*<label> Documento: {cve_tecFin}</label>
-          <br />
-          <label> id Monday: {idMonday}</label>
-          <br />
-          <label> Cliente: {razonSocial} </label>
-          <br />
-          <label> Nombre comercial: {nombreComercial}</label>
-          <div className="col">
-            <label htmlFor="factoringPercentage">
-              Porcentaje de Factoraje:
-            </label>
-            <input
-              id="factoringPercentage"
-              type="number"
-              placeholder="Ingresa el porcentaje"
-              value={factorajeManual}
-              onChange={(e) => setFactorajeManual(e.target.value)}
-            />
-            <br />
-            <button onClick={() => setFactorajeManual("")}>
-              Valores Originales
-            </button>
-            <br />
-          </div>*/}
           {/*Fin Mostrar Factoraje*/}
 
           <table className="table table-hover">
             <thead>
               <tr>
                 <th></th>
-                <th scope="col">Valor de proyecto</th>
+                <th scope="col" style={{textAlign: "center"}}>Valor de Proyecto</th>
                 <th scope="col"></th>
-                <th scope="col">
+                <th scope="col" style={{textAlign: "center"}}>
                   {sumaValorProyecto.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
                 </th>
-                <th scope="col"> 100%</th>
+                <th scope="col" style={{textAlign: "center"}}> 100%</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <th scope="row">costos</th>
+                <th scope="row" style={{textAlign: "center"}}>costos</th>
                 <th></th>
                 <td></td>
                 <td></td>
@@ -788,48 +754,48 @@ const calcularCotizacion = async () => {
               </tr>
               <tr>
                 <td></td>
-                <th scope="row">Materiales</th>
+                <th style={{textAlign: "center"}}>Materiales</th>
                 <td></td>
-                <td>
+                <td style={{textAlign: "center"}}>
                   {(totalMateria * 1).toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
                 </td>
-                <td>
+                <td style={{textAlign: "center"}}>
                   {((totalMateria * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
                 <td></td>
-                <th scope="row">Subcontrato</th>
+                <th scope="row" style={{textAlign: "center"}}>Subcontrato</th>
                 <td></td>
-                <td>
+                <td style={{textAlign: "center"}}>
                   {(totalSubContrado * 1).toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
                 </td>
-                <td>
+                <td style={{textAlign: "center"}}>
                   {((totalSubContrado * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
                 <th></th>
-                <th scope="row">Viaticos</th>
+                <th scope="row" style={{textAlign: "center"}}>Viaticos</th>
                 <td></td>
-                <td>
+                <td style={{textAlign: "center"}}>
                   {(totalViatico * 1).toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
                 </td>
-                <td>
+                <td style={{textAlign: "center"}}>
                   {((totalViatico * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
-                <th>-</th>
+                <th style={{textAlign: "center"}}>-</th>
                 <th scope="row"></th>
                 <td></td>
                 <td></td>
@@ -837,16 +803,16 @@ const calcularCotizacion = async () => {
               </tr>
               <tr>
                 <th></th>
-                <th scope="row">Dias de Credito</th>
+                <th scope="row" style={{textAlign: "center"}}>Dias de Credito</th>
                 <td></td>
-                <td>
+                <td style={{textAlign: "center"}}>
                   {/*CAMBIAR FORMULA*/}
                   {diasCredito}
                 </td>
                 <td></td>
               </tr>
               <tr>
-                <th>-</th>
+                <th style={{textAlign: "center"}}>-</th>
                 <th scope="row"></th>
                 <td></td>
                 <td></td>
@@ -854,21 +820,21 @@ const calcularCotizacion = async () => {
               </tr>
               <tr>
                 <th></th>
-                <th scope="row">Costo Directo</th>
+                <th scope="row" style={{textAlign: "center"}}>Costo Directo</th>
                 <td></td>
-                <td>
+                <td style={{textAlign: "center"}}>
                   {/*CAMBIAR FORMULA*/}
                   {valorDidirecto.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
                 </td>
-                <td>
+                <td style={{textAlign: "center"}}>
                   {((valorDidirecto * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
-                <th>-</th>
+                <th style={{textAlign: "center"}}>-</th>
                 <th scope="row"></th>
                 <td></td>
                 <td></td>
@@ -876,20 +842,20 @@ const calcularCotizacion = async () => {
               </tr>
               <tr>
                 <th></th>
-                <th scope="row">Costo Indirecto</th>
+                <th scope="row" style={{textAlign: "center"}}>Costo Indirecto</th>
                 <td></td>
-                <td>
+                <td style={{textAlign: "center"}}>
                   {valorIndirecto.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
                 </td>
-                <td>
+                <td style={{textAlign: "center"}}>
                   {((valorIndirecto * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
-                <th>-</th>
+                <th style={{textAlign: "center"}}>-</th>
                 <th scope="row"></th>
                 <td></td>
                 <td></td>
@@ -897,17 +863,17 @@ const calcularCotizacion = async () => {
               </tr>
               <tr className="table-success">
                 <th></th>
-                <th scope="row" style={{ color: "green" }}>
+                <th scope="row" style={{ color: "green", textAlign: "center" }}>
                   Utilidad Esperada
                 </th>
                 <td></td>
-                <td style={{ color: "green" }}>
+                <td style={{ color: "green", textAlign: "center" }}>
                   {utilidadEsperada.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
                 </td>
-                <td style={{ color: "green" }}>
+                <td style={{ color: "green", textAlign: "center" }}>
                   {((utilidadEsperada * 100) / sumaValorProyecto).toFixed(2)}%
                 </td>
               </tr>
@@ -916,9 +882,9 @@ const calcularCotizacion = async () => {
                 <>
                   <tr>
                     <th></th>
-                    <th scope="row">Factoraje</th>
+                    <th scope="row" style={{textAlign: "center"}}>Factoraje</th>
                     <td></td>
-                    <td>
+                    <td style={{textAlign: "center"}}>
                       {(
                         sumaValorProyecto *
                         (factorajeManual / 100)
@@ -927,7 +893,7 @@ const calcularCotizacion = async () => {
                         currency: "USD",
                       })}
                     </td>
-                    <td>
+                    <td style={{textAlign: "center"}}>
                       {(
                         (sumaValorProyecto * (factorajeManual / 100) * 100) /
                         sumaValorProyecto
@@ -937,11 +903,11 @@ const calcularCotizacion = async () => {
                   </tr>
                   <tr>
                     <th></th>
-                    <th scope="row" style={{ color: "green" }}>
+                    <th scope="row" style={{ color: "green", textAlign: "center" }}>
                       Utilidad Neta
                     </th>
                     <td></td>
-                    <td>
+                    <td style={{textAlign: "center"}}>
                       {(
                         utilidadEsperada -
                         sumaValorProyecto * (factorajeManual / 100)
@@ -950,7 +916,7 @@ const calcularCotizacion = async () => {
                         currency: "USD",
                       })}
                     </td>
-                    <td>
+                    <td style={{textAlign: "center"}}>
                       {(
                         ((utilidadEsperada -
                           sumaValorProyecto * (factorajeManual / 100)) *

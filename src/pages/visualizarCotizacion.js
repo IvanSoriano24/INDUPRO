@@ -703,7 +703,7 @@ const VisualizarCotizacion = () => {
       //console.log("📦 Insumo encontrado:", data);
     });
 
-    /*for (const cve_art of articulos) {
+    for (const cve_art of articulos) {
       try {
         const response = await axios.get(
           `http://localhost:5000/api/datosInsumoe/${cve_art}`
@@ -718,7 +718,7 @@ const VisualizarCotizacion = () => {
           err.message
         );
       }
-    }*/
+    }
 
     /*const dataPartidas = {
       data: data,
@@ -1027,7 +1027,7 @@ const VisualizarCotizacion = () => {
                       <td>{item.noPartidaATF}</td>
                       <td>{item.descripcion}</td>
                       <td>{item.observacion}</td>
-                      <td>
+                      <td style={{ textAlign: "right" }}>
                         {item.totalPartida.toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
