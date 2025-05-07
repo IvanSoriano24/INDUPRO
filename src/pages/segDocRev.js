@@ -129,7 +129,7 @@ const SegDocRev = () => {
     getParLevDigital();
   }, [cve_tecFin]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
   /************************/
-  
+
   const getParLevDigital_Insumo = async () => {
     try {
       const data = await getDocs(
@@ -160,7 +160,7 @@ const SegDocRev = () => {
     getParLevDigital_Insumo();
   }, [cve_tecFin]);
   /********/
-  
+
   const getParLevDigital_Mo = async () => {
     try {
       const data = await getDocs(
@@ -190,103 +190,100 @@ const SegDocRev = () => {
   useEffect(() => {
     getParLevDigital_Mo();
   }, [cve_tecFin]);
-/*****************************************************PRECOT*****************************************************/
-const estatusPC =
-precotizacionList.length > 0
-  ? precotizacionList[0].estatus
-  : "No hay documentos de precotización";
-const docAntPC =
-precotizacionList.length > 0
-  ? precotizacionList[0].docAnt
-  : "No hay documentos de precotización";
-const docSigPC =
-precotizacionList.length > 0
-  ? precotizacionList[0].docSig
-  : "No hay documentos de precotización";
+  /*****************************************************PRECOT*****************************************************/
+  const estatusPC =
+    precotizacionList.length > 0
+      ? precotizacionList[0].estatus
+      : "No hay documentos de precotización";
+  const docAntPC =
+    precotizacionList.length > 0
+      ? precotizacionList[0].docAnt
+      : "No hay documentos de precotización";
+  const docSigPC =
+    precotizacionList.length > 0
+      ? precotizacionList[0].docSig
+      : "No hay documentos de precotización";
 
-const getPreCotAnalisis = async () => {
-try {
-  const data = await getDocs(
-    query(
-      collection(db, "PRECOTIZACION"),
-      where("cve_precot", "==", docAnt)
-    )
-  );
-  const par_levDigList = data.docs.map((doc) => ({
-    ...doc.data(),
-    id: doc.id,
-  }));
-  setPrecotizacionList(par_levDigList);
-} catch (error) {
-  console.error("Error fetching PRECOTIZACION data:", error);
-}
-};
+  const getPreCotAnalisis = async () => {
+    try {
+      const data = await getDocs(
+        query(
+          collection(db, "PRECOTIZACION"),
+          where("cve_precot", "==", docAnt)
+        )
+      );
+      const par_levDigList = data.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setPrecotizacionList(par_levDigList);
+    } catch (error) {
+      console.error("Error fetching PRECOTIZACION data:", error);
+    }
+  };
 
-useEffect(() => {
-getPreCotAnalisis();
-}, [docAnt]);
+  useEffect(() => {
+    getPreCotAnalisis();
+  }, [docAnt]);
 
-const mostrarPreCotizacion = () => {
-const cvePrecot =
-  precotizacionList.length > 0
-    ? precotizacionList[0].cve_precot
-    : "No hay documentos de precotización";
+  const mostrarPreCotizacion = () => {
+    const cvePrecot =
+      precotizacionList.length > 0
+        ? precotizacionList[0].cve_precot
+        : "No hay documentos de precotización";
 
-swal({
-  title: "Seguimiento de documento",
-  text:
-    "Documento consultado: " +
-    cvePrecot +
-    "\n" +
-    "Documento anterior: " +
-    docAntPC +
-    "\n" +
-    "Documento siguiente: " +
-    docSigPC +
-    "\n" +
-    "Estatus: " +
-    estatusPC, //AQUI
-  icon: "info",
-  buttons: "Aceptar",
-});
-};
-/*****************************************************PRECOT*****************************************************/
+    swal({
+      title: "Seguimiento de documento",
+      text:
+        "Documento consultado: " +
+        cvePrecot +
+        "\n" +
+        "Documento anterior: " +
+        docAntPC +
+        "\n" +
+        "Documento siguiente: " +
+        docSigPC +
+        "\n" +
+        "Estatus: " +
+        estatusPC, //AQUI
+      icon: "info",
+      buttons: "Aceptar",
+    });
+  };
+  /*****************************************************PRECOT*****************************************************/
   /*****************************************************LEV*****************************************************/
   const estatusLev =
-  levList.length > 0
-    ? levList[0].estatus
-    : "No hay documentos de precotización";
+    levList.length > 0
+      ? levList[0].estatus
+      : "No hay documentos de precotización";
 
-const docSigLev =
-levList.length > 0
-    ? levList[0].docSig
-    : "No hay documentos de precotización";
+  const docSigLev =
+    levList.length > 0
+      ? levList[0].docSig
+      : "No hay documentos de precotización";
 
-const getLev = async () => {
-  try {
-    const data = await getDocs(
-      query(
-        collection(db, "LEVDIGITAL"),
-        where("cve_levDig", "==", docAntPC)
-      )
-    );
-    const par_levDigList = data.docs.map((doc) => ({
-      ...doc.data(),
-      id: doc.id,
-    }));
-    setLevList(par_levDigList);
-  } catch (error) {
-    console.error("Error fetching LEVDIGITAL data:", error);
-  }
-};
+  const getLev = async () => {
+    try {
+      const data = await getDocs(
+        query(collection(db, "LEVDIGITAL"), where("cve_levDig", "==", docAntPC))
+      );
+      const par_levDigList = data.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setLevList(par_levDigList);
+    } catch (error) {
+      console.error("Error fetching LEVDIGITAL data:", error);
+    }
+  };
 
-useEffect(() => {
-  getLev();
-}, [docAntPC]);
+  useEffect(() => {
+    getLev();
+  }, [docAntPC]);
 
   const mostrarAlerta = () => {
     const cveLev =
-    levList.length > 0
+      levList.length > 0
         ? levList[0].cve_levDig
         : "No hay documentos de precotización";
     swal({
@@ -308,10 +305,9 @@ useEffect(() => {
     });
   };
   /*****************************************************LEV*****************************************************/
-/********************************************************REV*****************************************************/
+  /********************************************************REV*****************************************************/
 
   const mostrarAnalisTecnico = () => {
-
     swal({
       title: "Seguimiento de documento",
       text:
@@ -331,7 +327,7 @@ useEffect(() => {
     });
   };
 
-/********************************************************REV*****************************************************/
+  /********************************************************REV*****************************************************/
   const getCotizacion = async () => {
     try {
       const data = await getDocs(
@@ -341,7 +337,7 @@ useEffect(() => {
         ...doc.data(),
         id: doc.id,
       }));
-      
+
       setCotizacion(par_levDigList);
     } catch (error) {
       console.error("Error fetching PAR_LEVDIGITAL data:", error);
@@ -352,14 +348,10 @@ useEffect(() => {
   }, [docSig]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
 
   const cveCot =
-    cotizacion.length > 0
-      ? cotizacion[0].cve_tecFin
-      : "No hay Cotizacion";
+    cotizacion.length > 0 ? cotizacion[0].cve_tecFin : "No hay Cotizacion";
 
-    const estatusCot =
-    cotizacion.length > 0
-      ? cotizacion[0].estatus
-      : "No hay Cotizacion";
+  const estatusCot =
+    cotizacion.length > 0 ? cotizacion[0].estatus : "No hay Cotizacion";
   const mostrarCotizacion = () => {
     swal({
       title: "Seguimiento de documento",
@@ -379,7 +371,7 @@ useEffect(() => {
       buttons: "Aceptar",
     });
   };
-/********************************************************COTIZACION*****************************************************/
+  /********************************************************COTIZACION*****************************************************/
   return (
     <div className="container">
       <div className="row">
@@ -403,21 +395,23 @@ useEffect(() => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusLev  === "Cancelado"
-                    ? "red"
-                    : estatusLev === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusLev === "Cancelado"
+                        ? "red"
+                        : estatusLev === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusLev  === "Cancelado"
-                    ? "red"
-                    : estatusLev === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusLev === "Cancelado"
+                        ? "red"
+                        : estatusLev === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   Levantamiento
@@ -425,14 +419,15 @@ useEffect(() => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusLev  === "Cancelado"
-                    ? "red"
-                    : estatusLev === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusLev === "Cancelado"
+                        ? "red"
+                        : estatusLev === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
-                  digital
+                  Digital
                 </span>
               </div>
               <div
@@ -448,21 +443,23 @@ useEffect(() => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusPC === "Cancelado"
-                    ? "red"
-                    : estatusPC === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusPC === "Cancelado"
+                        ? "red"
+                        : estatusPC === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusPC === "Cancelado"
-                    ? "red"
-                    : estatusPC === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusPC === "Cancelado"
+                        ? "red"
+                        : estatusPC === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   Pre
@@ -470,11 +467,12 @@ useEffect(() => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusPC === "Cancelado"
-                    ? "red"
-                    : estatusPC === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusPC === "Cancelado"
+                        ? "red"
+                        : estatusPC === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   Cotización
@@ -493,21 +491,23 @@ useEffect(() => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatus === "Cancelado"
-                    ? "red"
-                    : estatus === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatus === "Cancelado"
+                        ? "red"
+                        : estatus === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatus === "Cancelado"
-                    ? "red"
-                    : estatus === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatus === "Cancelado"
+                        ? "red"
+                        : estatus === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   Análsis ténico
@@ -515,14 +515,15 @@ useEffect(() => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatus === "Cancelado"
-                    ? "red"
-                    : estatus === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatus === "Cancelado"
+                        ? "red"
+                        : estatus === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
-                  financiero
+                  Financiero
                 </span>
               </div>
               <div
@@ -538,21 +539,23 @@ useEffect(() => {
                   className="me-2"
                   style={{
                     fontSize: "80px",
-                    color: estatusCot === "Cancelado"
-                    ? "red"
-                    : estatusCot === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusCot === "Cancelado"
+                        ? "red"
+                        : estatusCot === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 />
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusCot === "Cancelado"
-                    ? "red"
-                    : estatusCot === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusCot === "Cancelado"
+                        ? "red"
+                        : estatusCot === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
                   Cotización
@@ -560,14 +563,15 @@ useEffect(() => {
                 <span
                   style={{
                     fontSize: "20px",
-                    color: estatusCot === "Cancelado"
-                    ? "red"
-                    : estatusCot === "Bloqueado"
-                    ? "green"
-                    : "black",
+                    color:
+                      estatusCot === "Cancelado"
+                        ? "red"
+                        : estatusCot === "Bloqueado"
+                        ? "green"
+                        : "black",
                   }}
                 >
-                  terminada
+                  Terminada
                 </span>
               </div>
             </div>
@@ -642,13 +646,21 @@ useEffect(() => {
               </div>
             </div>
           </div>
-          <div>
-            <br></br>
-            <p>Partidas</p>
+          <br></br>
+          <p>Partidas</p>
+          <div
+            className="row"
+            style={{
+              border: "1px solid #000",
+              borderColor: "gray",
+              maxHeight: "240px",
+              overflowY: "auto",
+            }}
+          >
             <table class="table">
               <thead>
                 <tr>
-                  <th scope="col">No. PARTIDA</th>
+                  <th scope="col">No. Partida</th>
                   <th scope="col">Descripción</th>
                   <th scope="col">Observaciones</th>
                 </tr>
@@ -663,11 +675,22 @@ useEffect(() => {
                 ))}
               </tbody>
             </table>
-            <p>Insumos</p>
+          </div>
+          <br></br>
+          <p>Insumos</p>
+          <div
+            className="row"
+            style={{
+              border: "1px solid #000",
+              borderColor: "gray",
+              maxHeight: "240px",
+              overflowY: "auto",
+            }}
+          >
             <table class="table">
               <thead>
                 <tr>
-                  <th scope="col">No. PARTIDA</th>
+                  <th scope="col">No. Partidas</th>
                   <th scope="col">Unidad</th>
                   <th scope="col">Insumo</th>
                   <th scope="col">Cantidad</th>
@@ -681,19 +704,32 @@ useEffect(() => {
                     <td>{item.unidad}</td>
                     <td>{item.insumo}</td>
                     <td>{item.cantidad}</td>
-                    <td style={{ textAlign: "right" }}>{item.costoCotizado.toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })}</td>
+                    <td style={{ textAlign: "right" }}>
+                      {item.costoCotizado.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      })}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p>Mano de Obra</p>
+          </div>
+          <br></br>
+          <p>Mano de Obra</p>
+          <div
+            className="row"
+            style={{
+              border: "1px solid #000",
+              borderColor: "gray",
+              maxHeight: "240px",
+              overflowY: "auto",
+            }}
+          >
             <table class="table">
               <thead>
                 <tr>
-                  <th scope="col">No. PARTIDA</th>
+                  <th scope="col">No. Partida</th>
                   <th scope="col">Personal</th>
                   <th scope="col">Dias Trabajados</th>
                 </tr>
@@ -709,6 +745,11 @@ useEffect(() => {
               </tbody>
             </table>
           </div>
+          <br></br>
+          <Link to="/revTecnicoFinanciero">
+            <button className="btn btn-danger">Regresar</button>
+          </Link>
+          &nbsp; &nbsp;
         </div>
       </div>
     </div>

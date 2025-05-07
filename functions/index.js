@@ -383,10 +383,11 @@ app.post("/api/guardarPartidas", async (req, res) => {
   try {
     //console.log("📦 req.body:", req.body);
     const { data: partidas } = req.body;
+    let nuPartida = 1;
     for (const data of partidas) {
       const {
         CVE_DOC,
-        nuPartida,
+        //nuPartida,
         CVE_ART,
         CANT,
         PREC,
@@ -515,6 +516,8 @@ app.post("/api/guardarPartidas", async (req, res) => {
         .input("IMPU6", sql.Float, IMPU6)
         .input("IMPU5", sql.Float, IMPU5)
         .query(query);
+
+        nuPartida++;
     }
     res.status(201).json({ message: "Partidas insertada correctamente." });
   } catch (err) {

@@ -178,15 +178,6 @@ useEffect(() => {
             />
           </div>
         </div>
-        <div className="col-md-2 ">
-          <div className="mb-3">
-            <div class="input-group-append">
-              <button class="btn btn-outline-secondary" type="button">
-                <IoSearchSharp />
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
       <Nav tabs>
         <NavItem>

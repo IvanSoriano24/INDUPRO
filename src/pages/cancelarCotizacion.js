@@ -314,11 +314,14 @@ console.log("datsos: ", cve_tecFin)
               </div>
             </div>
           </div>
+          <p>Partidas</p>
           <div
-            className="row"
-            style={{ border: "1px solid #000", borderColor: "gray" }}
-          >
-            <div>
+              style={{
+                border: "1px solid #000",
+                maxHeight: "550px",
+                overflowY: "auto",
+              }}
+            >
               <br></br>
               <table class="table">
                 <thead>
@@ -338,9 +341,12 @@ console.log("datsos: ", cve_tecFin)
                   ))}
                 </tbody>
               </table>
-            </div>
           </div>
           <br></br>
+          <Link to="/cotizacion">
+                      <button className="btn btn-danger">Regresar</button>
+                    </Link>
+                    &nbsp; &nbsp;
           <button
             className="btn btn-danger"
             onClick={() => mostrarAlerta(cve_tecFin)}

@@ -548,7 +548,7 @@ const AgregarParLevDiGAdicional = () => {
       {/* Modal para agregar partida */}
       <Modal
         show={showAgregar}
-        onHide={handleShowAgregar}
+        onHide={handleCloseAgregar}
         dialogClassName="lg"
         centered
         scrollable

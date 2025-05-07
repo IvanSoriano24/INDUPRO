@@ -400,7 +400,7 @@ const SegDocPreCotizacion = () => {
                         : "black",
                   }}
                 >
-                  digital
+                  Digital
                 </span>
               </div>
               <div
@@ -496,7 +496,7 @@ const SegDocPreCotizacion = () => {
                         : "black",
                   }}
                 >
-                  financiero
+                  Financiero
                 </span>
               </div>
               <div
@@ -544,14 +544,14 @@ const SegDocPreCotizacion = () => {
                         : "black",
                   }}
                 >
-                  terminada
+                  Terminada
                 </span>
               </div>
             </div>
           </div>
           <div className="row">
             <div className="col-md-4 ">
-              <label className="form-label">CLIENTE</label>
+              <label className="form-label">Cliente</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -567,7 +567,7 @@ const SegDocPreCotizacion = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE ELABORACIÓN</label>
+              <label className="form-label">Fecha de Elaboración</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -588,7 +588,7 @@ const SegDocPreCotizacion = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE INICIO</label>
+              <label className="form-label">Fecha de Inicio</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -604,7 +604,7 @@ const SegDocPreCotizacion = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA FIN</label>
+              <label className="form-label">Fecha Fin</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -621,30 +621,50 @@ const SegDocPreCotizacion = () => {
           </div>
           <div>
             <br></br>
-            <p>Partidas</p>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">No. PARTIDA</th>
-                  <th scope="col">DESCRIPCIÓN</th>
-                  <th scope="col">Observaciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {par_preCot.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.noPartida}</td>
-                    <td>{item.descripcion}</td>
-                    <td>{item.observacion}</td>
+              <p>Partidas</p>
+              <div
+              className="row"
+              style={{
+                border: "1px solid #000",
+                borderColor: "gray",
+                maxHeight: "240px",
+                overflowY: "auto",
+              }}
+            >
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">No. Partida</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Observaciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {par_preCot.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.noPartida}</td>
+                      <td>{item.descripcion}</td>
+                      <td>{item.observacion}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <br></br>
             <p>Insumos</p>
+            <div
+              className="row"
+              style={{
+                border: "1px solid #000",
+                borderColor: "gray",
+                maxHeight: "240px",
+                overflowY: "auto",
+              }}
+            >
             <table class="table">
               <thead>
                 <tr>
-                  <th scope="col">No. PARTIDA</th>
+                  <th scope="col">No. Partida</th>
                   <th scope="col">Unidad</th>
                   <th scope="col">Insumo</th>
                   <th scope="col">Cantidad</th>
@@ -658,19 +678,32 @@ const SegDocPreCotizacion = () => {
                     <td>{item.unidad}</td>
                     <td>{item.insumo}</td>
                     <td>{item.cantidad}</td>
-                    <td style={{ textAlign: "right" }}>{item.costoCotizado.toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })}</td>
+                    <td style={{ textAlign: "right" }}>
+                      {item.costoCotizado.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      })}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            </div>
+            <br></br>
             <p>Mano de Obra</p>
+            <div
+              className="row"
+              style={{
+                border: "1px solid #000",
+                borderColor: "gray",
+                maxHeight: "240px",
+                overflowY: "auto",
+              }}
+            >
             <table class="table">
               <thead>
                 <tr>
-                  <th scope="col">No. PARTIDA</th>
+                  <th scope="col">No. Partida</th>
                   <th scope="col">Personal</th>
                   <th scope="col">Dias Trabajados</th>
                 </tr>
@@ -685,7 +718,13 @@ const SegDocPreCotizacion = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
+          <br></br>
+          <Link to="/precotizacion">
+            <button className="btn btn-danger">Regresar</button>
+          </Link>
+          &nbsp; &nbsp;
         </div>
       </div>
     </div>

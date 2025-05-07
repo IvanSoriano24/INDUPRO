@@ -230,12 +230,12 @@ const CancelarATF = () => {
       <div className="row">
         <div className="col">
           <h1 style={{ color: "red" }}>
-            <BsExclamationCircleFill /> Cancelar cotización
+            <BsExclamationCircleFill /> Cancelar Cotización
           </h1>
           <div className="row">
             <div className="col-md-4">
               <div className="mb-3">
-                <label className="form-label">FOLIO</label>
+                <label className="form-label">Folio</label>
                 <input
                   className="form-control"
                   id="inputFolioSecuencial"
@@ -247,7 +247,7 @@ const CancelarATF = () => {
               </div>
             </div>
             <div className="col-md-4 ">
-              <label className="form-label">CLIENTE</label>
+              <label className="form-label">Cliente</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -263,7 +263,7 @@ const CancelarATF = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE ELABORACIÓN</label>
+              <label className="form-label">Fecha de Elaboración</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -279,7 +279,7 @@ const CancelarATF = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA DE INICIO</label>
+              <label className="form-label">Fecha de Inicio</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -295,7 +295,7 @@ const CancelarATF = () => {
             </div>
 
             <div className="col-md-4 ">
-              <label className="form-label">FECHA FIN</label>
+              <label className="form-label">Fecha Fin</label>
               <div class="input-group mb-3">
                 <input
                   placeholder=""
@@ -310,9 +310,15 @@ const CancelarATF = () => {
               </div>
             </div>
           </div>
+          <p>Partidas</p>
           <div
             className="row"
-            style={{ border: "1px solid #000", borderColor: "gray" }}
+            style={{
+              border: "1px solid #000",
+              borderColor: "gray",
+              maxHeight: "240px",
+              overflowY: "auto",
+            }}
           >
             <div>
               <br></br>
@@ -337,11 +343,15 @@ const CancelarATF = () => {
             </div>
           </div>
           <br></br>
+          <Link to="/revTecnicoFinanciero">
+            <button className="btn btn-danger">Regresar</button>
+          </Link>
+          &nbsp; &nbsp;
           <button
             className="btn btn-danger"
             onClick={() => mostrarAlerta(cve_tecFin)}
           >
-            <HiMiniDocumentMinus /> Cancelar documento
+            <HiMiniDocumentMinus /> Cancelar Documento
           </button>
         </div>
       </div>

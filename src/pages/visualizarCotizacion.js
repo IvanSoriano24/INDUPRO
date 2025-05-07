@@ -239,7 +239,18 @@ const VisualizarCotizacion = () => {
                   table: {
                     headerRows: 1,
                     widths: ["*"],
-                    body: [["Descripción"], [item.descripcion]],
+                    body: [
+                      [
+                        {
+                          text: "Descripción",
+                          bold: true,
+                          fontSize: 12,
+                          alignment: "center",
+                          fillColor: "#eeeeee", // Opcional: fondo gris claro
+                        },
+                      ],
+                      [item.descripcion],
+                    ],
                   },
                   layout: "noBorders",
                 },
@@ -438,8 +449,20 @@ const VisualizarCotizacion = () => {
                   table: {
                     headerRows: 1,
                     widths: ["*"],
-                    body: [["Descripción"], [item.descripcion]],
+                    body: [
+                      [
+                        {
+                          text: "Descripción",
+                          bold: true,
+                          fontSize: 11,
+                          alignment: "center",
+                          fillColor: "#eeeeee", // Opcional: fondo gris claro
+                        },
+                      ],
+                      [item.descripcion],
+                    ],
                   },
+                  layout: "noBorders",
                 },
                 {
                   text:
@@ -528,34 +551,37 @@ const VisualizarCotizacion = () => {
     }
   };
   const mostrarAlerta = (cve_tecFin) => {
-    swal.fire({
-      title: "¿Estás seguro de aceptar?",
-      text: "Una vez aceptado el documento no podrás hacer uso de él.",
-      icon: "warning",
-      showCancelButton: true, // ✅ muestra botón de cancelar
-      confirmButtonText: "Aceptar",
-      cancelButtonText: "Cancelar",
-      reverseButtons: true,  // ✅ opcional: pone "Cancelar" a la izquierda
-    }).then((result) => {
-      if (result.isConfirmed) {
-        aceptarCotizacion(cve_tecFin);
-      } else if (result.dismiss === swal.DismissReason.cancel) {
-        swal.fire("Cancelado", "No se acepto la cotizacion.", "info");
-      }
-    });
+    swal
+      .fire({
+        title: "¿Estás seguro de aceptar?",
+        text: "Una vez aceptado el documento no podrás hacer uso de él.",
+        icon: "warning",
+        showCancelButton: true, // ✅ muestra botón de cancelar
+        confirmButtonText: "Aceptar",
+        cancelButtonText: "Cancelar",
+        reverseButtons: true, // ✅ opcional: pone "Cancelar" a la izquierda
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          handleOpenModal();
+          //aceptarCotizacion(cve_tecFin);
+        } else if (result.dismiss === swal.DismissReason.cancel) {
+          swal.fire("Cancelado", "No se acepto la cotizacion.", "info");
+        }
+      });
   };
-  
-  const aceptarCotizacion = async (cve_tecFin) => {
+
+  const aceptarCotizacion = async (cve_tecFin, folioSiguiente) => {
     try {
       swal.fire({
-            title: "Procesando Solicitud...",
-            text: "Por favor espera mientras se valida el contenido.",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => {
-              swal.showLoading();
-            },
-          });
+        title: "Procesando Solicitud...",
+        text: "Por favor espera mientras se valida el contenido.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          swal.showLoading();
+        },
+      });
       const q = query(
         collection(db, "COTIZACION"),
         where("cve_tecFin", "==", cve_tecFin)
@@ -586,24 +612,25 @@ const VisualizarCotizacion = () => {
         // Actualiza el estatus del documento
         const datos = {
           estatus: "Aceptado",
+          folioSae: folioSiguiente,
         };
-        await updateDoc(factoresRef, datos);
-        // Obtener el documento COTIZACION por cve_tecFin
-        // No se recomienda recargar la página; en su lugar, puedes manejar la actualización del estado localmente
-        swal.close();
-        swal
-          .fire({
-            icon: "success",
-            title: "Guardado",
-            text: "Cotizacion Guardada.",
-            timer: 1500, // Espera 1.5 segundos
-            showConfirmButton: false,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-          })
-          .then(() => {
-            navigate("/cotizacion");
-          });
+      await updateDoc(factoresRef, datos);
+      // Obtener el documento COTIZACION por cve_tecFin
+      // No se recomienda recargar la página; en su lugar, puedes manejar la actualización del estado localmente
+      swal.close();
+      swal
+        .fire({
+          icon: "success",
+          title: "Guardado",
+          text: "Cotizacion Guardada.",
+          timer: 1500, // Espera 1.5 segundos
+          showConfirmButton: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        })
+        .then(() => {
+          navigate("/cotizacion");
+        });
       } else {
         console.log(
           "No se encontró ningún documento que coincida con los identificadores proporcionados."
@@ -615,12 +642,12 @@ const VisualizarCotizacion = () => {
   };
   /******************************************** SAE  *****************************************************************/
   const addSae = async () => {
-    console.log("Cliente:", cliente);
+    //console.log("Cliente:", cliente);
 
     const { folioSiguiente } = (
       await axios.get(
-        //"http://localhost:5000/api/obtenerFolio"
-        "/api/obtenerFolio"
+        "http://localhost:5000/api/obtenerFolio"
+        //"/api/obtenerFolio"
       )
     ).data;
     setFolioSig(folioSiguiente);
@@ -631,8 +658,8 @@ const VisualizarCotizacion = () => {
 
     let clave = cliente.toString(); // sin padStart
     const clie = await axios.get(
-      //`http://localhost:5000/api/datosClie/${clave}`
-      `/api/datosClie/${clave}`
+      `http://localhost:5000/api/datosClie/${clave}`
+      //`/api/datosClie/${clave}`
     );
 
     const datosCliente = clie.data.datosCliente;
@@ -676,11 +703,11 @@ const VisualizarCotizacion = () => {
       //console.log("📦 Insumo encontrado:", data);
     });
 
-    for (const cve_art of articulos) {
+    /*for (const cve_art of articulos) {
       try {
         const response = await axios.get(
-          //`http://localhost:5000/api/datosInsumoe/${cve_art}`
-          `/api/datosInsumoe/${cve_art}`
+          `http://localhost:5000/api/datosInsumoe/${cve_art}`
+          //`/api/datosInsumoe/${cve_art}`
         );
         const datosInsumo = response.data.datosInsumos;
         console.log("🧾 Datos del insumo:", datosInsumo);
@@ -691,7 +718,7 @@ const VisualizarCotizacion = () => {
           err.message
         );
       }
-    }
+    }*/
 
     /*const dataPartidas = {
       data: data,
@@ -727,7 +754,7 @@ const VisualizarCotizacion = () => {
       return {
         data: detalle,
         CVE_DOC: CVE_DOC ?? "",
-        nuPartida: detalle.noPartidaATF ?? "",
+        //nuPartida: detalle.noPartidaATF ?? "",
         CVE_ART: detalle.claveSae ?? "",
         CANT: detalle.cantidad ?? 0,
         PREC: detalle.costoCotizado ?? 0,
@@ -755,11 +782,12 @@ const VisualizarCotizacion = () => {
       };
     });
 
-    console.log("CVE_DOC:", CVE_DOC);
+    //console.log("CVE_DOC:", CVE_DOC);
+    console.log("Partidas: ", dataPartidas);
 
     await axios.post(
-      //"http://localhost:5000/api/guardarPartidas", {
-      "/api/guardarPartidas",
+      "http://localhost:5000/api/guardarPartidas",
+      //"/api/guardarPartidas",
       {
         data: dataPartidas,
       }
@@ -793,17 +821,19 @@ const VisualizarCotizacion = () => {
     };
     console.log("Cotizacion: ", dataCotizacion);
     const responseCotizacion = await axios.post(
-      //"http://localhost:5000/api/cotizacion",
-      "/api/cotizacion",
+      "http://localhost:5000/api/cotizacion",
+      //"/api/cotizacion",
       dataCotizacion
     );
 
     const { nuevoFolio } = (
       await axios.get(
-        //"http://localhost:5000/api/actualizarFolio"
-        "/api/actualizarFolio"
+        "http://localhost:5000/api/actualizarFolio"
+        //"/api/actualizarFolio"
       )
     ).data;
+
+    aceptarCotizacion(cve_tecFin, folioSiguiente)
   };
 
   const handleOpenModal = async () => {
@@ -811,8 +841,8 @@ const VisualizarCotizacion = () => {
     if (clientes.length === 0) {
       console.log("🔄 Cargando proveedores antes de editar...");
       const responseClientes = await axios.get(
-        //"http://localhost:5000/api/cliente"
-        "/api/cliente"
+        "http://localhost:5000/api/cliente"
+        //"/api/cliente"
       );
       listaClientes = responseClientes.data;
       setClientes(listaClientes);
@@ -830,8 +860,8 @@ const VisualizarCotizacion = () => {
     }, 200);
     const { folioSiguiente } = (
       await axios.get(
-        //"http://localhost:5000/api/obtenerFolio"
-        "/api/obtenerFolio"
+        "http://localhost:5000/api/obtenerFolio"
+        //"/api/obtenerFolio"
       )
     ).data;
     setFolioSae(folioSiguiente);
@@ -1021,10 +1051,6 @@ const VisualizarCotizacion = () => {
           &nbsp; &nbsp;
           <button className="btn btn-danger" onClick={() => navigate(-1)}>
             <IoArrowBackCircleOutline /> Regresar
-          </button>
-          &nbsp; &nbsp;
-          <button className="btn btn-success" onClick={handleOpenModal}>
-            <FaDatabase /> Mandar a SAE
           </button>
           &nbsp; &nbsp;
           <button

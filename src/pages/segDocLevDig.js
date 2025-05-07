@@ -578,6 +578,10 @@ const SegDocLevDig = () => {
               </tbody>
             </table>
           </div>
+          <br></br>
+          <Link to="/levantamientoDigital">
+            <button className="btn btn-danger">Regresar</button>
+          </Link>
         </div>
       </div>
     </div>

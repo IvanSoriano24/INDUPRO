@@ -24,6 +24,7 @@ const SegDocRev = () => {
   const [cve_levDig, setCve_levDig] = useState("");
   const [cve_precot, setCve_precot] = useState("");
   const [cve_tecFin, setCve_tecFin] = useState("");
+  const [folioSae, setFolioSae] = useState("");
   const [folios, setFolios] = useState([]);
   const [selectedFolio, setSelectedFolio] = useState("");
   const [folioSiguiente, setFolioSiguiente] = useState(1);
@@ -48,6 +49,7 @@ const SegDocRev = () => {
     const factoresDOC = await getDoc(doc(db, "COTIZACION", id));
     if (factoresDOC.exists()) {
       setCve_tecFin(factoresDOC.data().cve_tecFin);
+      setFolioSae(factoresDOC.data().folioSae);
       setCve_clie(factoresDOC.data().cve_clie);
       setFechaElaboracion(factoresDOC.data().fechaElaboracion);
       setFechaInicio(factoresDOC.data().fechaInicio);
@@ -333,7 +335,7 @@ const SegDocRev = () => {
           where("cve_tecFin", "==", cveATF)
         )
       );
-console.log("DATS: ", cveATF);
+      console.log("DATS: ", cveATF);
       const par_levDigList = data.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
@@ -387,7 +389,7 @@ console.log("DATS: ", cveATF);
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1>Documento: {cve_tecFin}</h1>
+          <h1>Documento: {estatus === "Aceptado" ? folioSae : cve_tecFin}</h1>
           {/*INICIO*/}
           <div
             className="row"
@@ -439,7 +441,7 @@ console.log("DATS: ", cveATF);
                         : "black",
                   }}
                 >
-                  digital
+                  Digital
                 </span>
               </div>
               <div
@@ -535,7 +537,7 @@ console.log("DATS: ", cveATF);
                         : "black",
                   }}
                 >
-                  financiero
+                  Financiero
                 </span>
               </div>
               <div
@@ -583,7 +585,7 @@ console.log("DATS: ", cveATF);
                         : "black",
                   }}
                 >
-                  terminada
+                  Terminada
                 </span>
               </div>
             </div>
@@ -662,72 +664,107 @@ console.log("DATS: ", cveATF);
           <div>
             <br></br>
             <p>Partidas</p>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">No. PARTIDA</th>
-                  <th scope="col">Descripción</th>
-                  <th scope="col">Observaciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {par_rev.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.noPartidaATF}</td>
-                    <td>{item.descripcion}</td>
-                    <td>{item.observacion}</td>
+            <div
+              className="row"
+              style={{
+                border: "1px solid #000",
+                borderColor: "gray",
+                maxHeight: "240px",
+                overflowY: "auto",
+              }}
+            >
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">No. Partida</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Observaciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {par_rev.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.noPartidaATF}</td>
+                      <td>{item.descripcion}</td>
+                      <td>{item.observacion}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <p>Insumos</p>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">No. PARTIDA</th>
-                  <th scope="col">Unidad</th>
-                  <th scope="col">Insumo</th>
-                  <th scope="col">Cantidad</th>
-                  <th scope="col">Costo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {par_rev_Insu.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.noPartidaATF}</td>
-                    <td>{item.unidad}</td>
-                    <td>{item.insumo}</td>
-                    <td>{item.cantidad}</td>
-                    <td style={{ textAlign: "right" }}>
-                      {item.costoCotizado.toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                      })}
-                    </td>
+            <div
+              className="row"
+              style={{
+                border: "1px solid #000",
+                borderColor: "gray",
+                maxHeight: "240px",
+                overflowY: "auto",
+              }}
+            >
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">No. Partida</th>
+                    <th scope="col">Unidad</th>
+                    <th scope="col">Insumo</th>
+                    <th scope="col">Cantidad</th>
+                    <th scope="col">Costo</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {par_rev_Insu.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.noPartidaATF}</td>
+                      <td>{item.unidad}</td>
+                      <td>{item.insumo}</td>
+                      <td>{item.cantidad}</td>
+                      <td style={{ textAlign: "right" }}>
+                        {item.costoCotizado.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <p>Mano de Obra</p>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">No. PARTIDA</th>
-                  <th scope="col">Personal</th>
-                  <th scope="col">Dias Trabajados</th>
-                </tr>
-              </thead>
-              <tbody>
-                {par_rev_Mo.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.noPartidaMO}</td>
-                    <td>{item.personal}</td>
-                    <td>{item.diasTrabajados}</td>
+            <div
+              className="row"
+              style={{
+                border: "1px solid #000",
+                borderColor: "gray",
+                maxHeight: "240px",
+                overflowY: "auto",
+              }}
+            >
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">No. Partida</th>
+                    <th scope="col">Personal</th>
+                    <th scope="col">Dias Trabajados</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {par_rev_Mo.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.noPartidaMO}</td>
+                      <td>{item.personal}</td>
+                      <td>{item.diasTrabajados}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
+          <br></br>
+          <Link to="/cotizacion">
+            <button className="btn btn-danger">Regresar</button>
+          </Link>
+          &nbsp; &nbsp;
         </div>
       </div>
     </div>

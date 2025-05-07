@@ -293,6 +293,10 @@ const CancelarPreCotizacion = () => {
             </div>
           </div>
           <br></br>
+          <Link to="/levantamientoDigital">
+            <button className="btn btn-danger">Regresar</button>
+          </Link>
+          &nbsp; &nbsp;
           <button
             className="btn btn-danger"
             onClick={() => mostrarAlerta(cve_precot)}

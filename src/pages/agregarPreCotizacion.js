@@ -129,7 +129,19 @@ const AgregarPreCotizacion = () => {
   const [show, setShow] = useState(false);
   const [showPartida, setShowPartida] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const handleClose = () => setShow(false);
+  //const handleClose = () => setShow(false);
+  const handleClose = () => {
+    limpiarPartida();
+    setCantidad(0);
+    setDescripcion("");
+    setObservacion("");
+    setShowPartida(false);
+  };
+  const limpiarPartida = () => {
+    setCantidad("");
+    setDescripcion("");
+    setObservacion("");
+  };
   const handleShow = () => setShow(true);
   const [modoModal, setModoModal] = useState("Crear");
 
