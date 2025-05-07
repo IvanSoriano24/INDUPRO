@@ -389,7 +389,9 @@ const SegDocRev = () => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h1>Documento: {estatus === "Aceptado" ? folioSae : cve_tecFin}</h1>
+          <h1>
+            {estatus === "Aceptado" ? `Folio SAE: ${folioSae}` : `Documento: ${cve_tecFin}`}
+          </h1>
           {/*INICIO*/}
           <div
             className="row"
