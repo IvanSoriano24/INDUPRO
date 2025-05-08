@@ -614,23 +614,23 @@ const VisualizarCotizacion = () => {
           estatus: "Aceptado",
           folioSae: folioSiguiente,
         };
-      await updateDoc(factoresRef, datos);
-      // Obtener el documento COTIZACION por cve_tecFin
-      // No se recomienda recargar la página; en su lugar, puedes manejar la actualización del estado localmente
-      swal.close();
-      swal
-        .fire({
-          icon: "success",
-          title: "Guardado",
-          text: "Cotizacion Guardada.",
-          timer: 1500, // Espera 1.5 segundos
-          showConfirmButton: false,
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-        })
-        .then(() => {
-          navigate("/cotizacion");
-        });
+        await updateDoc(factoresRef, datos);
+        // Obtener el documento COTIZACION por cve_tecFin
+        // No se recomienda recargar la página; en su lugar, puedes manejar la actualización del estado localmente
+        swal.close();
+        swal
+          .fire({
+            icon: "success",
+            title: "Guardado",
+            text: "Cotizacion Guardada.",
+            timer: 1500, // Espera 1.5 segundos
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+          })
+          .then(() => {
+            navigate("/cotizacion");
+          });
       } else {
         console.log(
           "No se encontró ningún documento que coincida con los identificadores proporcionados."
@@ -833,7 +833,7 @@ const VisualizarCotizacion = () => {
       )
     ).data;
 
-    aceptarCotizacion(cve_tecFin, folioSiguiente)
+    aceptarCotizacion(cve_tecFin, folioSiguiente);
   };
 
   const handleOpenModal = async () => {
@@ -848,16 +848,21 @@ const VisualizarCotizacion = () => {
       setClientes(listaClientes);
     }
 
-    // 🟢 Buscar el proveedor en la lista de proveedores
-    const cve_clie = cve_int.toString().padStart(10, " ");
-    console.log("Clave Para Select", cve_clie);
-    const clienteEncontrado = listaClientes.find(
-      (prov) => prov.CLAVE === cve_clie
-    );
 
-    setTimeout(() => {
-      setCliente(clienteEncontrado ? clienteEncontrado.CLAVE : "");
-    }, 200);
+
+    // 🟢 Buscar el proveedor en la lista de proveedores
+    if (cve_int) {
+      const cve_clie = cve_int.toString().padStart(10, " ");
+      console.log("Clave Para Select", cve_clie);
+      const clienteEncontrado = listaClientes.find(
+        (prov) => prov.CLAVE === cve_clie
+      );
+
+      setTimeout(() => {
+        setCliente(clienteEncontrado ? clienteEncontrado.CLAVE : "");
+      }, 200);
+    }
+
     const { folioSiguiente } = (
       await axios.get(
         //"http://localhost:5000/api/obtenerFolio"

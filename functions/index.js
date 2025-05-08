@@ -16,7 +16,16 @@ const config = {
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
   },
 };
-
+/*const config = {
+  user: "sa",
+  password: "Green2580a.",
+  server: "35.222.201.74",
+  database: "SAE90EMPRE01_MDCONNECTA",
+  options: {
+    encrypt: true, // Si estás usando SSL
+    trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
+  },
+};*/
 // Configuración CORS
 const corsOptions = {
   origin: ["*"],
@@ -44,15 +53,13 @@ app.use((req, res, next) => {
 app.get("/api/test", (req, res) => {
   res.status(200).json({ mensaje: "CORS funcionando correctamente" });
 });
-
-// Ruta para obtener las claves y descripciones de INVE01
 app.get("/api/claves", async (req, res) => {
   try {
     const pool = await sql.connect(config);
     const result = await pool
       .request()
       .query("SELECT CVE_ART, DESCR FROM INVE01");
-    res.json(result.recordset);
+    res.json(result.recordset); // Enviar los resultados como respuesta
   } catch (err) {
     console.error("Error al ejecutar la consulta:", err);
     res.status(500).json({
@@ -61,17 +68,22 @@ app.get("/api/claves", async (req, res) => {
     });
   }
 });
-
-// Ruta para obtener proveedores activos
 app.get("/api/proveedores", async (req, res) => {
   try {
+    // Conectar a la base de datos
     const pool = await sql.connect(config);
+
+    // Ejecutar la consulta
     const result = await pool
       .request()
       .query("SELECT CLAVE, NOMBRE FROM PROV01 WHERE STATUS = 'A'");
+
+    // Verifica si hay resultados
     if (result.recordset.length === 0) {
       return res.status(404).json({ message: "No hay proveedores activos." });
     }
+
+    // Enviar la respuesta
     res.json(result.recordset);
   } catch (err) {
     console.error("Error al ejecutar la consulta:", err);
@@ -81,8 +93,32 @@ app.get("/api/proveedores", async (req, res) => {
     });
   }
 });
+app.get("/api/cliente", async (req, res) => {
+  try {
+    // Conectar a la base de datos
+    const pool = await sql.connect(config);
 
-// Ruta para obtener las líneas master (unidades)
+    // Ejecutar la consulta
+    const result = await pool
+      .request()
+      .query("SELECT CLAVE, NOMBRE FROM CLIE01 WHERE STATUS = 'A'");
+
+    // Verifica si hay resultados
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "No hay clientes activos." });
+    }
+
+    // Enviar la respuesta
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("Error al ejecutar la consulta:", err);
+    res.status(500).json({
+      error: "Error al obtener datos de la base de datos",
+      details: err.message,
+    });
+  }
+});
+// Ruta para obtener las líneas
 app.get("/api/lineasMaster", async (req, res) => {
   try {
     const pool = await sql.connect(config);
@@ -112,8 +148,6 @@ app.get("/api/lineasMaster", async (req, res) => {
     });
   }
 });
-
-// Ruta para obtener categorías según la unidad (segundo nivel)
 app.get("/api/categorias/:unidad", async (req, res) => {
   try {
     const { unidad } = req.params;
@@ -134,10 +168,9 @@ app.get("/api/categorias/:unidad", async (req, res) => {
       .json({ error: "Error al obtener las categorías", details: err });
   }
 });
-
-// Ruta para obtener las líneas según la categoría (tercer nivel)
 app.get("/api/lineas/:categoria", async (req, res) => {
   const { categoria } = req.params;
+
   try {
     const pool = await sql.connect(config);
     const result = await pool
@@ -145,10 +178,10 @@ app.get("/api/lineas/:categoria", async (req, res) => {
       .input("categoria", sql.VarChar, categoria)
       .input("categoriaZ", sql.VarChar, categoria + "Z")
       .query(`SELECT CVE_LIN, DESC_LIN, CUENTA_COI 
-              FROM CLIN01 
-              WHERE CUENTA_COI >= @categoria 
-                AND CUENTA_COI < @categoriaZ
-                AND LEN(CUENTA_COI) - LEN(REPLACE(CUENTA_COI, '.', '')) = 2`);
+                FROM CLIN01 
+                WHERE CUENTA_COI >= @categoria 
+                  AND CUENTA_COI < @categoriaZ
+                  AND LEN(CUENTA_COI) - LEN(REPLACE(CUENTA_COI, '.', '')) = 2`);
     res.json(result.recordset);
   } catch (err) {
     console.error("Error al obtener las líneas:", err);
@@ -157,7 +190,6 @@ app.get("/api/lineas/:categoria", async (req, res) => {
       .json({ error: "Error al obtener las líneas", details: err });
   }
 });
-// Ruta para obtener la Clave SAE desde SQL Server basado en CVE_LIN
 app.get("/api/clave-sae", async (req, res) => {
   try {
 
@@ -516,7 +548,6 @@ app.post("/api/guardarPartidas", async (req, res) => {
         .input("IMPU6", sql.Float, IMPU6)
         .input("IMPU5", sql.Float, IMPU5)
         .query(query);
-
         nuPartida++;
     }
     res.status(201).json({ message: "Partidas insertada correctamente." });
