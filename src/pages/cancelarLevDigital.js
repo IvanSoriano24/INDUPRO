@@ -166,7 +166,7 @@ const CancelarPreCotizacion = () => {
   };
   const mostrarAlerta = (cve_precot) => {
     swal({
-      title: "Estás segudo de cancelar?",
+      title: "Estás seguro de cancelar?",
       text: "Una vez cancelado el documento no podrás hacer uso de el y solo podrás consultarlo!",
       icon: "warning",
       buttons: true,

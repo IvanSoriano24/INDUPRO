@@ -212,7 +212,7 @@ console.log("datsos: ", cve_tecFin)
 
   const mostrarAlerta = (cve_tecFin) => {
     swal({
-      title: "Estás segudo de cancelar?",
+      title: "Estás seguro de cancelar?",
       text: "Una vez cancelado el documento no podrás hacer uso de el.",
       icon: "warning",
       buttons: true,

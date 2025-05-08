@@ -137,6 +137,13 @@ const AgregarPreCotizacion = () => {
     setObservacion("");
     setShowPartida(false);
   };
+  const handleCloseShow = () => {
+    limpiarPartida();
+    setCantidad(0);
+    setDescripcion("");
+    setObservacion("");
+    setShow(false);
+  }
   const limpiarPartida = () => {
     setCantidad("");
     setDescripcion("");
@@ -2138,7 +2145,7 @@ const AgregarPreCotizacion = () => {
       </Modal>
       <Modal
         show={show}
-        onHide={handleClose}
+        onHide={handleCloseShow}
         dialogClassName="lg"
         centered
         scrollable
@@ -2184,7 +2191,7 @@ const AgregarPreCotizacion = () => {
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+          <Button variant="secondary" onClick={handleCloseShow}>
             Cancelar
           </Button>
           <Button variant="primary" onClick={guardarEdicion}>
