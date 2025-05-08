@@ -78,6 +78,25 @@ const VisualizarPDF = () => {
   const [factoraje, setFactoraje] = useState(0);
   const [utilidadNeta, setUtilidadNeta] = useState(0);
   const [valoresArticulo, seValoresArticulo] = useState([]);
+
+  function DecimalAlignedCell({ value }) {
+    const [entero, decimal] = Number(value).toFixed(2).split(".");
+    const enteroFormateado = Number(entero).toLocaleString("en-US");
+  
+    return (
+      <td style={{ textAlign: "center", fontFamily: "monospace" }}>
+        <span style={{ display: "inline-flex", justifyContent: "center" }}>
+          <span style={{ minWidth: "60px", textAlign: "right" }}>
+            ${enteroFormateado}
+          </span>
+          <span>.</span>
+          <span style={{ minWidth: "30px", textAlign: "left" }}>
+            {decimal}
+          </span>
+        </span>
+      </td>
+    );
+  }
   /* ---------------------------------------- LLAMADA A COLECCIONES ---------------------------------------- */
   const navigate = useNavigate();
   const { id } = useParams();
@@ -632,7 +651,7 @@ const calcularCotizacion = async () => {
       }
     });
   };
-  
+
   /*****************************************************************************************************/
   const aplicarFactoraje = () => {
     setFactorajeAplicado(true);
@@ -708,7 +727,7 @@ const calcularCotizacion = async () => {
               </button>
               &nbsp; &nbsp;
               {factorajeManual !== "" && (
-                
+
                 <button
                   className="btn btn-primary"
                   onClick={() => {
@@ -733,20 +752,21 @@ const calcularCotizacion = async () => {
             <thead>
               <tr>
                 <th></th>
-                <th scope="col" style={{textAlign: "center"}}>Valor de Proyecto</th>
+                <th scope="col" style={{ textAlign: "center" }}>Valor de Proyecto</th>
                 <th scope="col"></th>
-                <th scope="col" style={{textAlign: "center"}}>
+                <DecimalAlignedCell value={sumaValorProyecto} />
+                {/*<th scope="col" style={{ textAlign: "center" }}>
                   {sumaValorProyecto.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
-                </th>
-                <th scope="col" style={{textAlign: "center"}}> 100%</th>
+                </th>*/}
+                <th scope="col" style={{ textAlign: "center" }}> 100%</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <th scope="row" style={{textAlign: "center"}}>costos</th>
+                <th scope="row" style={{ textAlign: "center" }}>Costos</th>
                 <th></th>
                 <td></td>
                 <td></td>
@@ -754,48 +774,33 @@ const calcularCotizacion = async () => {
               </tr>
               <tr>
                 <td></td>
-                <th style={{textAlign: "center"}}>Materiales</th>
+                <th style={{ textAlign: "center" }}>Materiales</th>
                 <td></td>
-                <td style={{textAlign: "center"}}>
-                  {(totalMateria * 1).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })}
-                </td>
-                <td style={{textAlign: "center"}}>
+                <DecimalAlignedCell value={totalMateria} />
+                <td style={{ textAlign: "center" }}>
                   {((totalMateria * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
                 <td></td>
-                <th scope="row" style={{textAlign: "center"}}>Subcontrato</th>
+                <th scope="row" style={{ textAlign: "center" }}>Subcontrato</th>
                 <td></td>
-                <td style={{textAlign: "center"}}>
-                  {(totalSubContrado * 1).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })}
-                </td>
-                <td style={{textAlign: "center"}}>
+                <DecimalAlignedCell value={totalSubContrado} />
+                <td style={{ textAlign: "center" }}>
                   {((totalSubContrado * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
                 <th></th>
-                <th scope="row" style={{textAlign: "center"}}>Viaticos</th>
+                <th scope="row" style={{ textAlign: "center" }}>Viaticos</th>
                 <td></td>
-                <td style={{textAlign: "center"}}>
-                  {(totalViatico * 1).toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "USD",
-                  })}
-                </td>
-                <td style={{textAlign: "center"}}>
+                <DecimalAlignedCell value={totalViatico} />
+                <td style={{ textAlign: "center" }}>
                   {((totalViatico * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
-                <th style={{textAlign: "center"}}>-</th>
+                <th style={{ textAlign: "center" }}>-</th>
                 <th scope="row"></th>
                 <td></td>
                 <td></td>
@@ -803,16 +808,16 @@ const calcularCotizacion = async () => {
               </tr>
               <tr>
                 <th></th>
-                <th scope="row" style={{textAlign: "center"}}>Dias de Credito</th>
+                <th scope="row" style={{ textAlign: "center" }}>Dias de Credito</th>
                 <td></td>
-                <td style={{textAlign: "center"}}>
+                <td style={{ textAlign: "center" }}>
                   {/*CAMBIAR FORMULA*/}
                   {diasCredito}
                 </td>
                 <td></td>
               </tr>
               <tr>
-                <th style={{textAlign: "center"}}>-</th>
+                <th style={{ textAlign: "center" }}>-</th>
                 <th scope="row"></th>
                 <td></td>
                 <td></td>
@@ -820,21 +825,21 @@ const calcularCotizacion = async () => {
               </tr>
               <tr>
                 <th></th>
-                <th scope="row" style={{textAlign: "center"}}>Costo Directo</th>
+                <th scope="row" style={{ textAlign: "center" }}>Costo Directo</th>
                 <td></td>
-                <td style={{textAlign: "center"}}>
-                  {/*CAMBIAR FORMULA*/}
+                <DecimalAlignedCell value={valorDidirecto} />
+                {/*<td style={{ textAlign: "center" }}>
                   {valorDidirecto.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
-                </td>
-                <td style={{textAlign: "center"}}>
+                </td>*/}
+                <td style={{ textAlign: "center" }}>
                   {((valorDidirecto * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
-                <th style={{textAlign: "center"}}>-</th>
+                <th style={{ textAlign: "center" }}>-</th>
                 <th scope="row"></th>
                 <td></td>
                 <td></td>
@@ -842,20 +847,21 @@ const calcularCotizacion = async () => {
               </tr>
               <tr>
                 <th></th>
-                <th scope="row" style={{textAlign: "center"}}>Costo Indirecto</th>
+                <th scope="row" style={{ textAlign: "center" }}>Costo Indirecto</th>
                 <td></td>
-                <td style={{textAlign: "center"}}>
+                <DecimalAlignedCell value={valorIndirecto} />
+                {/*<td style={{ textAlign: "center" }}>
                   {valorIndirecto.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
-                </td>
-                <td style={{textAlign: "center"}}>
+                </td>*/}
+                <td style={{ textAlign: "center" }}>
                   {((valorIndirecto * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
-                <th style={{textAlign: "center"}}>-</th>
+                <th style={{ textAlign: "center" }}>-</th>
                 <th scope="row"></th>
                 <td></td>
                 <td></td>
@@ -867,12 +873,13 @@ const calcularCotizacion = async () => {
                   Utilidad Esperada
                 </th>
                 <td></td>
-                <td style={{ color: "green", textAlign: "center" }}>
+                <DecimalAlignedCell value={utilidadEsperada} />
+                {/*<td style={{ color: "green", textAlign: "center" }}>
                   {utilidadEsperada.toLocaleString("en-US", {
                     style: "currency",
                     currency: "USD",
                   })}
-                </td>
+                </td>*/}
                 <td style={{ color: "green", textAlign: "center" }}>
                   {((utilidadEsperada * 100) / sumaValorProyecto).toFixed(2)}%
                 </td>
@@ -882,9 +889,10 @@ const calcularCotizacion = async () => {
                 <>
                   <tr>
                     <th></th>
-                    <th scope="row" style={{textAlign: "center"}}>Factoraje</th>
+                    <th scope="row" style={{ textAlign: "center" }}>Factoraje</th>
                     <td></td>
-                    <td style={{textAlign: "center"}}>
+                    <DecimalAlignedCell value={sumaValorProyecto * (factorajeManual / 100)} />
+                    {/*<td style={{ textAlign: "center" }}>
                       {(
                         sumaValorProyecto *
                         (factorajeManual / 100)
@@ -892,8 +900,8 @@ const calcularCotizacion = async () => {
                         style: "currency",
                         currency: "USD",
                       })}
-                    </td>
-                    <td style={{textAlign: "center"}}>
+                    </td>*/}
+                    <td style={{ textAlign: "center" }}>
                       {(
                         (sumaValorProyecto * (factorajeManual / 100) * 100) /
                         sumaValorProyecto
@@ -907,7 +915,8 @@ const calcularCotizacion = async () => {
                       Utilidad Neta
                     </th>
                     <td></td>
-                    <td style={{textAlign: "center"}}>
+                    <DecimalAlignedCell value={utilidadEsperada - sumaValorProyecto * (factorajeManual / 100)} />
+                    {/*<td style={{ textAlign: "center" }}>
                       {(
                         utilidadEsperada -
                         sumaValorProyecto * (factorajeManual / 100)
@@ -915,8 +924,8 @@ const calcularCotizacion = async () => {
                         style: "currency",
                         currency: "USD",
                       })}
-                    </td>
-                    <td style={{textAlign: "center"}}>
+                    </td>*/}
+                    <td style={{ textAlign: "center" }}>
                       {(
                         ((utilidadEsperada -
                           sumaValorProyecto * (factorajeManual / 100)) *
