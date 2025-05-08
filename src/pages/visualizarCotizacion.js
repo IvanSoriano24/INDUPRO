@@ -646,8 +646,8 @@ const VisualizarCotizacion = () => {
 
     const { folioSiguiente } = (
       await axios.get(
-        "http://localhost:5000/api/obtenerFolio"
-        //"/api/obtenerFolio"
+        //"http://localhost:5000/api/obtenerFolio"
+        "/api/obtenerFolio"
       )
     ).data;
     setFolioSig(folioSiguiente);
@@ -658,8 +658,8 @@ const VisualizarCotizacion = () => {
 
     let clave = cliente.toString(); // sin padStart
     const clie = await axios.get(
-      `http://localhost:5000/api/datosClie/${clave}`
-      //`/api/datosClie/${clave}`
+      //`http://localhost:5000/api/datosClie/${clave}`
+      `/api/datosClie/${clave}`
     );
 
     const datosCliente = clie.data.datosCliente;
@@ -706,8 +706,8 @@ const VisualizarCotizacion = () => {
     for (const cve_art of articulos) {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/datosInsumoe/${cve_art}`
-          //`/api/datosInsumoe/${cve_art}`
+          //`http://localhost:5000/api/datosInsumoe/${cve_art}`
+          `/api/datosInsumoe/${cve_art}`
         );
         const datosInsumo = response.data.datosInsumos;
         console.log("🧾 Datos del insumo:", datosInsumo);
@@ -786,8 +786,8 @@ const VisualizarCotizacion = () => {
     console.log("Partidas: ", dataPartidas);
 
     await axios.post(
-      "http://localhost:5000/api/guardarPartidas",
-      //"/api/guardarPartidas",
+      //"http://localhost:5000/api/guardarPartidas",
+      "/api/guardarPartidas",
       {
         data: dataPartidas,
       }
@@ -821,15 +821,15 @@ const VisualizarCotizacion = () => {
     };
     console.log("Cotizacion: ", dataCotizacion);
     const responseCotizacion = await axios.post(
-      "http://localhost:5000/api/cotizacion",
-      //"/api/cotizacion",
+      //"http://localhost:5000/api/cotizacion",
+      "/api/cotizacion",
       dataCotizacion
     );
 
     const { nuevoFolio } = (
       await axios.get(
-        "http://localhost:5000/api/actualizarFolio"
-        //"/api/actualizarFolio"
+        //"http://localhost:5000/api/actualizarFolio"
+        "/api/actualizarFolio"
       )
     ).data;
 
@@ -841,8 +841,8 @@ const VisualizarCotizacion = () => {
     if (clientes.length === 0) {
       console.log("🔄 Cargando proveedores antes de editar...");
       const responseClientes = await axios.get(
-        "http://localhost:5000/api/cliente"
-        //"/api/cliente"
+        //"http://localhost:5000/api/cliente"
+        "/api/cliente"
       );
       listaClientes = responseClientes.data;
       setClientes(listaClientes);
@@ -860,8 +860,8 @@ const VisualizarCotizacion = () => {
     }, 200);
     const { folioSiguiente } = (
       await axios.get(
-        "http://localhost:5000/api/obtenerFolio"
-        //"/api/obtenerFolio"
+        //"http://localhost:5000/api/obtenerFolio"
+        "/api/obtenerFolio"
       )
     ).data;
     setFolioSae(folioSiguiente);
