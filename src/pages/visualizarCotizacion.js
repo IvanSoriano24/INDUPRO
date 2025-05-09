@@ -754,7 +754,7 @@ const VisualizarCotizacion = () => {
       return {
         data: detalle,
         CVE_DOC: CVE_DOC ?? "",
-        //nuPartida: detalle.noPartidaATF ?? "",
+        noPartida: detalle.noPartidaATF ?? "",
         CVE_ART: detalle.claveSae ?? "",
         CANT: detalle.cantidad ?? 0,
         PREC: detalle.costoCotizado ?? 0,

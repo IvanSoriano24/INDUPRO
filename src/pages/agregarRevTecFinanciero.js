@@ -820,6 +820,105 @@ const AgregarRevTecFinanciero = () => {
     return calculoInsumo;
   };
 
+  const sumarCalculoServicio = async (cve_tecFin, noPartida) => {
+    const moSnapshot = await getDocs(
+      query(
+        collection(db, "PAR_PRECOTIZACION_INSU"),
+        where("cve_precot", "==", cve_tecFin),
+        where("noPartidaPC", "==", Number(noPartida))
+        // No pongas el filtro de "insumo" aquí
+      )
+    );
+
+    if (moSnapshot.empty) {
+      console.warn("⚠️ No se encontraron insumos para:", cve_tecFin, noPartida);
+      return 0;
+    }
+
+    let calculoInsumo = 0;
+
+    moSnapshot.forEach((doc) => {
+      const data = doc.data();
+      const tipoInsumo = data.insumo?.toLowerCase().trim(); // evitar mayúsculas o espacios
+      if (
+        tipoInsumo === "Subcontratos" ||
+        tipoInsumo === "subcontratos" ||
+        tipoInsumo === "S" ||
+        tipoInsumo === "s"
+      ) {
+        calculoInsumo += Number(data.total || 0);
+      }
+    });
+
+    return calculoInsumo;
+  };
+
+  const sumarCalculoMaterial = async (cve_tecFin, noPartida) => {
+    const moSnapshot = await getDocs(
+      query(
+        collection(db, "PAR_PRECOTIZACION_INSU"),
+        where("cve_precot", "==", cve_tecFin),
+        where("noPartidaPC", "==", Number(noPartida))
+        // No pongas el filtro de "insumo" aquí
+      )
+    );
+
+    if (moSnapshot.empty) {
+      console.warn("⚠️ No se encontraron insumos para:", cve_tecFin, noPartida);
+      return 0;
+    }
+
+    let calculoInsumo = 0;
+
+    moSnapshot.forEach((doc) => {
+      const data = doc.data();
+      const tipoInsumo = data.insumo?.toLowerCase().trim(); // evitar mayúsculas o espacios
+      if (
+        tipoInsumo === "Material" ||
+        tipoInsumo === "material" ||
+        tipoInsumo === "m" ||
+        tipoInsumo === "M"
+      ) {
+        calculoInsumo += Number(data.total || 0);
+      }
+    });
+
+    return calculoInsumo;
+  };
+
+  const sumarCalculoViaticos = async (cve_tecFin, noPartida) => {
+    const moSnapshot = await getDocs(
+      query(
+        collection(db, "PAR_PRECOTIZACION_INSU"),
+        where("cve_precot", "==", cve_tecFin),
+        where("noPartidaPC", "==", Number(noPartida))
+        // No pongas el filtro de "insumo" aquí
+      )
+    );
+
+    if (moSnapshot.empty) {
+      console.warn("⚠️ No se encontraron insumos para:", cve_tecFin, noPartida);
+      return 0;
+    }
+
+    let calculoInsumo = 0;
+
+    moSnapshot.forEach((doc) => {
+      const data = doc.data();
+      const tipoInsumo = data.insumo?.toLowerCase().trim(); // evitar mayúsculas o espacios
+      if (
+        tipoInsumo === "Viáticos" ||
+        tipoInsumo === "viáticos" ||
+        tipoInsumo === "V" ||
+        tipoInsumo === "v"
+      ) {
+        calculoInsumo += Number(data.total || 0);
+      }
+    });
+
+    return calculoInsumo;
+  };
+
   const obtenerPorcentajes = async () => {
     try {
       // Obtener el documento de la colección "PORCENTAJES"
@@ -1061,6 +1160,18 @@ const AgregarRevTecFinanciero = () => {
             cve_precot,
             itemTotales.noPartida
           );
+          const sumarCalculoServicioV = await sumarCalculoServicio(
+            cve_precot,
+            itemTotales.noPartida
+          );
+          const sumarCalculoMaterialV = await sumarCalculoMaterial(
+            cve_precot,
+            itemTotales.noPartida
+          );
+          const sumarCalculoViaticosV = await sumarCalculoViaticos(
+            cve_precot,
+            itemTotales.noPartida
+          );
           //console.log("Suma: ", sumarCalculoInsumoV);
           await addDoc(cotTotal, {
             cve_tecFin: selectedFolio + folioSiguiente.toString(),
@@ -1069,6 +1180,9 @@ const AgregarRevTecFinanciero = () => {
             observacion: itemTotales.observacion,
             cantidad: parseInt(itemTotales.cantidad),
             totalInsumo: sumarCalculoInsumoV,
+            totalServicio: sumarCalculoServicioV,
+            totalMaterial: sumarCalculoMaterialV,
+            totalViaticos: sumarCalculoViaticosV,
             totalMO: sumaValorLider,
             totalPartida: sumaValorLider + sumarCalculoInsumoV,
             costoFijoPorcentaje: costoFijo,
@@ -2125,7 +2239,7 @@ const AgregarRevTecFinanciero = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="col-md-3">
                 <br></br>
                 <button

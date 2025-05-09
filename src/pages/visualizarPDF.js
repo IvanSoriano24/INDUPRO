@@ -289,9 +289,9 @@ const VisualizarPDF = () => {
           });
 
           sumaValorInsumos += moData.totalInsumo; //Factoraje
-          console.log("InsumoValor: ", moData.totalInsumo);
-          console.log("Sumas", sumaValorInsumos);
+          
         });
+
         seValoresArticulo(claveArticulos);
         setSumaValorInsumos(sumaValorInsumos);
         let valorIndirecto = sumaValorInsumos * (costoFijo / 100);
@@ -310,16 +310,6 @@ const VisualizarPDF = () => {
         setFactoraje(factor);
         let utilidaNet = utilidadEsperada - factor;
         setUtilidadNeta(utilidaNet);*/
-
-        console.log("Datos Pre-Cotizados");
-        console.log(sumaValorInsumos);
-        console.log(totalMateria + totalSubContrado + totalViatico);
-
-        console.log("Datos Cotizados");
-        console.log(sumaValorProyecto);
-        console.log(valorDidirecto);
-        console.log(valorIndirecto);
-        console.log(utilidadEsperada);
       } catch (error) {
         console.error("Error al sumar valores:", error);
       }
@@ -613,6 +603,9 @@ const calcularCotizacion = async () => {
         descripcion: item.descripcion,
         observacion: item.observacion,
         totalPartida: item.totalInsumo,
+        totalMaterial: item.totalMaterial,
+        totalServicio: item.totalServicio,
+        totalViaticos: item.totalViaticos,
       });
     });
     await addDoc(bitacora, {
