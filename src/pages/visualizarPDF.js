@@ -602,10 +602,10 @@ const calcularCotizacion = async () => {
         cantidad: item.cantidad,
         descripcion: item.descripcion,
         observacion: item.observacion,
-        totalPartida: item.totalInsumo,
-        totalMaterial: item.totalMaterial,
-        totalServicio: item.totalServicio,
-        totalViaticos: item.totalViaticos,
+        totalPartida: item.totalInsumo ?? 0,
+        totalMaterial: item.totalMaterial ?? 0,
+        totalServicio: item.totalServicio ?? 0,
+        totalViaticos: item.totalViaticos ?? 0,
       });
     });
     await addDoc(bitacora, {

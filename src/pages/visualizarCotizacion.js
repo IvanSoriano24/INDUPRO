@@ -646,8 +646,8 @@ const VisualizarCotizacion = () => {
 
     const { folioSiguiente } = (
       await axios.get(
-        //"http://localhost:5000/api/obtenerFolio"
-        "/api/obtenerFolio"
+        "http://localhost:5000/api/obtenerFolio"
+        //"/api/obtenerFolio"
       )
     ).data;
     setFolioSig(folioSiguiente);
@@ -658,8 +658,8 @@ const VisualizarCotizacion = () => {
 
     let clave = cliente.toString(); // sin padStart
     const clie = await axios.get(
-      //`http://localhost:5000/api/datosClie/${clave}`
-      `/api/datosClie/${clave}`
+      `http://localhost:5000/api/datosClie/${clave}`
+      //`/api/datosClie/${clave}`
     );
 
     const datosCliente = clie.data.datosCliente;
@@ -706,8 +706,8 @@ const VisualizarCotizacion = () => {
     for (const cve_art of articulos) {
       try {
         const response = await axios.get(
-          //`http://localhost:5000/api/datosInsumoe/${cve_art}`
-          `/api/datosInsumoe/${cve_art}`
+          `http://localhost:5000/api/datosInsumoe/${cve_art}`
+          //`/api/datosInsumoe/${cve_art}`
         );
         const datosInsumo = response.data.datosInsumos;
         console.log("🧾 Datos del insumo:", datosInsumo);
@@ -720,36 +720,25 @@ const VisualizarCotizacion = () => {
       }
     }
 
-    /*const dataPartidas = {
-      data: data,
-      CVE_DOC: CVE_DOC,
-      nuPartida: data.noPartidaATF,
-      CVE_ART: data.claveSae,
-      CANT: data.cantidad,
-      PREC: data.costoCotizado,
-      IMPU1: results.IMPUESTO1,
-      IMPU2: results.IMPUESTO2,
-      IMPU3: results.IMPUESTO3,
-      IMPU4: results.IMPUESTO4,
-      IMPU5: results.IMPUESTO5,
-      IMPU6: results.IMPUESTO6,
-      IMPU7: results.IMPUESTO7,
-      IMPU8: results.IMPUESTO8,
-      IMP1APLICA: results.IMP1APLICA,
-      IMP2APLICA: results.IMP2APLICA,
-      IMP3APLICA: results.IMP3APLICA,
-      IMP4APLICA: results.IMP4APLICA,
-      IMP5APLICA: results.IMP5APLICA,
-      IMP6APLICA: results.IMP6APLICA,
-      IMP7APLICA: results.IMP7APLICA,
-      IMP8APLICA: results.IMP8APLICA,
-      CVE_ESQ: results.CVE_ESQIMPU,
-      TOT_PARTIDA: data.total,
-      UNI_VENTA: results.UNI_MED,
-    };*/
+    // Paso 1: Obtener costos de PAR_COTIZACION
+    const costosInsumos = query(
+      collection(db, "PAR_COTIZACION"),
+      where("cve_tecFin", "==", cve_tecFin)
+    );
+    const querySnapshot = await getDocs(costosInsumos);
+    const costos = [];
+    querySnapshot.forEach((doc) => {
+      costos.push(doc.data());
+    });
+
+    console.log("cve_tecFin. ", cve_tecFin);
+
     const data = detallesArticulos;
     const dataPartidas = detallesArticulos.map((detalle, index) => {
       const impuestos = results[index] || {};
+      //console.log("costos: ", costos);
+       const costoMatch = costos.find(c => Number(c.noPartidaATF) === Number(detalle.noPartidaATF)) || {};
+      console.log("costoMatch: ", costoMatch);
 
       return {
         data: detalle,
@@ -779,19 +768,34 @@ const VisualizarCotizacion = () => {
         IMP6APLICA: impuestos.IMP6APLICA ?? 0,
         IMP7APLICA: impuestos.IMP7APLICA ?? 0,
         IMP8APLICA: impuestos.IMP8APLICA ?? 0,
+
+        //CAMPLIB1: costoMatch.folio ?? "",
+        //CAMPLIB2: costoMatch.descripcion ?? "",
+        CAMPLIB24: costoMatch.totalServicio ?? 0,
+        CAMPLIB22: costoMatch.totalMaterial ?? 0,
+        CAMPLIB23: 0,
+        CAMPLIB25: costoMatch.totalViaticos ?? 0
       };
     });
 
     //console.log("CVE_DOC:", CVE_DOC);
     console.log("Partidas: ", dataPartidas);
 
-    await axios.post(
+    /*await axios.post(
       //"http://localhost:5000/api/guardarPartidas",
       "/api/guardarPartidas",
       {
         data: dataPartidas,
       }
-    );
+    );*/
+ /*await axios.post(
+      //"http://localhost:5000/api/guardarPartidasClim",
+      "/api/guardarPartidasClim",
+      {
+        data: dataPartidas,
+      }
+    );*/
+
 
     //const partidas = response.data;
 
@@ -820,7 +824,7 @@ const VisualizarCotizacion = () => {
       REG_FISC: datosCliente.REG_FISC ?? "",
     };
     console.log("Cotizacion: ", dataCotizacion);
-    const responseCotizacion = await axios.post(
+    /*const responseCotizacion = await axios.post(
       //"http://localhost:5000/api/cotizacion",
       "/api/cotizacion",
       dataCotizacion
@@ -831,9 +835,9 @@ const VisualizarCotizacion = () => {
         //"http://localhost:5000/api/actualizarFolio"
         "/api/actualizarFolio"
       )
-    ).data;
+    ).data;*/
 
-    aceptarCotizacion(cve_tecFin, folioSiguiente);
+    //aceptarCotizacion(cve_tecFin, folioSiguiente);
   };
 
   const handleOpenModal = async () => {
@@ -841,8 +845,8 @@ const VisualizarCotizacion = () => {
     if (clientes.length === 0) {
       console.log("🔄 Cargando proveedores antes de editar...");
       const responseClientes = await axios.get(
-        //"http://localhost:5000/api/cliente"
-        "/api/cliente"
+        "http://localhost:5000/api/cliente"
+        //"/api/cliente"
       );
       listaClientes = responseClientes.data;
       setClientes(listaClientes);
@@ -865,8 +869,8 @@ const VisualizarCotizacion = () => {
 
     const { folioSiguiente } = (
       await axios.get(
-        //"http://localhost:5000/api/obtenerFolio"
-        "/api/obtenerFolio"
+        "http://localhost:5000/api/obtenerFolio"
+        //"/api/obtenerFolio"
       )
     ).data;
     setFolioSae(folioSiguiente);
@@ -1126,11 +1130,11 @@ const VisualizarCotizacion = () => {
                     value={
                       cliente
                         ? {
-                            value: cliente,
-                            label:
-                              clientes.find((prov) => prov.CLAVE === cliente)
-                                ?.NOMBRE || "",
-                          }
+                          value: cliente,
+                          label:
+                            clientes.find((prov) => prov.CLAVE === cliente)
+                              ?.NOMBRE || "",
+                        }
                         : null
                     }
                     onChange={(selectedOption) => {

@@ -20,9 +20,9 @@ app.use(cors());
 // Base de Datos Desarrollo
 const config = {
   user: "sa",
-  password: "Green2580a.",
-  server: "35.222.201.74",
-  database: "SAE90EMPRE01_MDCONNECTA",
+  password: "Pamec2580a.",
+  server: "34.121.245.190",
+  database: "SAE90Empre01",
   options: {
     encrypt: true, // Si estás usando SSL
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
@@ -37,7 +37,7 @@ sql
   .catch((err) => {
     console.error("Error al conectar a la base de datos:", err);
   });
-  app.use(express.json());
+app.use(express.json());
 
 // Ruta para obtener las claves y descripciones de INVE01
 app.get("/api/claves", async (req, res) => {
@@ -296,18 +296,18 @@ app.post("/api/cotizacion", async (req, res) => {
     const FECHA_DOC = `${now.getFullYear()}-${(now.getMonth() + 1)
       .toString()
       .padStart(2, "0")}-${now
-      .getDate()
-      .toString()
-      .padStart(2, "0")} 00:00:00.000`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")} 00:00:00.000`;
     const VERSION_SINC = `${now.getFullYear()}-${(now.getMonth() + 1)
       .toString()
       .padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")} ${now
-      .getHours()
-      .toString()
-      .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now
-      .getSeconds()
-      .toString()
-      .padStart(2, "0")}.000`;
+        .getHours()
+        .toString()
+        .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now
+          .getSeconds()
+          .toString()
+          .padStart(2, "0")}.000`;
     const query = `
       INSERT INTO FACTC01 (
         TIP_DOC, CVE_DOC, CVE_CLPV, STATUS, FECHA_DOC, FECHA_ENT, FECHA_VEN,
@@ -405,11 +405,16 @@ app.post("/api/guardarPartidas", async (req, res) => {
     let nuPartida = 1;
     for (const data of partidas) {
       const {
+        data,
         CVE_DOC,
-        //nuPartida,
+        noPartida,
         CVE_ART,
         CANT,
         PREC,
+        TOT_PARTIDA,
+        UNI_VENTA,
+        CVE_ESQ,
+
         IMPU1,
         IMPU2,
         IMPU3,
@@ -418,8 +423,7 @@ app.post("/api/guardarPartidas", async (req, res) => {
         IMPU6,
         IMPU7,
         IMPU8,
-        CVE_ESQ,
-        TOT_PARTIDA,
+
         IMP1APLICA,
         IMP2APLICA,
         IMP3APLICA,
@@ -428,23 +432,28 @@ app.post("/api/guardarPartidas", async (req, res) => {
         IMP6APLICA,
         IMP7APLICA,
         IMP8APLICA,
-        UNI_VENTA,
+
+        CAMPLIB22,
+        CAMPLIB23,
+        CAMPLIB24,
+        CAMPLIB25
       } = data;
+
 
       const pool = await sql.connect(config);
       const date = new Date();
       const VERSION_SINC = `${date.getFullYear()}-${(date.getMonth() + 1)
         .toString()
         .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")} ${date
-        .getHours()
-        .toString()
-        .padStart(2, "0")}:${date
-        .getMinutes()
-        .toString()
-        .padStart(2, "0")}:${date
-        .getSeconds()
-        .toString()
-        .padStart(2, "0")}.000`;
+          .getHours()
+          .toString()
+          .padStart(2, "0")}:${date
+            .getMinutes()
+            .toString()
+            .padStart(2, "0")}:${date
+              .getSeconds()
+              .toString()
+              .padStart(2, "0")}.000`;
 
       const TIPO_PROD = ["No aplica", "SERVICIO", "Servicio"].includes(
         UNI_VENTA
@@ -535,8 +544,26 @@ app.post("/api/guardarPartidas", async (req, res) => {
         .input("IMPU6", sql.Float, IMPU6)
         .input("IMPU5", sql.Float, IMPU5)
         .query(query);
-        nuPartida++;
+      nuPartida++;
     }
+
+    const queryClibc = `
+      INSERT INTO PAR_FACT_CLIBC01 (
+        CLAVE_DOC, NUM_PART, CAMPLIB22, CAMPLIB23, CAMPLIB24, CAMPLIB25
+      ) VALUES (
+        @CLAVE_DOC, @NUM_PART, @CAMPLIB22, @CAMPLIB23, @CAMPLIB24, @CAMPLIB25
+      )
+    `;
+
+    await pool.request()
+      .input("CLAVE_DOC", sql.VarChar, CVE_DOC)
+      .input("NUM_PART", sql.Int, noPartida || nuPartida - 1) // Usa noPartida si viene
+      .input("CAMPLIB22", sql.Float, CAMPLIB22)
+      .input("CAMPLIB23", sql.Int, CAMPLIB23)
+      .input("CAMPLIB24", sql.Float, CAMPLIB24)
+      .input("CAMPLIB25", sql.Float, CAMPLIB25)
+      .query(queryClibc);
+
     res.status(201).json({ message: "Partidas insertada correctamente." });
   } catch (err) {
     console.error("Error al insertar las partidas:", err);
