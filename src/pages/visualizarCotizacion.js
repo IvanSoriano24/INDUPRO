@@ -781,20 +781,20 @@ const VisualizarCotizacion = () => {
     //console.log("CVE_DOC:", CVE_DOC);
     console.log("Partidas: ", dataPartidas);
 
-    /*await axios.post(
-      //"http://localhost:5000/api/guardarPartidas",
-      "/api/guardarPartidas",
+    await axios.post(
+      "http://localhost:5000/api/guardarPartidas",
+      //"/api/guardarPartidas",
       {
         data: dataPartidas,
       }
-    );*/
- /*await axios.post(
-      //"http://localhost:5000/api/guardarPartidasClim",
-      "/api/guardarPartidasClim",
+    );
+ await axios.post(
+      "http://localhost:5000/api/guardarPartidasClim",
+      //"/api/guardarPartidasClim",
       {
         data: dataPartidas,
       }
-    );*/
+    );
 
 
     //const partidas = response.data;
@@ -824,20 +824,20 @@ const VisualizarCotizacion = () => {
       REG_FISC: datosCliente.REG_FISC ?? "",
     };
     console.log("Cotizacion: ", dataCotizacion);
-    /*const responseCotizacion = await axios.post(
-      //"http://localhost:5000/api/cotizacion",
-      "/api/cotizacion",
+    const responseCotizacion = await axios.post(
+      "http://localhost:5000/api/cotizacion",
+      //"/api/cotizacion",
       dataCotizacion
     );
 
     const { nuevoFolio } = (
       await axios.get(
-        //"http://localhost:5000/api/actualizarFolio"
-        "/api/actualizarFolio"
+        "http://localhost:5000/api/actualizarFolio"
+        //"/api/actualizarFolio"
       )
-    ).data;*/
+    ).data;
 
-    //aceptarCotizacion(cve_tecFin, folioSiguiente);
+    aceptarCotizacion(cve_tecFin, folioSiguiente);
   };
 
   const handleOpenModal = async () => {

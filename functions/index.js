@@ -414,15 +414,20 @@ app.post("/api/cotizacion", async (req, res) => {
 app.post("/api/guardarPartidas", async (req, res) => {
   try {
     //console.log("📦 req.body:", req.body);
-    const { data: partidas } = req.body;
+     const { data: partidas } = req.body;
     let nuPartida = 1;
     for (const data of partidas) {
       const {
+        data: datosExtra, // ✅ renombrado
         CVE_DOC,
-        //nuPartida,
+        noPartida,
         CVE_ART,
         CANT,
         PREC,
+        TOT_PARTIDA,
+        UNI_VENTA,
+        CVE_ESQ,
+
         IMPU1,
         IMPU2,
         IMPU3,
@@ -431,8 +436,7 @@ app.post("/api/guardarPartidas", async (req, res) => {
         IMPU6,
         IMPU7,
         IMPU8,
-        CVE_ESQ,
-        TOT_PARTIDA,
+
         IMP1APLICA,
         IMP2APLICA,
         IMP3APLICA,
@@ -441,23 +445,29 @@ app.post("/api/guardarPartidas", async (req, res) => {
         IMP6APLICA,
         IMP7APLICA,
         IMP8APLICA,
-        UNI_VENTA,
+
+        CAMPLIB22,
+        CAMPLIB23,
+        CAMPLIB24,
+        CAMPLIB25
       } = data;
 
+     const CAMPPLIB1 = datosExtra?.comentariosAdi || '';
+      const partidaa = datosExtra?.noPartidaATF || '';
       const pool = await sql.connect(config);
       const date = new Date();
       const VERSION_SINC = `${date.getFullYear()}-${(date.getMonth() + 1)
         .toString()
         .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")} ${date
-        .getHours()
-        .toString()
-        .padStart(2, "0")}:${date
-        .getMinutes()
-        .toString()
-        .padStart(2, "0")}:${date
-        .getSeconds()
-        .toString()
-        .padStart(2, "0")}.000`;
+          .getHours()
+          .toString()
+          .padStart(2, "0")}:${date
+            .getMinutes()
+            .toString()
+            .padStart(2, "0")}:${date
+              .getSeconds()
+              .toString()
+              .padStart(2, "0")}.000`;
 
       const TIPO_PROD = ["No aplica", "SERVICIO", "Servicio"].includes(
         UNI_VENTA
@@ -486,7 +496,7 @@ app.post("/api/guardarPartidas", async (req, res) => {
         @UUID, @VERSION_SINC, @TOTIMP8, @TOTIMP7, @TOTIMP6, @TOTIMP5,
         @IMP8APLA, @IMP7APLA, @IMP6APLA, @IMP5APLA, @IMPU8, @IMPU7, @IMPU6, @IMPU5
       )
-    `;
+     `;
 
       await pool
         .request()
@@ -548,8 +558,29 @@ app.post("/api/guardarPartidas", async (req, res) => {
         .input("IMPU6", sql.Float, IMPU6)
         .input("IMPU5", sql.Float, IMPU5)
         .query(query);
-        nuPartida++;
+      nuPartida++;
+
+      const queryClibc = `
+      INSERT INTO PAR_FACTC_CLIBC01 (
+        CLAVE_DOC, NUM_PART, CAMPLIB1, CAMPLIB22, CAMPLIB23, CAMPLIB24, CAMPLIB25
+      ) VALUES (
+        @CLAVE_DOC, @NUM_PART, @CAMPLIB22, @CAMPLIB23, @CAMPLIB24, @CAMPLIB25
+      )
+    `;
+
+    await pool.request()
+      .input("CLAVE_DOC", sql.VarChar, CVE_DOC)
+      .input("NUM_PART", sql.Int, partidaa || nuPartida - 1) // Usa noPartida si viene
+      .input("CAMPLIB1", sql.VarChar, CAMPPLIB1)
+      .input("CAMPLIB22", sql.Float, CAMPLIB22)
+      .input("CAMPLIB23", sql.Int, CAMPLIB23)
+      .input("CAMPLIB24", sql.Float, CAMPLIB24)
+      .input("CAMPLIB25", sql.Float, CAMPLIB25)
+      .query(queryClibc);
     }
+
+    
+
     res.status(201).json({ message: "Partidas insertada correctamente." });
   } catch (err) {
     console.error("Error al insertar las partidas:", err);
