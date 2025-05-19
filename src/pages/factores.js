@@ -37,7 +37,7 @@ const Factores = () => {
 
   const updatePorcentaje = async (e) => {
     e.preventDefault();
-    if (costoFijo >= 0) {
+    if (costoFijo <= 0) {
       swal.fire({
         icon: "warning",
         title: "Costo Incorrecto",
@@ -45,7 +45,7 @@ const Factores = () => {
       });
       return;
     }
-    if (factoraje >= 0) {
+    if (factoraje <= 0) {
         swal.fire({
           icon: "warning",
           title: "Factoraje Incorrecto",
@@ -53,7 +53,7 @@ const Factores = () => {
         });
         return;
       }
-      if (fianzas >= 0) {
+      if (fianzas <= 0) {
         swal.fire({
           icon: "warning",
           title: "Fianzas Incorrecto",
@@ -61,7 +61,7 @@ const Factores = () => {
         });
         return;
       }
-      if (utilidad >= 0) {
+      if (utilidad <= 0) {
         swal.fire({
           icon: "warning",
           title: "Utilidad Incorrecto",

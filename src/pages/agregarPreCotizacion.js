@@ -143,7 +143,7 @@ const AgregarPreCotizacion = () => {
     setDescripcion("");
     setObservacion("");
     setShow(false);
-  }
+  };
   const limpiarPartida = () => {
     setCantidad("");
     setDescripcion("");
@@ -262,7 +262,7 @@ const AgregarPreCotizacion = () => {
 
           const nombreInsumo = await insumoNombre(insumoOriginal);
 
-          //console.log(nombreInsumo);
+          console.log(nombreInsumo);
           prevPartida = parseInt(noPartida);
 
           filteredData.push({
@@ -327,9 +327,6 @@ const AgregarPreCotizacion = () => {
   };
   const validarInsumo = (Insumo) => {
     if (
-      Insumo == "Subcontratos" ||
-      Insumo == "Viáticos" ||
-      Insumo == "Material" ||
       Insumo == "S" ||
       Insumo == "V" ||
       Insumo == "M" ||
@@ -1155,6 +1152,7 @@ const AgregarPreCotizacion = () => {
       return;
     }
     // 🟢 Normaliza el proveedor eliminando espacios en blanco
+    //console.log("proveedor: ", proveedor);
     const proveedorNormalizado = proveedor ? proveedor.trim() : "";
     const proveedorClave =
       proveedores.find((prov) => prov.CLAVE.trim() === proveedorNormalizado)
@@ -1165,7 +1163,10 @@ const AgregarPreCotizacion = () => {
     const updatedList = listPartidas.map((item) => {
       if (item.noPartida === selectedPartida.noPartida) {
         const insumosActualizados = item.insumos.map((existingInsumo) => {
-          if (existingInsumo.insumo === insumo) {
+          if (
+            existingInsumo.insumo === insumo &&
+            existingInsumo.claveSae === claveSae
+          ) {
             return {
               ...existingInsumo,
               cantidad,
@@ -1184,7 +1185,9 @@ const AgregarPreCotizacion = () => {
         });
 
         const insumoYaExiste = item.insumos.some(
-          (existingInsumo) => existingInsumo.insumo === insumo
+          (existingInsumo) =>
+            existingInsumo.insumo === insumo &&
+            existingInsumo.claveSae === claveSae
         );
 
         return {
@@ -1209,6 +1212,7 @@ const AgregarPreCotizacion = () => {
               ],
         };
       }
+      console.log("item: ", item);
       return item;
     });
 
@@ -1536,7 +1540,8 @@ const AgregarPreCotizacion = () => {
             tipoDocumento: "Registro de partida",
             noPartida: "N/A",
           });
-
+          console.log("insumo: ", insumo.insumo);
+          console.log("cantidad: ", insumo.cantidad);
           await addDoc(parPrecotizacionInsumos, {
             cve_precot: selectedFolio + folioSiguiente.toString(),
             noPartidaPC: parseInt(item.noPartida),

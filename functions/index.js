@@ -18,9 +18,9 @@ const config = {
 };
 /*const config = {
   user: "sa",
-  password: "Green2580a.",
-  server: "35.222.201.74",
-  database: "SAE90EMPRE01_MDCONNECTA",
+  password: "Pamec2580a.",
+  server: "34.121.245.190",
+  database: "SAE90Empre01",
   options: {
     encrypt: true, // Si estás usando SSL
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos

@@ -1873,21 +1873,28 @@ const AgregarRevTecFinanciero = () => {
           itemMO.personal ?? "",
           itemMO.diasTrabajados ?? "",
         ]);
+        //console.log(par_PreCoti_insu);
         const tableBody20 = par_PreCoti_insu.map((item) => [
-          item.noPartidaPC ?? "",
-          item.insumo ?? "",
-          item.unidad ?? "",
-          item.claveSae ?? "",
-          item.proveedor ?? "",
-          item.cantidad ?? "",
-          item.costoCotizado.toLocaleString("en-US", {
-            style: "currency",
-            currency: "USD",
-          }),
-          item.total.toLocaleString("en-US", {
-            style: "currency",
-            currency: "USD",
-          }),
+          { text: item.noPartidaPC, fontSize: 9 },
+          { text: item.insumo, fontSize: 9 },
+          { text: item.unidad, fontSize: 9 },
+          { text: item.claveSae, fontSize: 9 },
+          { text: item.proveedor, fontSize: 9 },
+          { text: item.cantidad, fontSize: 9 },
+          {
+            text: item.costoCotizado.toLocaleString("en-US", {
+              style: "currency",
+              currency: "USD",
+            }),
+            fontSize: 9,
+          },
+          {
+            text: item.total.toLocaleString("en-US", {
+              style: "currency",
+              currency: "USD",
+            }),
+            fontSize: 9,
+          },
         ]);
 
         // Define el contenido del documento PDF
@@ -1946,8 +1953,9 @@ const AgregarRevTecFinanciero = () => {
               layout: "noBorders",
             },
             {
-              text: "INSUMOS", // 🔵 TÍTULO para la segunda tabla
+              text: "INSUMOS",
               style: "sectionTitle",
+              fontSize: 10, // Ajusta el número a tu preferencia, el valor predeterminado suele ser 12
               margin: [0, 30, 0, 8],
             },
             {
@@ -1956,14 +1964,20 @@ const AgregarRevTecFinanciero = () => {
                 widths: ["auto", "auto", "auto", "auto", "*", "auto", "*", "*"],
                 body: [
                   [
-                    { text: "No. Partida", style: "tableHeader" },
-                    { text: "Insumo", style: "tableHeader" },
-                    { text: "Unidad", style: "tableHeader" },
-                    { text: "Clave Producto", style: "tableHeader" },
+                    { text: "No. Partida", style: "tableHeader"},
+                    { text: "Insumo", style: "tableHeader"},
+                    { text: "Unidad", style: "tableHeader"},
+                    {
+                      text: "Clave Producto",
+                      style: "tableHeader"
+                    },
                     { text: "Proveedor", style: "tableHeader" },
-                    { text: "Cantidad", style: "tableHeader" },
-                    { text: "Costo Cotizado", style: "tableHeader" },
-                    { text: "Total", style: "tableHeader" },
+                    { text: "Cantidad", style: "tableHeader"},
+                    {
+                      text: "Costo Cotizado",
+                      style: "tableHeader"
+                    },
+                    { text: "Total", style: "tableHeader"},
                   ],
                   ...tableBody20,
                 ],
