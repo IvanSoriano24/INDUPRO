@@ -289,6 +289,7 @@ const VisualizarPDF = () => {
           });
 
           sumaValorInsumos += moData.totalInsumo; //Factoraje
+          console.log("totalInsumo: ", totalInsumo);
           
         });
 
@@ -301,6 +302,9 @@ const VisualizarPDF = () => {
         let sumaValorProyecto =
           (sumaValorInsumos + valorIndirecto) / (1 - utilidad / 100);
         setSumaValorProyecto(sumaValorProyecto);
+
+        console.log("sumaValorProyecto: ", sumaValorProyecto);
+        console.log("sumaValorInsumos: ", sumaValorInsumos);
 
         let utilidadEsperada =
           sumaValorProyecto - valorDidirecto - valorIndirecto;

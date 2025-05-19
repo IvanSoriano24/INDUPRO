@@ -819,7 +819,6 @@ const AgregarRevTecFinanciero = () => {
     });
     return calculoInsumo;
   };
-
   const sumarCalculoServicio = async (cve_tecFin, noPartida) => {
     const moSnapshot = await getDocs(
       query(
@@ -852,7 +851,6 @@ const AgregarRevTecFinanciero = () => {
 
     return calculoInsumo;
   };
-
   const sumarCalculoMaterial = async (cve_tecFin, noPartida) => {
     const moSnapshot = await getDocs(
       query(
@@ -885,7 +883,6 @@ const AgregarRevTecFinanciero = () => {
 
     return calculoInsumo;
   };
-
   const sumarCalculoViaticos = async (cve_tecFin, noPartida) => {
     const moSnapshot = await getDocs(
       query(
