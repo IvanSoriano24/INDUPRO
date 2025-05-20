@@ -186,14 +186,14 @@ const VisualizarPDF = () => {
       }));
       // Inicializa la variable total
       let totalIns = 0;
-
+      let sum = 0;
       // Calcula el total para cada elemento y agrégalo al total general
       par_levDigList1.forEach((item) => {
-        console.log("Insumos: ", item);
-        console.log("Tot: ", item.total)
+        sum++;
         //totalIns += item.cantidad * item.costoCotizado;
         totalIns += item.total;
       });
+      console.log("PartidasI: ", sum);
       // Actualiza el estado con la lista de elementos y el total calculado
       setPar_PreCoti_insu(par_levDigList1);
       setTotalMateria(totalIns);
@@ -275,18 +275,15 @@ const VisualizarPDF = () => {
             where("cve_tecFin", "==", cve_tecFin)
           )
         );
-        /*getTotalViaticos();
-        getTotalMateriales();
-        getTotalSubcontrato();*/
         let sumaValorInsumos = 0;
         let valorIndirecto = 0;
         let sumaValorProyecto = 0;
         let claveArticulos = [];
+        let sum = 0;
 
         moSnapshot.forEach((moDoc) => {
           const moData = moDoc.data();
-          console.log("Partidas: ", moData);
-          console.log("Tot: ", moData.totalInsumo);
+          sum++;
           claveArticulos.push({
             claveSae: moData.claveSae,
             noPartidaATF: moData.noPartidaATF,
@@ -299,14 +296,15 @@ const VisualizarPDF = () => {
 
           // Calcula por partida
           const indirectoPartida = insumo * porcCostoFijo;
-          const totalPartidaIns = (insumo + indirectoPartida) / (1 - porcUtilidad);
+          const totalPartidaIns =
+            (insumo + indirectoPartida) / (1 - porcUtilidad);
 
           // Suma totales
           sumaValorInsumos += insumo;
           valorIndirecto += indirectoPartida;
           sumaValorProyecto += totalPartidaIns;
-          
         });
+        console.log("PartidasP: ", sum);
         setSumaValorInsumos(sumaValorInsumos);
         setValorIndirecto(valorIndirecto);
         setSumaValorProyecto(sumaValorProyecto);
@@ -323,7 +321,7 @@ const VisualizarPDF = () => {
       } catch (error) {
         console.error("Error al sumar valores:", error);
       }
-    }; 
+    };
     sumarValorTotales();
   }, [cve_tecFin]);
 
@@ -645,10 +643,13 @@ const calcularCotizacion = async () => {
       .then((willDelete) => {
         if (willDelete) {
           addCotizacion();
-          swal.fire("¡Felicidades, ahora puedes decargar tu cotización!", {
-            icon: "success",
-          });
-          navigate("/cotizacion");
+          swal
+            .fire("¡Felicidades, ahora puedes decargar tu cotización!", {
+              icon: "success",
+            })
+            .then(() => {
+              navigate("/cotizacion");
+            });
         } else {
           swal.fire("¡Ok, seguimos viendo los costos!");
         }

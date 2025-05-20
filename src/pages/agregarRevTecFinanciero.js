@@ -1146,7 +1146,8 @@ const AgregarRevTecFinanciero = () => {
         fianzas !== undefined
       ) {
         const cotTotal = collection(db, "ANALISIS_TOTALES");
-        par_levDigital.forEach(async (itemTotales) => {
+        //par_levDigital.forEach(async (itemTotales) => {
+        for (const itemTotales of par_levDigital){
           //const cve_ATF = selectedFolio + folioSiguiente.toString()
           const sumaValorLider = await sumarValorLider(
             cve_precot,
@@ -1220,7 +1221,8 @@ const AgregarRevTecFinanciero = () => {
                 ((costoFijo + factoraje) / 100 + 1) *
                 parseInt(itemTotales.cantidad),
           });
-        });
+        //});
+        }
       }
       swal.close();
       swal
