@@ -189,7 +189,10 @@ const VisualizarPDF = () => {
 
       // Calcula el total para cada elemento y agrégalo al total general
       par_levDigList1.forEach((item) => {
-        totalIns += item.cantidad * item.costoCotizado;
+        console.log("Insumos: ", item);
+        console.log("Tot: ", item.total)
+        //totalIns += item.cantidad * item.costoCotizado;
+        totalIns += item.total;
       });
       // Actualiza el estado con la lista de elementos y el total calculado
       setPar_PreCoti_insu(par_levDigList1);
@@ -276,49 +279,51 @@ const VisualizarPDF = () => {
         getTotalMateriales();
         getTotalSubcontrato();*/
         let sumaValorInsumos = 0;
-        const { costoFijo, factoraje, utilidad, fianzas } =
-          await getPorcentajes();
+        let valorIndirecto = 0;
+        let sumaValorProyecto = 0;
+        let claveArticulos = [];
 
-        const claveArticulos = [];
         moSnapshot.forEach((moDoc) => {
           const moData = moDoc.data();
+          console.log("Partidas: ", moData);
+          console.log("Tot: ", moData.totalInsumo);
           claveArticulos.push({
             claveSae: moData.claveSae,
             noPartidaATF: moData.noPartidaATF,
             cve_tecFin: moData.cve_tecFin,
           });
 
-          sumaValorInsumos += moData.totalInsumo; //Factoraje
-          console.log("totalInsumo: ", totalInsumo);
+          const insumo = moData.totalInsumo;
+          const porcCostoFijo = moData.costoFijoPorcentaje / 100;
+          const porcUtilidad = moData.utilidadPorcentaje / 100;
+
+          // Calcula por partida
+          const indirectoPartida = insumo * porcCostoFijo;
+          const totalPartidaIns = (insumo + indirectoPartida) / (1 - porcUtilidad);
+
+          // Suma totales
+          sumaValorInsumos += insumo;
+          valorIndirecto += indirectoPartida;
+          sumaValorProyecto += totalPartidaIns;
           
         });
-
-        seValoresArticulo(claveArticulos);
         setSumaValorInsumos(sumaValorInsumos);
-        let valorIndirecto = sumaValorInsumos * (costoFijo / 100);
         setValorIndirecto(valorIndirecto);
-        let valorDidirecto = sumaValorInsumos;
-        setValorDidirecto(valorDidirecto);
-        let sumaValorProyecto =
-          (sumaValorInsumos + valorIndirecto) / (1 - utilidad / 100);
         setSumaValorProyecto(sumaValorProyecto);
-
-        console.log("sumaValorProyecto: ", sumaValorProyecto);
+        //console.log("valorIndirecto: ", valorIndirecto);
+        //console.log("sumaValorProyecto: ", sumaValorProyecto);
         console.log("sumaValorInsumos: ", sumaValorInsumos);
-
+        seValoresArticulo(claveArticulos);
+        let valorDidirecto = sumaValorInsumos;
+        //console.log("valorDidirecto: ", valorDidirecto);
+        setValorDidirecto(valorDidirecto);
         let utilidadEsperada =
           sumaValorProyecto - valorDidirecto - valorIndirecto;
         setUtilidadEsperada(utilidadEsperada);
-
-        /*let factor = sumaValorProyecto * (factoraje/100);
-        setFactoraje(factor);
-        let utilidaNet = utilidadEsperada - factor;
-        setUtilidadNeta(utilidaNet);*/
       } catch (error) {
         console.error("Error al sumar valores:", error);
       }
-    };
-
+    }; 
     sumarValorTotales();
   }, [cve_tecFin]);
 
@@ -629,23 +634,25 @@ const calcularCotizacion = async () => {
   };
 
   const asegurarCotizacion = () => {
-    swal.fire({
-      title: "Estás seguro de aprobar la cotización?",
-      text: "Una vez aprobada, no podrán modificarse los costos del proyecto!",
-      icon: "warning",
-      buttons: true,
-      dangerMode: true,
-    }).then((willDelete) => {
-      if (willDelete) {
-        addCotizacion();
-        swal.fire("¡Felicidades, ahora puedes decargar tu cotización!", {
-          icon: "success",
-        });
-        navigate("/cotizacion");
-      } else {
-        swal.fire("¡Ok, seguimos viendo los costos!");
-      }
-    });
+    swal
+      .fire({
+        title: "Estás seguro de aprobar la cotización?",
+        text: "Una vez aprobada, no podrán modificarse los costos del proyecto!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      })
+      .then((willDelete) => {
+        if (willDelete) {
+          addCotizacion();
+          swal.fire("¡Felicidades, ahora puedes decargar tu cotización!", {
+            icon: "success",
+          });
+          navigate("/cotizacion");
+        } else {
+          swal.fire("¡Ok, seguimos viendo los costos!");
+        }
+      });
   };
 
   /*****************************************************************************************************/

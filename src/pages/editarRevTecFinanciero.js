@@ -97,6 +97,8 @@ const EditarRecTecFinanciero = () => {
   const [factorajeEdit, setFactorajeEdit] = useState("");
   const [costoFijoEdit, setCostoFijoEdit] = useState("");
   const [totalesDoc, setTotalesDoc] = useState([]);
+  const [totalInsumosEdit, setTotalInsumosEdit] = useState("");
+  const [cantidadEdit, setCantidadEdit] = useState("");
   /* --------------------------------PARTIDAS PARA MANO DE OBRA -----------------*/
   const [manoObra, setManoObra] = useState([]);
   const [noPartidaMO, setNoParatidaMO] = useState(1);
@@ -170,7 +172,7 @@ const EditarRecTecFinanciero = () => {
         ...doc.data(),
         id: doc.id,
       }));
-      console.log("Datos de PAR_PRECOTIZACION_INSU:", par_levDigList1);
+      console.log("Datos de PAR_TECFIN_INSU:", par_levDigList1);
       par_levDigList1.sort((a, b) => a.noPartidaATF - b.noPartidaATF);
       setPar_PreCoti_insu(par_levDigList1);
       const maxPartida = Math.max(
@@ -352,6 +354,8 @@ const EditarRecTecFinanciero = () => {
       setCostoFijoEdit(item.costoFijoPorcentaje);
       setUtilidadEdit(item.utilidadPorcentaje);
       setIdPartidaEdit(item.id);
+      setTotalInsumosEdit(item.totalInsumo);
+      setCantidadEdit(item.cantidad);
 
       // 🟢 Establecer el número de partida correctamente
       //setSelectedPartida({ noPartida });
@@ -369,10 +373,16 @@ const EditarRecTecFinanciero = () => {
     const factorIndirectoNum = factorIndirectoPor / 100;
     const valorInsumos = parseInt(cantidadTotalesEdit) * insumosEdit;
     const costoUnitarioC = subtotalPartida * (factorIndirectoNum + 1);
+    const costoIntegradoC = ((1 + costoFijoEdit / 100) * totalInsumosEdit * 1 * parseInt(cantidadEdit))
     const costoFactorizadoC = parseInt(cantidadTotalesEdit) * costoUnitarioC;
     const precioXpartidaC =
-      costoFactorizadoC / (1 - parseInt(utilidadEdit) / 100);
-    const utilidaEsperada = precioXpartidaC - costoFactorizadoC;
+      ((1 + costoFijoEdit / 100) * (totalInsumosEdit * 1 * cantidadEdit)) / 
+      (1 - utilidadEdit / 100);
+      const precioUnitarioC =
+      ((1 + costoFijoEdit / 100) * (totalInsumosEdit * 1 * cantidadEdit)) / 
+      (1 - utilidadEdit / 100);
+    
+    //const utilidaEsperada = precioXpartidaC - costoFactorizadoC;
 
     const datos = {
       //cantidad: parseInt(cantidadTotalesEdit),
@@ -385,7 +395,8 @@ const EditarRecTecFinanciero = () => {
       //costoUnitario: costoUnitarioC,
       //costoFactorizado: costoFactorizadoC,
       utilidadPorcentaje: parseInt(utilidadEdit),
-      //precioXpartida: precioXpartidaC,
+      precioXpartida: precioXpartidaC,
+      precioUnitario: precioUnitarioC,
       //utilidaEsperada: utilidaEsperada,
     };
     await updateDoc(preCotizacionRef, datos);
@@ -703,10 +714,7 @@ const EditarRecTecFinanciero = () => {
                       </td>{" "}
                       {/*5*/}
                       <td style={{ textAlign: "right" }}>
-                        {(
-                          (1 + itemTotal.costoFijoPorcentaje / 100) *
-                          (itemTotal.totalInsumo * 1 * itemTotal.cantidad)
-                        ).toLocaleString("en-US", {
+                        {(itemTotal.costoIntegrado).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
@@ -730,23 +738,14 @@ const EditarRecTecFinanciero = () => {
                       </td>{" "}
                       {/*9*/}
                       <td style={{ textAlign: "right" }}>
-                        {(
-                          ((1 + itemTotal.costoFijoPorcentaje / 100) *
-                            (itemTotal.totalInsumo * 1 * itemTotal.cantidad)) /
-                          (1 - itemTotal.utilidadPorcentaje / 100)
-                        ).toLocaleString("en-US", {
+                        {(itemTotal.costoXpartida).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
                       </td>{" "}
                       {/*10*/}
                       <td style={{ textAlign: "right" }}>
-                        {(
-                          ((1 + itemTotal.costoFijoPorcentaje / 100) *
-                            (itemTotal.totalInsumo * 1 * itemTotal.cantidad)) /
-                          (1 - itemTotal.utilidadPorcentaje / 100) /
-                          itemTotal.cantidad
-                        ).toLocaleString("en-US", {
+                        {(itemTotal.precioUnitario).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}

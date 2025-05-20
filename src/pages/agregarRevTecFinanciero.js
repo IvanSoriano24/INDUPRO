@@ -1190,9 +1190,12 @@ const AgregarRevTecFinanciero = () => {
             factorIndirectoNum: (costoFijo + factoraje) / 100,
             valorInsumos: parseInt(itemTotales.cantidad) * sumarCalculoInsumoV,
             claveSae: claveSae,
+            costoIntegrado: ((1 + costoFijo / 100) * sumarCalculoInsumoV * 1 * parseInt(itemTotales.cantidad)),
             costoXpartida:
-              parseInt(itemTotales.cantidad) *
-              (sumaValorLider + sumarCalculoInsumoV),
+              (1 + costoFijo / 100) *
+              sumarCalculoInsumoV *
+              1 *
+              parseInt(itemTotales.cantidad),
             costoUnitario:
               (sumaValorLider + sumarCalculoInsumoV) *
               ((costoFijo + factoraje) / 100 + 1),
@@ -1201,9 +1204,12 @@ const AgregarRevTecFinanciero = () => {
               ((costoFijo + factoraje) / 100 + 1) *
               parseInt(itemTotales.cantidad),
             precioXpartida:
-              ((sumaValorLider + sumarCalculoInsumoV) *
-                ((costoFijo + factoraje) / 100 + 1) *
-                parseInt(itemTotales.cantidad)) /
+              ((1 + costoFijo / 100) *
+                (sumarCalculoInsumoV * 1 * parseInt(itemTotales.cantidad))) /
+              (1 - utilidad / 100),
+            precioUnitario:
+              ((1 + costoFijo / 100) *
+                (sumarCalculoInsumoV * 1 * parseInt(itemTotales.cantidad))) /
               (1 - utilidad / 100),
             utilidaEsperada:
               ((sumaValorLider + sumarCalculoInsumoV) *
@@ -1964,20 +1970,20 @@ const AgregarRevTecFinanciero = () => {
                 widths: ["auto", "auto", "auto", "auto", "*", "auto", "*", "*"],
                 body: [
                   [
-                    { text: "No. Partida", style: "tableHeader"},
-                    { text: "Insumo", style: "tableHeader"},
-                    { text: "Unidad", style: "tableHeader"},
+                    { text: "No. Partida", style: "tableHeader" },
+                    { text: "Insumo", style: "tableHeader" },
+                    { text: "Unidad", style: "tableHeader" },
                     {
                       text: "Clave Producto",
-                      style: "tableHeader"
+                      style: "tableHeader",
                     },
                     { text: "Proveedor", style: "tableHeader" },
-                    { text: "Cantidad", style: "tableHeader"},
+                    { text: "Cantidad", style: "tableHeader" },
                     {
                       text: "Costo Cotizado",
-                      style: "tableHeader"
+                      style: "tableHeader",
                     },
-                    { text: "Total", style: "tableHeader"},
+                    { text: "Total", style: "tableHeader" },
                   ],
                   ...tableBody20,
                 ],
