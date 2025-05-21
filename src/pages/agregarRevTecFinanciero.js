@@ -804,7 +804,7 @@ const AgregarRevTecFinanciero = () => {
       query(
         collection(db, "PAR_PRECOTIZACION_INSU"),
         where("cve_precot", "==", cve_tecFin),
-        where("noPartidaPC", "==", Number(noPartida))
+        where("noPartidaPC", "==", noPartida)
       )
     );
     //console.log("moSnapshot: ", moSnapshot);
@@ -824,13 +824,13 @@ const AgregarRevTecFinanciero = () => {
       query(
         collection(db, "PAR_PRECOTIZACION_INSU"),
         where("cve_precot", "==", cve_tecFin),
-        where("noPartidaPC", "==", Number(noPartida))
+        where("noPartidaPC", "==", noPartida)
         // No pongas el filtro de "insumo" aquí
       )
     );
 
     if (moSnapshot.empty) {
-      console.warn("⚠️ No se encontraron insumos para:", cve_tecFin, noPartida);
+      console.warn("⚠️ No se encontraron servicios para:", cve_tecFin, noPartida);
       return 0;
     }
 
@@ -856,13 +856,13 @@ const AgregarRevTecFinanciero = () => {
       query(
         collection(db, "PAR_PRECOTIZACION_INSU"),
         where("cve_precot", "==", cve_tecFin),
-        where("noPartidaPC", "==", Number(noPartida))
+        where("noPartidaPC", "==", noPartida)
         // No pongas el filtro de "insumo" aquí
       )
     );
 
     if (moSnapshot.empty) {
-      console.warn("⚠️ No se encontraron insumos para:", cve_tecFin, noPartida);
+      console.warn("⚠️ No se encontraron materiales para:", cve_tecFin, noPartida);
       return 0;
     }
 
@@ -871,6 +871,7 @@ const AgregarRevTecFinanciero = () => {
     moSnapshot.forEach((doc) => {
       const data = doc.data();
       const tipoInsumo = data.insumo?.toLowerCase().trim(); // evitar mayúsculas o espacios
+      console.log("Insumo: ", tipoInsumo);
       if (
         tipoInsumo === "Material" ||
         tipoInsumo === "material" ||
@@ -888,13 +889,13 @@ const AgregarRevTecFinanciero = () => {
       query(
         collection(db, "PAR_PRECOTIZACION_INSU"),
         where("cve_precot", "==", cve_tecFin),
-        where("noPartidaPC", "==", Number(noPartida))
+        where("noPartidaPC", "==", noPartida)
         // No pongas el filtro de "insumo" aquí
       )
     );
 
     if (moSnapshot.empty) {
-      console.warn("⚠️ No se encontraron insumos para:", cve_tecFin, noPartida);
+      console.warn("⚠️ No se encontraron viaticos para:", cve_tecFin, noPartida);
       return 0;
     }
 
@@ -1170,7 +1171,10 @@ const AgregarRevTecFinanciero = () => {
             cve_precot,
             itemTotales.noPartida
           );
-          //console.log("Suma: ", sumarCalculoInsumoV);
+          console.log("sumarCalculoInsumoV: ", sumarCalculoInsumoV);
+          console.log("sumarCalculoServicioV: ", sumarCalculoServicioV);
+          console.log("sumarCalculoMaterialV: ", sumarCalculoMaterialV);
+          console.log("sumarCalculoViaticosV: ", sumarCalculoViaticosV);
           await addDoc(cotTotal, {
             cve_tecFin: selectedFolio + folioSiguiente.toString(),
             noPartidaATF: itemTotales.noPartida, //DESDE AQUÍ LO RECUPERO
@@ -1221,8 +1225,8 @@ const AgregarRevTecFinanciero = () => {
                 ((costoFijo + factoraje) / 100 + 1) *
                 parseInt(itemTotales.cantidad),
           });
-        //});
         }
+        //});
       }
       swal.close();
       swal
