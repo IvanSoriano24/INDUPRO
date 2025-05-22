@@ -993,8 +993,8 @@ const AgregarPreCotizacion = () => {
       //if (clavesSAE.length === 0) {
       console.log("🔄 Cargando claves SAE antes de editar...");
       const responseInsumos = await axios.get(
-        //"http://localhost:5000/api/clave-sae"
-        "/api/clave-sae"
+        "http://localhost:5000/api/clave-sae"
+        //"/api/clave-sae"
       );
 
       // ✅ Transformamos la respuesta para tener claves limpias y legibles

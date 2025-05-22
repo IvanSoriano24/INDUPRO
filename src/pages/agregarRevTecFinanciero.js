@@ -1138,96 +1138,62 @@ const AgregarRevTecFinanciero = () => {
 
       /**************************************************AGREGAR TOTALES ******************************** */
 
-      const { costoFijo, factoraje, utilidad, fianzas } =
-        await obtenerPorcentajes();
+      const { costoFijo, factoraje, utilidad, fianzas } = await obtenerPorcentajes();
+
       if (
-        costoFijo !== undefined &&
-        factoraje !== undefined &&
-        utilidad !== undefined &&
-        fianzas !== undefined
+          costoFijo !== undefined &&
+          factoraje !== undefined &&
+          utilidad !== undefined &&
+          fianzas !== undefined
       ) {
         const cotTotal = collection(db, "ANALISIS_TOTALES");
-        //par_levDigital.forEach(async (itemTotales) => {
-        for (const itemTotales of par_levDigital){
-          //const cve_ATF = selectedFolio + folioSiguiente.toString()
-          const sumaValorLider = await sumarValorLider(
-            cve_precot,
-            itemTotales.noPartida
-          );
-          //const noPartidaEntero = parseInt(item.noPartida, 10);
-          const sumarCalculoInsumoV = await sumarCalculoInsumo(
-            cve_precot,
-            itemTotales.noPartida
-          );
-          const sumarCalculoServicioV = await sumarCalculoServicio(
-            cve_precot,
-            itemTotales.noPartida
-          );
-          const sumarCalculoMaterialV = await sumarCalculoMaterial(
-            cve_precot,
-            itemTotales.noPartida
-          );
-          const sumarCalculoViaticosV = await sumarCalculoViaticos(
-            cve_precot,
-            itemTotales.noPartida
-          );
-          console.log("sumarCalculoInsumoV: ", sumarCalculoInsumoV);
-          console.log("sumarCalculoServicioV: ", sumarCalculoServicioV);
-          console.log("sumarCalculoMaterialV: ", sumarCalculoMaterialV);
-          console.log("sumarCalculoViaticosV: ", sumarCalculoViaticosV);
+
+        for (const itemTotales of par_levDigital) {
+          const cantidad = parseInt(itemTotales.cantidad);
+          const sumaValorLider = await sumarValorLider(cve_precot, itemTotales.noPartida);
+          const sumarCalculoInsumoV = await sumarCalculoInsumo(cve_precot, itemTotales.noPartida);
+          const sumarCalculoServicioV = await sumarCalculoServicio(cve_precot, itemTotales.noPartida);
+          const sumarCalculoMaterialV = await sumarCalculoMaterial(cve_precot, itemTotales.noPartida);
+          const sumarCalculoViaticosV = await sumarCalculoViaticos(cve_precot, itemTotales.noPartida);
+
+          const costoBase = sumaValorLider + sumarCalculoInsumoV;
+          const factorIndirecto = (costoFijo + factoraje) / 100;
+          const costoIntegrado = costoBase * (1 + factorIndirecto);
+          const precioXpartida = costoIntegrado / (1 - utilidad / 100);
+          const precioUnitario = precioXpartida / cantidad;
+          const utilidadEsperada = precioXpartida - costoIntegrado;
+
           await addDoc(cotTotal, {
             cve_tecFin: selectedFolio + folioSiguiente.toString(),
-            noPartidaATF: itemTotales.noPartida, //DESDE AQUÍ LO RECUPERO
+            noPartidaATF: itemTotales.noPartida,
             descripcion: itemTotales.descripcion,
             observacion: itemTotales.observacion,
-            cantidad: parseInt(itemTotales.cantidad),
+            cantidad: cantidad,
             totalInsumo: sumarCalculoInsumoV,
             totalServicio: sumarCalculoServicioV,
             totalMaterial: sumarCalculoMaterialV,
             totalViaticos: sumarCalculoViaticosV,
             totalMO: sumaValorLider,
-            totalPartida: sumaValorLider + sumarCalculoInsumoV,
+            totalPartida: costoBase,
             costoFijoPorcentaje: costoFijo,
             factorajePorcentaje: factoraje,
             utilidadPorcentaje: utilidad,
             fianzasPorcentaje: fianzas,
             factorIndirectoPorcentaje: costoFijo + factoraje,
-            factorIndirectoNum: (costoFijo + factoraje) / 100,
-            valorInsumos: parseInt(itemTotales.cantidad) * sumarCalculoInsumoV,
+            factorIndirectoNum: factorIndirecto,
+            valorInsumos: cantidad * sumarCalculoInsumoV,
             claveSae: claveSae,
-            costoIntegrado: ((1 + costoFijo / 100) * sumarCalculoInsumoV * 1 * parseInt(itemTotales.cantidad)),
-            costoXpartida:
-              (1 + costoFijo / 100) *
-              sumarCalculoInsumoV *
-              1 *
-              parseInt(itemTotales.cantidad),
-            costoUnitario:
-              (sumaValorLider + sumarCalculoInsumoV) *
-              ((costoFijo + factoraje) / 100 + 1),
-            costoFactorizado:
-              (sumaValorLider + sumarCalculoInsumoV) *
-              ((costoFijo + factoraje) / 100 + 1) *
-              parseInt(itemTotales.cantidad),
-            precioXpartida:
-              ((1 + costoFijo / 100) *
-                (sumarCalculoInsumoV * 1 * parseInt(itemTotales.cantidad))) /
-              (1 - utilidad / 100),
-            precioUnitario:
-              ((1 + costoFijo / 100) *
-                (sumarCalculoInsumoV * 1 * parseInt(itemTotales.cantidad))) /
-              (1 - utilidad / 100),
-            utilidaEsperada:
-              ((sumaValorLider + sumarCalculoInsumoV) *
-                ((costoFijo + factoraje) / 100 + 1) *
-                parseInt(itemTotales.cantidad)) /
-                (1 - utilidad / 100) -
-              (sumaValorLider + sumarCalculoInsumoV) *
-                ((costoFijo + factoraje) / 100 + 1) *
-                parseInt(itemTotales.cantidad),
+            costoIntegrado: costoIntegrado,
+            costoXpartida: costoIntegrado,
+            costoUnitario: costoIntegrado / cantidad,
+            costoFactorizado: costoIntegrado, // si quieres un nombre más explícito usa otro campo
+            precioXpartida: precioXpartida,
+            precioUnitario: precioUnitario,
+            utilidaEsperada: utilidadEsperada
           });
         }
-        //});
       }
+
       swal.close();
       swal
         .fire({
@@ -1336,8 +1302,8 @@ const AgregarRevTecFinanciero = () => {
     try {
       console.log("Categoria:", categoriaSeleccionada);
       const response = await axios.get(
-        `/api/categorias/${categoriaSeleccionada}`
-        //`http://localhost:5000/api/categorias/${categoriaSeleccionada}`
+        //`/api/categorias/${categoriaSeleccionada}`
+        `http://localhost:5000/api/categorias/${categoriaSeleccionada}`
       );
       setFamilias(response.data); // Guarda las familias filtradas en el estado
       console.log("Familias filtradas obtenidas:", response.data);
@@ -1350,8 +1316,8 @@ const AgregarRevTecFinanciero = () => {
     try {
       //console.log(familiaSeleccionada);
       const response = await axios.get(
-        `/api/lineas/${familiaSeleccionada}`
-        //`http://localhost:5000/api/lineas/${familiaSeleccionada}`
+        //`/api/lineas/${familiaSeleccionada}`
+        `http://localhost:5000/api/lineas/${familiaSeleccionada}`
       );
       setLineas(response.data); // Guardar las líneas en el estado
       console.log("Líneas filtradas obtenidas:", response.data); // Verifica la respuesta
@@ -1638,8 +1604,8 @@ const AgregarRevTecFinanciero = () => {
       console.log("🔎 Buscando Clave SAE para la línea (CVE_LIN):", cveLin); // 🔍 Verifica qué valor se envía
 
       const response = await axios.get(
-        //`http://localhost:5000/api/clave-sae/${cveLin}`
-        `/api/clave-sae/${cveLin}`
+        `http://localhost:5000/api/clave-sae/${cveLin}`
+        //`/api/clave-sae/${cveLin}`
       );
 
       console.log("🔹 Claves SAE obtenidas desde SQL:", response.data);
@@ -1732,8 +1698,8 @@ const AgregarRevTecFinanciero = () => {
       if (clavesSAE.length === 0) {
         console.log("🔄 Cargando claves SAE antes de editar...");
         const responseInsumos = await axios.get(
-          //"http://localhost:5000/api/clave-sae"
-          "/api/clave-sae"
+          "http://localhost:5000/api/clave-sae"
+          //"/api/clave-sae"
         );
 
         // ✅ Transformamos la respuesta para tener claves limpias y legibles
@@ -1817,8 +1783,8 @@ const AgregarRevTecFinanciero = () => {
       //if (clavesSAE.length === 0) {
       console.log("🔄 Cargando claves SAE antes de editar...");
       const responseInsumos = await axios.get(
-        //"http://localhost:5000/api/clave-sae"
-        "/api/clave-sae"
+        "http://localhost:5000/api/clave-sae"
+        //"/api/clave-sae"
       );
 
       // ✅ Transformamos la respuesta para tener claves limpias y legibles

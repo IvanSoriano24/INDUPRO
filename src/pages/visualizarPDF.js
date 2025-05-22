@@ -290,19 +290,21 @@ const VisualizarPDF = () => {
             cve_tecFin: moData.cve_tecFin,
           });
 
+
           const insumo = moData.totalInsumo;
+          const cantidad = moData.cantidad ?? 1; // Asegúrate de que tenga valor
           const porcCostoFijo = moData.costoFijoPorcentaje / 100;
           const porcUtilidad = moData.utilidadPorcentaje / 100;
 
-          // Calcula por partida
-          const indirectoPartida = insumo * porcCostoFijo;
-          const totalPartidaIns =
-            (insumo + indirectoPartida) / (1 - porcUtilidad);
+          const totalInsumoPorCantidad = insumo * cantidad;
+          const indirectoPartida = totalInsumoPorCantidad * porcCostoFijo;
+          const totalPartidaIns = (totalInsumoPorCantidad + indirectoPartida) / (1 - porcUtilidad);
 
           // Suma totales
-          sumaValorInsumos += insumo;
+          sumaValorInsumos += totalInsumoPorCantidad;
           valorIndirecto += indirectoPartida;
           sumaValorProyecto += totalPartidaIns;
+
         });
         console.log("PartidasP: ", sum);
         setSumaValorInsumos(sumaValorInsumos);
