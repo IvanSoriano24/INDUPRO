@@ -196,22 +196,47 @@ const EditarRecTecFinanciero = () => {
   const obtenerPartidasTotales = async () => {
     try {
       const data = await getDocs(
-        query(
-          collection(db, "ANALISIS_TOTALES"),
-          where("cve_tecFin", "==", cve_tecFin)
-        )
+          query(collection(db, "ANALISIS_TOTALES"), where("cve_tecFin", "==", cve_tecFin))
       );
-      const par_levDigList1 = data.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      par_levDigList1.sort((a, b) => a.noPartidaATF - b.noPartidaATF);
-      console.log("Analisis: ", par_levDigList1);
-      setTotalesDoc(par_levDigList1);
+
+      const docs = data.docs.map((docSnap) => {
+        const docData = { ...docSnap.data(), id: docSnap.id };
+        return docData;
+      });
+
+      for (const item of docs) {
+        const cantidad = parseFloat(item.cantidad || 0);
+        const totalInsumos = parseFloat(item.totalInsumo || 0);
+        const costoFijo = parseFloat(item.costoFijoPorcentaje || 0);
+        const utilidad = parseFloat(item.utilidadPorcentaje || 0);
+
+        const costoDirecto = totalInsumos * cantidad;
+        const costoIntegrado = costoDirecto * (1 + costoFijo / 100);
+        const precioPorPartida = costoIntegrado * (1 + utilidad / 100);
+        const precioUnitario = precioPorPartida / cantidad;
+        const utilidadMonetaria = precioPorPartida - costoIntegrado;
+
+        // Si los datos están desactualizados, actualízalos
+        const diferencia = Math.abs((item.precioXpartida || 0) - precioPorPartida);
+        if (diferencia > 1) { // Solo si hay una diferencia significativa
+          const partidaRef = doc(db, "ANALISIS_TOTALES", item.id);
+          await updateDoc(partidaRef, {
+            costoIntegrado,
+            precioXpartida: precioPorPartida,
+            precioUnitario,
+            utilidadEsperada: utilidadMonetaria
+          });
+        }
+      }
+
+      // Ahora sí actualiza el estado local
+      docs.sort((a, b) => a.noPartidaATF - b.noPartidaATF);
+      setTotalesDoc(docs);
     } catch (error) {
-      console.error("Error fetching PAR_LEVDIGITAL data:", error);
+      console.error("Error al obtener y actualizar ANALISIS_TOTALES:", error);
     }
   };
+
 
   useEffect(() => {
     obtenerPartidasTotales();
@@ -367,41 +392,45 @@ const EditarRecTecFinanciero = () => {
   };
   const editarPartidaTotales = async () => {
     const preCotizacionRef = doc(db, "ANALISIS_TOTALES", idPartidaEdit);
-    const subtotalPartida = insumosEdit + manoObraEdit;
-    const factorIndirectoPor =
-      parseInt(factorajeEdit) + parseInt(costoFijoEdit);
-    const factorIndirectoNum = factorIndirectoPor / 100;
-    const valorInsumos = parseInt(cantidadTotalesEdit) * insumosEdit;
-    const costoUnitarioC = subtotalPartida * (factorIndirectoNum + 1);
-    const costoIntegradoC = ((1 + costoFijoEdit / 100) * totalInsumosEdit * 1 * parseInt(cantidadEdit))
-    const costoFactorizadoC = parseInt(cantidadTotalesEdit) * costoUnitarioC;
-    const precioXpartidaC =
-      ((1 + costoFijoEdit / 100) * (totalInsumosEdit * 1 * cantidadEdit)) / 
-      (1 - utilidadEdit / 100);
-      const precioUnitarioC =
-      ((1 + costoFijoEdit / 100) * (totalInsumosEdit * 1 * cantidadEdit)) / 
-      (1 - utilidadEdit / 100);
-    
-    //const utilidaEsperada = precioXpartidaC - costoFactorizadoC;
+
+    const cantidad = parseFloat(cantidadEdit || 0);
+    const totalInsumos = parseFloat(totalInsumosEdit || 0);
+    const costoFijo = parseFloat(costoFijoEdit || 0);
+    const utilidad = parseFloat(utilidadEdit || 0);
+
+    // Paso 1: Costo directo
+    const costoDirecto = totalInsumos * cantidad;
+
+    // Paso 2: Costo integrado con costo fijo
+    const costoIntegrado = costoDirecto * (1 + costoFijo / 100);
+
+    // Paso 3: Aplicar utilidad sobre el costo integrado
+    const precioPorPartida = costoIntegrado * (1 + utilidad / 100);
+
+    // Paso 4: Precio unitario
+    const precioUnitario = precioPorPartida / cantidad;
+
+    // Utilidad monetaria (solo si necesitas almacenarla aparte)
+    const utilidadMonetaria = precioPorPartida - costoIntegrado;
 
     const datos = {
-      //cantidad: parseInt(cantidadTotalesEdit),
-      //valorInsumos: valorInsumos,
-      //costoXpartida: parseInt(cantidadTotalesEdit) * subtotalPartida,
-      factorajePorcentaje: factorajeEdit,
-      costoFijoPorcentaje: costoFijoEdit,
-      utilidadPorcentaje: utilidadEdit,
-      //factorIndirectoPorcentaje: factorIndirectoPor,
-      //costoUnitario: costoUnitarioC,
-      //costoFactorizado: costoFactorizadoC,
-      utilidadPorcentaje: parseInt(utilidadEdit),
-      precioXpartida: precioXpartidaC,
-      precioUnitario: precioUnitarioC,
-      //utilidaEsperada: utilidaEsperada,
+      costoFijoPorcentaje: costoFijo,
+      utilidadPorcentaje: utilidad,
+      costoIntegrado,
+      precioXpartida: precioPorPartida,
+
+      precioUnitario,
+      utilidadEsperada: utilidadMonetaria,
     };
+
+    console.log("hola");
+
     await updateDoc(preCotizacionRef, datos);
-    window.location.href = window.location.href;
+    await obtenerPartidasTotales(); // Recarga datos
+    closeTot(); // Cierra modal
   };
+
+
   return (
     <div className="container">
       <div className="row">
@@ -738,7 +767,7 @@ const EditarRecTecFinanciero = () => {
                       </td>{" "}
                       {/*9*/}
                       <td style={{ textAlign: "right" }}>
-                        {(itemTotal.costoXpartida).toLocaleString("en-US", {
+                        {(itemTotal.precioXpartida).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
