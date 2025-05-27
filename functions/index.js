@@ -6,7 +6,7 @@ const cors = require("cors");
 const app = express();
 
 // Configuración de SQL
-/*const config = {
+const config = {
   user: "sa",
   password: "Green2580a.",
   server: "35.222.201.74", // Cambia la IP según tu configuración
@@ -15,8 +15,8 @@ const app = express();
     encrypt: true, // Si estás usando SSL
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
   },
-};*/
-const config = {
+};
+/*const config = {
   user: "sa",
   password: "Pamec2580a.",
   server: "34.121.245.190",
@@ -25,7 +25,7 @@ const config = {
     encrypt: true, // Si estás usando SSL
     trustServerCertificate: true, // Evita problemas con certificados en algunos entornos
   },
-};
+};*/
 // Configuración CORS
 const corsOptions = {
   origin: ["*"],

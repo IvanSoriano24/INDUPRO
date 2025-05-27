@@ -196,7 +196,10 @@ const EditarRecTecFinanciero = () => {
   const obtenerPartidasTotales = async () => {
     try {
       const data = await getDocs(
-          query(collection(db, "ANALISIS_TOTALES"), where("cve_tecFin", "==", cve_tecFin))
+        query(
+          collection(db, "ANALISIS_TOTALES"),
+          where("cve_tecFin", "==", cve_tecFin)
+        )
       );
 
       const docs = data.docs.map((docSnap) => {
@@ -217,14 +220,17 @@ const EditarRecTecFinanciero = () => {
         const utilidadMonetaria = precioPorPartida - costoIntegrado;
 
         // Si los datos están desactualizados, actualízalos
-        const diferencia = Math.abs((item.precioXpartida || 0) - precioPorPartida);
-        if (diferencia > 1) { // Solo si hay una diferencia significativa
+        const diferencia = Math.abs(
+          (item.precioXpartida || 0) - precioPorPartida
+        );
+        if (diferencia > 1) {
+          // Solo si hay una diferencia significativa
           const partidaRef = doc(db, "ANALISIS_TOTALES", item.id);
           await updateDoc(partidaRef, {
             costoIntegrado,
             precioXpartida: precioPorPartida,
             precioUnitario,
-            utilidadEsperada: utilidadMonetaria
+            utilidadEsperada: utilidadMonetaria,
           });
         }
       }
@@ -236,7 +242,6 @@ const EditarRecTecFinanciero = () => {
       console.error("Error al obtener y actualizar ANALISIS_TOTALES:", error);
     }
   };
-
 
   useEffect(() => {
     obtenerPartidasTotales();
@@ -375,7 +380,6 @@ const EditarRecTecFinanciero = () => {
     console.log(item);
     limpiarCampos();
     try {
-      
       setCostoFijoEdit(item.costoFijoPorcentaje);
       setUtilidadEdit(item.utilidadPorcentaje);
       setIdPartidaEdit(item.id);
@@ -416,20 +420,16 @@ const EditarRecTecFinanciero = () => {
     const datos = {
       costoFijoPorcentaje: costoFijo,
       utilidadPorcentaje: utilidad,
-      costoIntegrado,
+      costoIntegrado: costoIntegrado,
       precioXpartida: precioPorPartida,
-
-      precioUnitario,
+      precioUnitario: precioUnitario,
       utilidadEsperada: utilidadMonetaria,
     };
-
-    console.log("hola");
 
     await updateDoc(preCotizacionRef, datos);
     await obtenerPartidasTotales(); // Recarga datos
     closeTot(); // Cierra modal
   };
-
 
   return (
     <div className="container">
@@ -718,68 +718,56 @@ const EditarRecTecFinanciero = () => {
                 <tbody>
                   {totalesDoc.map((itemTotal, indexPC) => (
                     <tr key={indexPC}>
-                      <td>{itemTotal.noPartidaATF}</td> {/*1*/}
-                      <td>{itemTotal.cantidad}</td> {/*2*/}
+                      <td>{itemTotal.noPartidaATF ?? "-"}</td>
+                      <td>{itemTotal.cantidad ?? 0}</td>
                       <td style={{ textAlign: "right" }}>
-                        {(itemTotal.totalInsumo * 1).toLocaleString("en-US", {
+                        {(itemTotal.totalInsumo ?? 0).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
-                      </td>{" "}
-                      {/*3*/}
+                      </td>
                       <td style={{ textAlign: "right" }}>
                         {(
-                          itemTotal.totalInsumo *
-                          1 *
-                          itemTotal.cantidad
+                          (itemTotal.totalInsumo ?? 0) *
+                          (itemTotal.cantidad ?? 0)
                         ).toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })}
-                      </td>{" "}
-                      {/*4*/}
+                      </td>
                       <td style={{ textAlign: "center" }}>
-                        {itemTotal.costoFijoPorcentaje}%
-                      </td>{" "}
-                      {/*5*/}
+                        {itemTotal.costoFijoPorcentaje ?? 0}%
+                      </td>
                       <td style={{ textAlign: "right" }}>
-                        {(itemTotal.costoIntegrado).toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })}
-                      </td>{" "}
-                      {/*6*/}
-                      {/*<td style={{ textAlign: "right" }}>
-                        {(itemTotal.costoUnitario * 1).toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })}
-                      </td> */}
-                      {/*<td style={{ textAlign: "right" }}>
-                        {(itemTotal.costoFactorizado * 1).toLocaleString(
+                        {(itemTotal.costoIntegrado ?? 0).toLocaleString(
                           "en-US",
-                          { style: "currency", currency: "USD" }
+                          {
+                            style: "currency",
+                            currency: "USD",
+                          }
                         )}
-                      </td>*/}{" "}
-                      {/*8*/}
+                      </td>
                       <td style={{ textAlign: "center" }}>
-                        {itemTotal.utilidadPorcentaje}%
-                      </td>{" "}
-                      {/*9*/}
+                        {itemTotal.utilidadPorcentaje ?? 0}%
+                      </td>
                       <td style={{ textAlign: "right" }}>
-                        {(itemTotal.precioXpartida).toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })}
-                      </td>{" "}
-                      {/*10*/}
+                        {(itemTotal.precioXpartida ?? 0).toLocaleString(
+                          "en-US",
+                          {
+                            style: "currency",
+                            currency: "USD",
+                          }
+                        )}
+                      </td>
                       <td style={{ textAlign: "right" }}>
-                        {(itemTotal.precioUnitario).toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })}
-                      </td>{" "}
-                      {/*11*/}
+                        {(itemTotal.precioUnitario ?? 0).toLocaleString(
+                          "en-US",
+                          {
+                            style: "currency",
+                            currency: "USD",
+                          }
+                        )}
+                      </td>
                       <td style={{ textAlign: "center" }}>
                         <button
                           className="btn btn-primary"
@@ -808,19 +796,33 @@ const EditarRecTecFinanciero = () => {
               <table class="table">
                 <thead>
                   <tr>
-                    <th scope="col" style={{ textAlign: "center" }}>No. Partida</th>
-                    <th scope="col" style={{ textAlign: "center" }}>Tipo de insumo</th>
-                    <th scope="col" style={{ textAlign: "center" }}>Cantidad</th>
-                    <th scope="col" style={{ textAlign: "center" }}>Costo</th>
-                    <th scope="col" style={{ textAlign: "center" }}>Total sin Factores</th>
+                    <th scope="col" style={{ textAlign: "center" }}>
+                      No. Partida
+                    </th>
+                    <th scope="col" style={{ textAlign: "center" }}>
+                      Tipo de insumo
+                    </th>
+                    <th scope="col" style={{ textAlign: "center" }}>
+                      Cantidad
+                    </th>
+                    <th scope="col" style={{ textAlign: "center" }}>
+                      Costo
+                    </th>
+                    <th scope="col" style={{ textAlign: "center" }}>
+                      Total sin Factores
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {par_PreCoti_insu.map((itemPC, indexPC) => (
                     <tr key={indexPC}>
-                      <td style={{ textAlign: "center" }}>{itemPC.noPartidaATF}</td>
+                      <td style={{ textAlign: "center" }}>
+                        {itemPC.noPartidaATF}
+                      </td>
                       <td style={{ textAlign: "center" }}>{itemPC.insumo}</td>
-                      <td style={{ textAlign: "center" }}>{itemPC.cantidad + " " + itemPC.unidad}</td>
+                      <td style={{ textAlign: "center" }}>
+                        {itemPC.cantidad + " " + itemPC.unidad}
+                      </td>
                       <td style={{ textAlign: "right" }}>
                         {(itemPC.costoCotizado * 1).toLocaleString("en-US", {
                           style: "currency",
@@ -866,7 +868,7 @@ const EditarRecTecFinanciero = () => {
                   {listMO.map((itemMO, indexMO) => (
                     <tr key={indexMO}>
                       <td>{itemMO.noPartidaMO}</td>
-                      <td >{itemMO.cantidadTrabajadores}</td>
+                      <td>{itemMO.cantidadTrabajadores}</td>
                       <td>{itemMO.personal}</td>
                       <td>{itemMO.diasTrabajados}</td>
                       {/*<td>
@@ -889,7 +891,9 @@ const EditarRecTecFinanciero = () => {
           </div>
           <br></br>
           <div className="buttons-container">
-            <Link to="/revTecnicoFinanciero"><button className="btn btn-danger" >Regresar</button></Link>
+            <Link to="/revTecnicoFinanciero">
+              <button className="btn btn-danger">Regresar</button>
+            </Link>
           </div>
         </div>
       </div>
@@ -941,12 +945,7 @@ const EditarRecTecFinanciero = () => {
         </Modal.Footer>
       </Modal>
       {/*---------------------------------------------------------------------------------------------------*/}
-      <Modal
-        show={tot}
-        onHide={closeTot}
-        dialogClassName="lg"
-        centered
-      >
+      <Modal show={tot} onHide={closeTot} dialogClassName="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>Totales</Modal.Title>
         </Modal.Header>

@@ -1312,8 +1312,8 @@ const AgregarRevTecFinanciero = () => {
     try {
       console.log("Categoria:", categoriaSeleccionada);
       const response = await axios.get(
-        //`/api/categorias/${categoriaSeleccionada}`
-        `http://localhost:5000/api/categorias/${categoriaSeleccionada}`
+        `/api/categorias/${categoriaSeleccionada}`
+        //`http://localhost:5000/api/categorias/${categoriaSeleccionada}`
       );
       setFamilias(response.data); // Guarda las familias filtradas en el estado
       console.log("Familias filtradas obtenidas:", response.data);
@@ -1326,8 +1326,8 @@ const AgregarRevTecFinanciero = () => {
     try {
       //console.log(familiaSeleccionada);
       const response = await axios.get(
-        //`/api/lineas/${familiaSeleccionada}`
-        `http://localhost:5000/api/lineas/${familiaSeleccionada}`
+        `/api/lineas/${familiaSeleccionada}`
+        //`http://localhost:5000/api/lineas/${familiaSeleccionada}`
       );
       setLineas(response.data); // Guardar las líneas en el estado
       console.log("Líneas filtradas obtenidas:", response.data); // Verifica la respuesta
@@ -1614,8 +1614,8 @@ const AgregarRevTecFinanciero = () => {
       console.log("🔎 Buscando Clave SAE para la línea (CVE_LIN):", cveLin); // 🔍 Verifica qué valor se envía
 
       const response = await axios.get(
-        `http://localhost:5000/api/clave-sae/${cveLin}`
-        //`/api/clave-sae/${cveLin}`
+        //`http://localhost:5000/api/clave-sae/${cveLin}`
+        `/api/clave-sae/${cveLin}`
       );
 
       console.log("🔹 Claves SAE obtenidas desde SQL:", response.data);
@@ -1708,8 +1708,8 @@ const AgregarRevTecFinanciero = () => {
       if (clavesSAE.length === 0) {
         console.log("🔄 Cargando claves SAE antes de editar...");
         const responseInsumos = await axios.get(
-          "http://localhost:5000/api/clave-sae"
-          //"/api/clave-sae"
+          //"http://localhost:5000/api/clave-sae"
+          "/api/clave-sae"
         );
 
         // ✅ Transformamos la respuesta para tener claves limpias y legibles
@@ -1793,8 +1793,8 @@ const AgregarRevTecFinanciero = () => {
       //if (clavesSAE.length === 0) {
       console.log("🔄 Cargando claves SAE antes de editar...");
       const responseInsumos = await axios.get(
-        "http://localhost:5000/api/clave-sae"
-        //"/api/clave-sae"
+        //"http://localhost:5000/api/clave-sae"
+        "/api/clave-sae"
       );
 
       // ✅ Transformamos la respuesta para tener claves limpias y legibles
