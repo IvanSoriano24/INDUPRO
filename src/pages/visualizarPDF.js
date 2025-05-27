@@ -294,12 +294,14 @@ const VisualizarPDF = () => {
           const insumo = moData.totalInsumo;
           const cantidad = moData.cantidad ?? 1; // Asegúrate de que tenga valor
           const porcCostoFijo = moData.costoFijoPorcentaje / 100;
+          //const porcCostoFijo = 1 + (moData.costoFijoPorcentaje / 100);
           const porcUtilidad = moData.utilidadPorcentaje / 100;
 
           const totalInsumoPorCantidad = insumo * cantidad;
+          const costo = insumo;
           const indirectoPartida = totalInsumoPorCantidad * porcCostoFijo;
           const totalPartidaIns = (totalInsumoPorCantidad + indirectoPartida) / (1 - porcUtilidad);
-
+        console.log("porcCostoFijo: ", porcCostoFijo);
           // Suma totales
           sumaValorInsumos += totalInsumoPorCantidad;
           valorIndirecto += indirectoPartida;
@@ -307,6 +309,7 @@ const VisualizarPDF = () => {
 
         });
         console.log("PartidasP: ", sum);
+        
         setSumaValorInsumos(sumaValorInsumos);
         setValorIndirecto(valorIndirecto);
         setSumaValorProyecto(sumaValorProyecto);

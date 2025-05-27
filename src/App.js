@@ -71,12 +71,86 @@ import VisualizarCotizacion from './pages/visualizarCotizacion';
 import { useEffect, useState } from 'react';
 import CancelarCotizacion from './pages/cancelarCotizacion';
 import CancelarLevDigital from './pages/cancelarLevDigital';
+import { useLocation } from "react-router-dom";
 
 function App() {
   //const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(
     !!localStorage.getItem('isAuthenticated') // Carga el estado inicial desde localStorage
   );
+useEffect(() => {
+  let timeoutId;
+
+  const logoutAfterInactivity = () => {
+    // Tiempo en milisegundos (30 minutos)
+    const INACTIVITY_LIMIT = 30 * 60 * 1000;
+
+    // Si ya hay un temporizador, lo reinicia
+    if (timeoutId) clearTimeout(timeoutId);
+
+    // Inicia o reinicia el temporizador
+    timeoutId = setTimeout(() => {
+      // Ejecuta logout
+      setIsAuthenticated(false);
+      localStorage.setItem('isAuthenticated', 'false');
+      window.location.href = "/login";
+    }, INACTIVITY_LIMIT);
+  };
+
+  // Eventos que reinician el temporizador
+  const resetTimer = () => logoutAfterInactivity();
+
+  // Detectar interacción del usuario
+  window.addEventListener("mousemove", resetTimer);
+  window.addEventListener("keydown", resetTimer);
+  window.addEventListener("scroll", resetTimer);
+  window.addEventListener("click", resetTimer);
+
+  // Inicia por primera vez
+  logoutAfterInactivity();
+
+  return () => {
+    clearTimeout(timeoutId);
+    window.removeEventListener("mousemove", resetTimer);
+    window.removeEventListener("keydown", resetTimer);
+    window.removeEventListener("scroll", resetTimer);
+    window.removeEventListener("click", resetTimer);
+  };
+}, []);
+/*const location = useLocation();
+useEffect(() => {
+  if (!isAuthenticated || location.pathname === "/login") return;
+
+  let timeoutId;
+
+  const logoutAfterInactivity = () => {
+    const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutos
+    if (timeoutId) clearTimeout(timeoutId);
+
+    timeoutId = setTimeout(() => {
+      setIsAuthenticated(false);
+      sessionStorage.setItem("isAuthenticated", "false");
+      window.location.href = "/login";
+    }, INACTIVITY_LIMIT);
+  };
+
+  const resetTimer = () => logoutAfterInactivity();
+
+  window.addEventListener("mousemove", resetTimer);
+  window.addEventListener("keydown", resetTimer);
+  window.addEventListener("scroll", resetTimer);
+  window.addEventListener("click", resetTimer);
+
+  logoutAfterInactivity();
+
+  return () => {
+    clearTimeout(timeoutId);
+    window.removeEventListener("mousemove", resetTimer);
+    window.removeEventListener("keydown", resetTimer);
+    window.removeEventListener("scroll", resetTimer);
+    window.removeEventListener("click", resetTimer);
+  };
+}, [isAuthenticated, location.pathname]);*/
 
   useEffect(() => {
     const authStatus = localStorage.getItem('isAuthenticated');
