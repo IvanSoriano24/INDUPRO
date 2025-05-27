@@ -71,15 +71,89 @@ import VisualizarCotizacion from './pages/visualizarCotizacion';
 import { useEffect, useState } from 'react';
 import CancelarCotizacion from './pages/cancelarCotizacion';
 import CancelarLevDigital from './pages/cancelarLevDigital';
+import { useLocation } from "react-router-dom";
 
 function App() {
   //const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(
-    !!sessionStorage.getItem('isAuthenticated') // Carga el estado inicial desde localStorage
+    !!localStorage.getItem('isAuthenticated') // Carga el estado inicial desde localStorage
   );
+useEffect(() => {
+  let timeoutId;
+
+  const logoutAfterInactivity = () => {
+    // Tiempo en milisegundos (30 minutos)
+    const INACTIVITY_LIMIT = 30 * 60 * 1000;
+
+    // Si ya hay un temporizador, lo reinicia
+    if (timeoutId) clearTimeout(timeoutId);
+
+    // Inicia o reinicia el temporizador
+    timeoutId = setTimeout(() => {
+      // Ejecuta logout
+      setIsAuthenticated(false);
+      localStorage.setItem('isAuthenticated', 'false');
+      window.location.href = "/login";
+    }, INACTIVITY_LIMIT);
+  };
+
+  // Eventos que reinician el temporizador
+  const resetTimer = () => logoutAfterInactivity();
+
+  // Detectar interacción del usuario
+  window.addEventListener("mousemove", resetTimer);
+  window.addEventListener("keydown", resetTimer);
+  window.addEventListener("scroll", resetTimer);
+  window.addEventListener("click", resetTimer);
+
+  // Inicia por primera vez
+  logoutAfterInactivity();
+
+  return () => {
+    clearTimeout(timeoutId);
+    window.removeEventListener("mousemove", resetTimer);
+    window.removeEventListener("keydown", resetTimer);
+    window.removeEventListener("scroll", resetTimer);
+    window.removeEventListener("click", resetTimer);
+  };
+}, []);
+/*const location = useLocation();
+useEffect(() => {
+  if (!isAuthenticated || location.pathname === "/login") return;
+
+  let timeoutId;
+
+  const logoutAfterInactivity = () => {
+    const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutos
+    if (timeoutId) clearTimeout(timeoutId);
+
+    timeoutId = setTimeout(() => {
+      setIsAuthenticated(false);
+      sessionStorage.setItem("isAuthenticated", "false");
+      window.location.href = "/login";
+    }, INACTIVITY_LIMIT);
+  };
+
+  const resetTimer = () => logoutAfterInactivity();
+
+  window.addEventListener("mousemove", resetTimer);
+  window.addEventListener("keydown", resetTimer);
+  window.addEventListener("scroll", resetTimer);
+  window.addEventListener("click", resetTimer);
+
+  logoutAfterInactivity();
+
+  return () => {
+    clearTimeout(timeoutId);
+    window.removeEventListener("mousemove", resetTimer);
+    window.removeEventListener("keydown", resetTimer);
+    window.removeEventListener("scroll", resetTimer);
+    window.removeEventListener("click", resetTimer);
+  };
+}, [isAuthenticated, location.pathname]);*/
 
   useEffect(() => {
-    const authStatus = sessionStorage.getItem('isAuthenticated');
+    const authStatus = localStorage.getItem('isAuthenticated');
     if (authStatus === 'true') {
       setIsAuthenticated(true);
     } else {
@@ -89,13 +163,13 @@ function App() {
 
   const handleLogin = () => {
     setIsAuthenticated(true);
-    sessionStorage.setItem('isAuthenticated', 'true');  // Asegúrate de guardar el estado en localStorage
+    localStorage.setItem('isAuthenticated', 'true');  // Asegúrate de guardar el estado en localStorage
   };
 
   const handleLogout = () => {
     // Para cerrar sesión
     setIsAuthenticated(false);
-    sessionStorage.setItem('isAuthenticated', 'false');
+    localStorage.setItem('isAuthenticated', 'false');
   };
 
   //Este mensaje debe de desaparecer despues de desacer todos los cambios
@@ -120,56 +194,55 @@ function App() {
                 )
               }
             />
-            <Route path="/levantamientoDigital" exact={true} element={<LevantamientoDigital />} />
-            <Route path="/precotizacion" exact={true} element={<Precotizacion />} />
-            <Route path="/revTecnicoFinanciero" exact={true} element={<RevTecnicoFinanciero />} />
-            <Route path="/cotizacion" exact={true} element={<Cotizacion />} />
-            <Route path="/clientes" exact={true} element={<Clientes />} />
-            <Route path="/contactos" exact={true} element={<Contactos />} />
-            <Route path="/tipo" exact={true} element={<Tipo />} />
-            <Route path="/usuarios" exact={true} element={<Usuarios />} />
-            <Route path="/factores/:id" exact={true} element={<Factores />} />
-            <Route path="/agregarCliente" exact={true} element={<AgregarCliente />} />
-            <Route path="/editarCliente/:id" element={<EditarCliente />} />
-            <Route path="/visualizarCliente/:id" element={<VisualizarCliente />} />
-            <Route path="/agregarContacto/:id" element={<AgregarContacto />} />
-            <Route path="/agregarTipo" element={<AgregarTipo />} />
-            <Route path="/editarContacto/:id" element={<EditarContacto />} />
-            <Route path="/personalProyectos" element={<PersonalProyectos />} />
-            <Route path="/agregarPersonal" element={<AgregarPersonal />} />
-            <Route path="/editarPersonalProyecto/:id" element={<EditarPersonalProyecto />} />
-            <Route path="/visualizarContacto/:id" element={<VisualizarContacto />} />
-            <Route path="/editarTipo/:id" element={<EditarTipo />} />
-            <Route path="/visualizarTipo/:id" element={<VisualizarTipo />} />
-            <Route path="/visualizarPersonal/:id" element={<VisualizarPersonal />} />
-            <Route path="/agregarFactores" element={<AgregarFactores />} />
-            <Route path="/editarFactores/:id" element={<EditarFactores />} />
-            <Route path="/visualizarFactor/:id" element={<VisualizarFactor />} />
-            <Route path="/agregarLevDigital" element={<AgregarLevDigital />} />
-            <Route path="/agregarPartidasLevDig" element={<AgregarPartidasLevDig />} />
-            <Route path="/editarLevDigital/:id" element={<EditarLevDigital />} />
-            <Route path="/editarParLevDig/:id" element={<EditarParLevDig />} />
-            <Route path="/agregarParLevDigAdicional/:id" element={<AgregarParLevDigAdicional />} />
-            <Route path="/agregarPreCotizacion/:id" element={<AgregarPreCotizacion />} />
-            <Route path="/editarPreCotizacion/:id" element={<EditarPreCotizacion />} />
-            <Route path="/cancelarPreCotizacion/:id" element={<CancelarPreCotizacion />} />
-            <Route path="/editarParPrecot/:id" element={<EditarParPrecot />} />
-            <Route path="/editarPartidasInsumoPC/:id" element={<EditarPartidasInsumosPC />} />
-            <Route path="/editarPartidasMO/:id" element={<EditarPartidasMO />} />
-            <Route path="/segDocLevDig/:id" element={<SegDocLevDig />} />
-            <Route path="/segDocPreCotizacion/:id" element={<SegDocPreCotizacion />} />
-            <Route path="/segDocRev/:id" element={<SegDocRev />} />
-            <Route path="/segDocCot/:id" element={<SegDocCot />} />
-            <Route path="/agregarRevTecFinanciero/:id" element={<AgregarRevTecFinanciero />} />
-            <Route path="/editarRevTecFinanciero/:id" element={<EditarRecTecFinanciero />} />
-            <Route path="/editarPartidasInsumosATF/:id" element={<EditarPartidasInsumosATF />} />
-            <Route path="/prueba2" element={<Prueba2 />} />
-            <Route path="/visualizarPDF/:id" element={<VisualizarPDF />} />
-            <Route path="/cancelarATF/:id" element={<CancelarATF />} />
-            <Route path="/cancelarCotizacion/:id" element={<CancelarCotizacion />} />
-            <Route path="/cancelarLevDigital/:id" element={<CancelarLevDigital />} />
-            <Route path="/visualizarCotizacion/:id" element={<VisualizarCotizacion />} />
-
+            <Route path="/levantamientoDigital" exact={true} element={ <ProtectedRoute isAuthenticated={isAuthenticated}><LevantamientoDigital /></ProtectedRoute>} />
+            <Route path="/precotizacion" exact={true} element={<ProtectedRoute isAuthenticated={isAuthenticated}><Precotizacion /></ProtectedRoute>} />
+            <Route path="/revTecnicoFinanciero" exact={true} element={<ProtectedRoute isAuthenticated={isAuthenticated}><RevTecnicoFinanciero /></ProtectedRoute>} />
+            <Route path="/cotizacion" exact={true} element={<ProtectedRoute isAuthenticated={isAuthenticated}><Cotizacion /></ProtectedRoute>} />
+            <Route path="/clientes" exact={true} element={<ProtectedRoute isAuthenticated={isAuthenticated}><Clientes /></ProtectedRoute>} />
+            <Route path="/contactos" exact={true} element={<ProtectedRoute isAuthenticated={isAuthenticated}><Contactos /></ProtectedRoute>} />
+            <Route path="/tipo" exact={true} element={<ProtectedRoute isAuthenticated={isAuthenticated}><Tipo /></ProtectedRoute>} />
+            <Route path="/usuarios" exact={true} element={<ProtectedRoute isAuthenticated={isAuthenticated}><Usuarios /></ProtectedRoute>} />
+            <Route path="/factores/:id" exact={true} element={<ProtectedRoute isAuthenticated={isAuthenticated}><Factores /></ProtectedRoute>} />
+            <Route path="/agregarCliente" exact={true} element={<ProtectedRoute isAuthenticated={isAuthenticated}><AgregarCliente /></ProtectedRoute>} />
+            <Route path="/editarCliente/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarCliente /></ProtectedRoute>} />
+            <Route path="/visualizarCliente/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><VisualizarCliente /></ProtectedRoute>} />
+            <Route path="/agregarContacto/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><AgregarContacto /></ProtectedRoute>} />
+            <Route path="/agregarTipo" element={<ProtectedRoute isAuthenticated={isAuthenticated}><AgregarTipo /></ProtectedRoute>} />
+            <Route path="/editarContacto/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarContacto /></ProtectedRoute>} />
+            <Route path="/personalProyectos" element={<ProtectedRoute isAuthenticated={isAuthenticated}><PersonalProyectos /></ProtectedRoute>} />
+            <Route path="/agregarPersonal" element={<ProtectedRoute isAuthenticated={isAuthenticated}><AgregarPersonal /></ProtectedRoute>} />
+            <Route path="/editarPersonalProyecto/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarPersonalProyecto /></ProtectedRoute>} />
+            <Route path="/visualizarContacto/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><VisualizarContacto /></ProtectedRoute>} />
+            <Route path="/editarTipo/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarTipo /></ProtectedRoute>} />
+            <Route path="/visualizarTipo/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><VisualizarTipo /></ProtectedRoute>} />
+            <Route path="/visualizarPersonal/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><VisualizarPersonal /></ProtectedRoute>} />
+            <Route path="/agregarFactores" element={<ProtectedRoute isAuthenticated={isAuthenticated}><AgregarFactores /></ProtectedRoute>} />
+            <Route path="/editarFactores/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarFactores /></ProtectedRoute>} />
+            <Route path="/visualizarFactor/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><VisualizarFactor /></ProtectedRoute>} />
+            <Route path="/agregarLevDigital" element={<ProtectedRoute isAuthenticated={isAuthenticated}><AgregarLevDigital /></ProtectedRoute>} />
+            <Route path="/agregarPartidasLevDig" element={<ProtectedRoute isAuthenticated={isAuthenticated}><AgregarPartidasLevDig /></ProtectedRoute>} />
+            <Route path="/editarLevDigital/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarLevDigital /></ProtectedRoute>} />
+            <Route path="/editarParLevDig/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarParLevDig /></ProtectedRoute>} />
+            <Route path="/agregarParLevDigAdicional/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><AgregarParLevDigAdicional /></ProtectedRoute>} />
+            <Route path="/agregarPreCotizacion/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><AgregarPreCotizacion /></ProtectedRoute>} />
+            <Route path="/editarPreCotizacion/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarPreCotizacion /></ProtectedRoute>} />
+            <Route path="/cancelarPreCotizacion/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><CancelarPreCotizacion /></ProtectedRoute>} />
+            <Route path="/editarParPrecot/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarParPrecot /></ProtectedRoute>} />
+            <Route path="/editarPartidasInsumoPC/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarPartidasInsumosPC /></ProtectedRoute>} />
+            <Route path="/editarPartidasMO/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarPartidasMO /></ProtectedRoute>} />
+            <Route path="/segDocLevDig/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><SegDocLevDig /></ProtectedRoute>} />
+            <Route path="/segDocPreCotizacion/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><SegDocPreCotizacion /></ProtectedRoute>} />
+            <Route path="/segDocRev/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><SegDocRev /></ProtectedRoute>} />
+            <Route path="/segDocCot/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><SegDocCot /></ProtectedRoute>} />
+            <Route path="/agregarRevTecFinanciero/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><AgregarRevTecFinanciero /></ProtectedRoute>} />
+            <Route path="/editarRevTecFinanciero/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarRecTecFinanciero /></ProtectedRoute>} />
+            <Route path="/editarPartidasInsumosATF/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><EditarPartidasInsumosATF /></ProtectedRoute>} />
+            <Route path="/prueba2" element={<ProtectedRoute isAuthenticated={isAuthenticated}><Prueba2 /></ProtectedRoute>} />
+            <Route path="/visualizarPDF/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><VisualizarPDF /></ProtectedRoute>} />
+            <Route path="/cancelarATF/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><CancelarATF /></ProtectedRoute>} />
+            <Route path="/cancelarCotizacion/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><CancelarCotizacion /></ProtectedRoute>} />
+            <Route path="/cancelarLevDigital/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><CancelarLevDigital /></ProtectedRoute>} />
+            <Route path="/visualizarCotizacion/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated}><VisualizarCotizacion /></ProtectedRoute>} />
           </Routes>
         </div>
       </div>

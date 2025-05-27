@@ -11,17 +11,17 @@ import GSSOLUCIONESLOGO from "../imagenes/GS-SOLUCIONES-LOGO.png";
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const userRole = sessionStorage.getItem('userRole'); 
+const userRole = localStorage.getItem('userRole'); 
 const SidebarComponent = ({ onLogout }) => {
   const clave = "NTtgoYURKvkxbuq2ospC";
   const navigate = useNavigate();
 const [isAuthenticated, setIsAuthenticated] = useState(
-    !!sessionStorage.getItem('isAuthenticated') // Carga el estado inicial desde localStorage
+    !!localStorage.getItem('isAuthenticated') // Carga el estado inicial desde localStorage
   );
   const handleLogout = () => {
-    sessionStorage.removeItem("isAuthenticated");
-    sessionStorage.removeItem("userRole");
-    sessionStorage.clear();
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("userRole");
+    localStorage.clear();
     //setIsAuthenticated(false);
     onLogout();
     navigate("/login");
