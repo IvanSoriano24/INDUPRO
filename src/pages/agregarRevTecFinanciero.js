@@ -1191,7 +1191,7 @@ const AgregarRevTecFinanciero = () => {
             fianzasPorcentaje: fianzas,
             factorIndirectoPorcentaje: costoFijo + factoraje,
             factorIndirectoNum: factorIndirecto,
-            valorInsumos: cantidad * sumarCalculoInsumoV, //cantidad de partida 60
+            valorInsumos: cantidad * sumarCalculoInsumoV,
             claveSae: claveSae,
             costoIntegrado: costoIntegrado,
             costoXpartida: costoIntegrado,
@@ -1885,6 +1885,13 @@ const AgregarRevTecFinanciero = () => {
           },
         ]);
 
+        //Correcion de doble layout
+        const customLayout = {
+          fillColor: (rowIndex) => (rowIndex === 0 ? "#eeeeee" : null),
+          hLineWidth: () => 0,
+          vLineWidth: () => 0,
+        };
+
         // Define el contenido del documento PDF
         const documentDefinition = {
           pageMargins: [40, 160, 40, 40],
@@ -1935,10 +1942,7 @@ const AgregarRevTecFinanciero = () => {
                   ...tableBody10,
                 ],
               },
-              layout: {
-                fillColor: (rowIndex) => (rowIndex === 0 ? "#eeeeee" : null),
-              },
-              layout: "noBorders",
+              layout: customLayout,
             },
             {
               text: "INSUMOS",
@@ -1970,10 +1974,7 @@ const AgregarRevTecFinanciero = () => {
                   ...tableBody20,
                 ],
               },
-              layout: {
-                fillColor: (rowIndex) => (rowIndex === 0 ? "#eeeeee" : null),
-              },
-              layout: "noBorders",
+              layout: customLayout,
             },
             {
               text: "Mano de Obra", // 🔵 TÍTULO para la segunda tabla
@@ -1994,10 +1995,8 @@ const AgregarRevTecFinanciero = () => {
                   ...tableBody30,
                 ],
               },
-              layout: {
-                fillColor: (rowIndex) => (rowIndex === 0 ? "#eeeeee" : null),
-              },
-              layout: "noBorders",
+              layout: customLayout,
+
             },
           ],
           styles: {
