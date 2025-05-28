@@ -289,7 +289,11 @@ const VisualizarPDF = () => {
             noPartidaATF: moData.noPartidaATF,
             cve_tecFin: moData.cve_tecFin,
           });
-
+/*
+totalInsumo: sumarCalculoInsumoV,
+valorInsumos: cantidad * sumarCalculoInsumoV,
+Falta multiplicar por cantidad de partida
+*/
 
           const insumo = moData.totalInsumo;
           const cantidad = moData.cantidad ?? 1; // Asegúrate de que tenga valor
@@ -302,7 +306,7 @@ const VisualizarPDF = () => {
           const indirectoPartida = totalInsumoPorCantidad * porcCostoFijo;
           const totalPartidaIns = (totalInsumoPorCantidad + indirectoPartida) / (1 - porcUtilidad);
         console.log("porcCostoFijo: ", porcCostoFijo);
-          // Suma totales
+          // Suma totales 
           sumaValorInsumos += totalInsumoPorCantidad;
           valorIndirecto += indirectoPartida;
           sumaValorProyecto += totalPartidaIns;
