@@ -386,8 +386,8 @@ const AgregarPreCotizacion = () => {
   const validarClaveSae = async (claveSae) => {
     try {
       const response = await axios.get(
-        //`http://localhost:5000/api/claveValidacion/${claveSae}`
-        `/api/claveValidacion/${claveSae}`
+        `http://localhost:5000/api/claveValidacion/${claveSae}`
+        //`/api/claveValidacion/${claveSae}`
       );
       const data = response.data;
       console.log(data);
@@ -993,7 +993,7 @@ const AgregarPreCotizacion = () => {
       //if (clavesSAE.length === 0) {
       console.log("🔄 Cargando claves SAE antes de editar...");
       const responseInsumos = await axios.get(
-        "http://localhost:5000/api/clave-sae"
+          "http://localhost:5000/api/clave-sae"
         //"/api/clave-sae"
       );
 
@@ -1053,8 +1053,8 @@ const AgregarPreCotizacion = () => {
     if (clavesSAE.length === 0) {
       console.log("🔄 Cargando claves SAE antes de editar...");
       const responseInsumos = await axios.get(
-        //"http://localhost:5000/api/clave-sae"
-        "/api/clave-sae"
+        "http://localhost:5000/api/clave-sae"
+        //"/api/clave-sae"
       );
 
       // ✅ Transformamos la respuesta para tener claves limpias y legibles

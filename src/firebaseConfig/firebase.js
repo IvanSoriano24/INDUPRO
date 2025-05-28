@@ -9,7 +9,7 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
+/*const firebaseConfig = {
   apiKey: "AIzaSyDWYr3Wloa2DD3iYxUtEJHzcDuU6_nHE9Y",
   authDomain: "gscotiza-cd748.firebaseapp.com",
   projectId: "gscotiza-cd748",
@@ -18,7 +18,7 @@ const firebaseConfig = {
   appId: "1:646240285537:web:4e54981eddb25dae6d0b20",
   measurementId: "G-TT4XSDGQLF"
 };
-/*const firebaseConfig = {
+*/const firebaseConfig = {
   apiKey: "AIzaSyBKv6eP7cS2UwRaC5SCAN_c-X5tOr4EzcQ",
   authDomain: "indupro-ejemplos.firebaseapp.com",
   projectId: "indupro-ejemplos",
@@ -26,7 +26,7 @@ const firebaseConfig = {
   messagingSenderId: "216596905783",
   appId: "1:216596905783:web:f59b8210a9453c4e4ba4b2",
   measurementId: "G-JB7NGQRR4J"
-};*/
+};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

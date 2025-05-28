@@ -79,6 +79,10 @@ const VisualizarPDF = () => {
   const [utilidadNeta, setUtilidadNeta] = useState(0);
   const [valoresArticulo, seValoresArticulo] = useState([]);
 
+  let [totalMaterialesDavid,  setTotalMaterialesDavid] = useState(0);
+  let [totalServiciosDavid,  setTotalServiciosDavid] = useState(0);
+  let [totalViaticosDavid,  setTotalViaticosDavid] = useState(0);
+
   function DecimalAlignedCell({ value }) {
     const [entero, decimal] = Number(value).toFixed(2).split(".");
     const enteroFormateado = Number(entero).toLocaleString("en-US");
@@ -193,7 +197,23 @@ const VisualizarPDF = () => {
         //totalIns += item.cantidad * item.costoCotizado;
         totalIns += item.total;
       });
+
+      // #####################################
+      try{
+        const docAnterior= await getDocs(
+            query(
+                collection(db, "PAR_TECFIN_INSU"),
+                where("cve_tecFin", "==", cve_tecFin)
+            )
+        );
+      } catch (error) {
+        console.error("Error al obtener la cantidad por partida");
+      }
+      // #####################################
+
+
       console.log("PartidasI: ", sum);
+      console.log("totalIns: -------------  ", totalIns);
       // Actualiza el estado con la lista de elementos y el total calculado
       setPar_PreCoti_insu(par_levDigList1);
       setTotalMateria(totalIns);
@@ -295,24 +315,49 @@ valorInsumos: cantidad * sumarCalculoInsumoV,
 Falta multiplicar por cantidad de partida
 */
 
+          // #################################### Partida 1 (totalMaterial (1327.85) x cantidad de partida (6)) + Partida 2 (totalMaterial (200) x cantidad de partida (1)) = 8,167.1
+          const materialesTotalesDePartidaPorCantidadDePartida___David = moData.totalMaterial * moData.cantidad;
+          const serviciosTotalesDePartidaPorCantidadDePartida___David = moData.totalServicio * moData.cantidad;
+          const viaticosTotalesDePartidaPorCantidadDePartida___David = moData.totalViaticos * moData.cantidad;
+
           const insumo = moData.totalInsumo;
           const cantidad = moData.cantidad ?? 1; // Asegúrate de que tenga valor
           const porcCostoFijo = moData.costoFijoPorcentaje / 100;
           //const porcCostoFijo = 1 + (moData.costoFijoPorcentaje / 100);
           const porcUtilidad = moData.utilidadPorcentaje / 100;
 
-          const totalInsumoPorCantidad = insumo * cantidad;
+
+          //Cambio
+          const valorInsumo = moData.valorInsumos ?? 0;
+
+          const totalInsumoPorCantidad = insumo * cantidad; //insumo tiene que ser valorInsumo
           const costo = insumo;
-          const indirectoPartida = totalInsumoPorCantidad * porcCostoFijo;
-          const totalPartidaIns = (totalInsumoPorCantidad + indirectoPartida) / (1 - porcUtilidad);
+          const indirectoPartida = valorInsumo * porcCostoFijo;
+          const totalPartidaIns = (valorInsumo + indirectoPartida) / (1 - porcUtilidad);
+          console.log("totalPartidaIns _------- ", totalPartidaIns);
         console.log("porcCostoFijo: ", porcCostoFijo);
           // Suma totales 
           sumaValorInsumos += totalInsumoPorCantidad;
           valorIndirecto += indirectoPartida;
           sumaValorProyecto += totalPartidaIns;
 
+          totalMaterialesDavid += materialesTotalesDePartidaPorCantidadDePartida___David;
+          totalServiciosDavid += serviciosTotalesDePartidaPorCantidadDePartida___David;
+          totalViaticosDavid += viaticosTotalesDePartidaPorCantidadDePartida___David;
+
+
         });
         console.log("PartidasP: ", sum);
+
+
+        setTotalMaterialesDavid(totalMaterialesDavid);
+        setTotalServiciosDavid(totalServiciosDavid);
+        setTotalViaticosDavid(totalViaticosDavid);
+
+
+        console.log("Total Materiales David -------------- ", totalMaterialesDavid);
+        console.log("Total Servicios David -------------- ", totalServiciosDavid);
+        console.log("Total Viaticos David -------------- ", totalViaticosDavid);
         
         setSumaValorInsumos(sumaValorInsumos);
         setValorIndirecto(valorIndirecto);
@@ -804,9 +849,9 @@ const calcularCotizacion = async () => {
                 <td></td>
                 <th style={{ textAlign: "center" }}>Materiales</th>
                 <td></td>
-                <DecimalAlignedCell value={totalMateria} />
+                <DecimalAlignedCell value={totalMaterialesDavid} />
                 <td style={{ textAlign: "center" }}>
-                  {((totalMateria * 100) / sumaValorProyecto).toFixed(2)} %
+                  {((totalMaterialesDavid * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
@@ -815,9 +860,9 @@ const calcularCotizacion = async () => {
                   Subcontrato
                 </th>
                 <td></td>
-                <DecimalAlignedCell value={totalSubContrado} />
+                <DecimalAlignedCell value={totalServiciosDavid} />
                 <td style={{ textAlign: "center" }}>
-                  {((totalSubContrado * 100) / sumaValorProyecto).toFixed(2)} %
+                  {((totalServiciosDavid * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
@@ -826,9 +871,9 @@ const calcularCotizacion = async () => {
                   Viaticos
                 </th>
                 <td></td>
-                <DecimalAlignedCell value={totalViatico} />
+                <DecimalAlignedCell value={totalViaticosDavid} />
                 <td style={{ textAlign: "center" }}>
-                  {((totalViatico * 100) / sumaValorProyecto).toFixed(2)} %
+                  {((totalViaticosDavid * 100) / sumaValorProyecto).toFixed(2)} %
                 </td>
               </tr>
               <tr>
