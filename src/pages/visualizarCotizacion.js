@@ -653,8 +653,8 @@ swal.fire({
       });
     const { folioSiguiente } = (
       await axios.get(
-        //"http://localhost:5000/api/obtenerFolio"
-        "/api/obtenerFolio"
+        "http://localhost:5000/api/obtenerFolio"
+        //"/api/obtenerFolio"
       )
     ).data;
     setFolioSig(folioSiguiente);
@@ -665,8 +665,8 @@ swal.fire({
 
     let clave = cliente.toString(); // sin padStart
     const clie = await axios.get(
-      //`http://localhost:5000/api/datosClie/${clave}`
-      `/api/datosClie/${clave}`
+      `http://localhost:5000/api/datosClie/${clave}`
+      //`/api/datosClie/${clave}`
     );
 
     const datosCliente = clie.data.datosCliente;
@@ -713,8 +713,8 @@ swal.fire({
     for (const cve_art of articulos) {
       try {
         const response = await axios.get(
-          //`http://localhost:5000/api/datosInsumoe/${cve_art}`
-          `/api/datosInsumoe/${cve_art}`
+          `http://localhost:5000/api/datosInsumoe/${cve_art}`
+          //`/api/datosInsumoe/${cve_art}`
         );
         const datosInsumo = response.data.datosInsumos;
         console.log("🧾 Datos del insumo:", datosInsumo);
@@ -746,13 +746,16 @@ swal.fire({
       //console.log("costos: ", costos);
        const costoMatch = costos.find(c => Number(c.noPartidaATF) === Number(detalle.noPartidaATF)) || {};
       console.log("costoMatch: ", costoMatch);
-
+  
+      console.log("cantidad: ", detalle.cantidad);
       return {
+        
         data: detalle,
         CVE_DOC: CVE_DOC ?? "",
         noPartida: detalle.noPartidaATF ?? "",
         CVE_ART: detalle.claveSae ?? "",
-        CANT: Number(detalle.cantidad) ?? 0,
+        //CANT: Number(detalle.cantidad) ?? 0,
+        CANT: Number((detalle.cantidad + "").replace(/[^0-9.]/g, "")) || 0,
         PREC: detalle.costoCotizado ?? 0,
         TOT_PARTIDA: detalle.total ?? 0,
         UNI_VENTA: impuestos.UNI_MED ?? "",
@@ -789,8 +792,8 @@ swal.fire({
     console.log("Partidas: ", dataPartidas);
 
     await axios.post(
-      //"http://localhost:5000/api/guardarPartidas",
-      "/api/guardarPartidas",
+      "http://localhost:5000/api/guardarPartidas",
+      //"/api/guardarPartidas",
       {
         data: dataPartidas,
       }
@@ -822,15 +825,15 @@ swal.fire({
     };
     console.log("Cotizacion: ", dataCotizacion);
     const responseCotizacion = await axios.post(
-      //"http://localhost:5000/api/cotizacion",
-      "/api/cotizacion",
+      "http://localhost:5000/api/cotizacion",
+      //"/api/cotizacion",
       dataCotizacion
     );
 
     const { nuevoFolio } = (
       await axios.get(
-        //"http://localhost:5000/api/actualizarFolio"
-        "/api/actualizarFolio"
+        "http://localhost:5000/api/actualizarFolio"
+        //"/api/actualizarFolio"
       )
     ).data;
 
@@ -842,8 +845,8 @@ swal.fire({
     if (clientes.length === 0) {
       console.log("🔄 Cargando proveedores antes de editar...");
       const responseClientes = await axios.get(
-        //"http://localhost:5000/api/cliente"
-        "/api/cliente"
+        "http://localhost:5000/api/cliente"
+        //"/api/cliente"
       );
       listaClientes = responseClientes.data;
       setClientes(listaClientes);
@@ -864,8 +867,8 @@ swal.fire({
 
     const { folioSiguiente } = (
       await axios.get(
-        //"http://localhost:5000/api/obtenerFolio"
-        "/api/obtenerFolio"
+        "http://localhost:5000/api/obtenerFolio"
+        //"/api/obtenerFolio"
       )
     ).data;
     setFolioSae(folioSiguiente);

@@ -33,7 +33,7 @@ import { FaPercent, FaCheckCircle } from "react-icons/fa";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import encabezadoPDF from "../imagenes/GS-ENCABEZADO-2.PNG";
-import swal from "sweetalert2";
+import Swal from "sweetalert2";
 import { Switch, FormControlLabel } from "@mui/material";
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -686,34 +686,36 @@ const calcularCotizacion = async () => {
   };
 
   const asegurarCotizacion = () => {
-    swal
-      .fire({
-        title: "Estás seguro de aprobar la cotización?",
-        text: "Una vez aprobada, no podrán modificarse los costos del proyecto!",
-        icon: "warning",
-        buttons: true,
-        dangerMode: true,
-      })
-      .then((willDelete) => {
-        if (willDelete) {
-          addCotizacion();
-          swal
-            .fire("¡Felicidades, ahora puedes decargar tu cotización!", {
-              icon: "success",
-            })
-            .then(() => {
-              navigate("/cotizacion");
-            });
-        } else {
-          swal.fire("¡Ok, seguimos viendo los costos!");
-        }
-      });
-  };
+      Swal
+        .fire({
+          title: "Estás seguro de aprobar la cotización?",
+          text: "Una vez aprobada, no podrán modificarse los costos del proyecto!",
+          icon: "warning",
+          showCancelButton: true, // ✅ muestra botón de cancelar
+          confirmButtonText: "Aceptar",
+          cancelButtonText: "Cancelar",
+          reverseButtons: true, // ✅ opcional: pone "Cancelar" a la izquierda
+        })
+        .then((result) => {
+          if (result.isConfirmed) {
+            addCotizacion();
+            Swal
+              .fire("¡Felicidades, ahora puedes decargar tu cotización!", {
+                icon: "success",
+              })
+              .then(() => {
+                navigate("/cotizacion");
+              });
+          } else {
+            Swal.fire("¡Ok, seguimos viendo los costos!");
+          }
+        });
+    };
 
   /*****************************************************************************************************/
   const aplicarFactoraje = () => {
-    if (factorajeAplicado <= 0) {
-      swal.fire({
+    if (factorajeManual <= 0) {
+      Swal.fire({
         icon: "warning",
         title: "Factoraje Negativo",
         text: "El Factoraje no Puede ser Negativo:",

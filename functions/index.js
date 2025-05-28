@@ -503,7 +503,7 @@ app.post("/api/guardarPartidas", async (req, res) => {
         .input("CVE_DOC", sql.VarChar, CVE_DOC)
         .input("NUM_PAR", sql.Int, nuPartida)
         .input("CVE_ART", sql.VarChar, CVE_ART)
-        .input("CANT", sql.VarChar, CANT)
+        .input("CANT", sql.Float, CANT)
         .input("PXS", sql.Float, 0)
         .input("PREC", sql.Float, PREC)
         .input("COST", sql.Float, 0)
@@ -561,8 +561,8 @@ app.post("/api/guardarPartidas", async (req, res) => {
       nuPartida++;
 
       const queryClibc = `
-      INSERT INTO PAR_FACTC_CLIBC01 (
-        CLAVE_DOC, NUM_PART, CAMPLIB1, CAMPLIB22, CAMPLIB23, CAMPLIB24, CAMPLIB25
+      INSERT INTO PAR_FACTC_CLIB01 (
+        CLAVE_DOC, NUM_PART, CAMPLIB22, CAMPLIB23, CAMPLIB24, CAMPLIB25
       ) VALUES (
         @CLAVE_DOC, @NUM_PART, @CAMPLIB22, @CAMPLIB23, @CAMPLIB24, @CAMPLIB25
       )
@@ -571,7 +571,6 @@ app.post("/api/guardarPartidas", async (req, res) => {
     await pool.request()
       .input("CLAVE_DOC", sql.VarChar, CVE_DOC)
       .input("NUM_PART", sql.Int, partidaa || nuPartida - 1) // Usa noPartida si viene
-      .input("CAMPLIB1", sql.VarChar, CAMPPLIB1)
       .input("CAMPLIB22", sql.Float, CAMPLIB22)
       .input("CAMPLIB23", sql.Int, CAMPLIB23)
       .input("CAMPLIB24", sql.Float, CAMPLIB24)
