@@ -156,7 +156,7 @@ const VisualizarPDF = () => {
   const cve_int =
     clientesList.length > 0
       ? clientesList[0].cve_int
-      : "No hay documentos de precotización";
+      : 0;
   const nombreComercial =
     clientesList.length > 0
       ? clientesList[0].nombreComercial
@@ -618,7 +618,7 @@ const calcularCotizacion = async () => {
       await addDoc(docCotizacion, {
         cve_tecFin: docFolio + nuevoFolioSiguiente.toString(),
         cve_clie: cve_clie,
-        cve_int: cve_int,
+        cve_int: cve_int ?? 0,
         estatus: "Activo",
         fechaElaboracion: fechaElaboracion,
         fechaInicio: fechaInicio,
@@ -636,7 +636,7 @@ const calcularCotizacion = async () => {
       await addDoc(docCotizacion, {
         cve_tecFin: docFolio + nuevoFolioSiguiente.toString(),
         cve_clie: cve_clie,
-        cve_int: cve_int,
+        cve_int: cve_int ?? "0",
         estatus: "Activo",
         fechaElaboracion: fechaElaboracion,
         fechaInicio: fechaInicio,
@@ -667,6 +667,7 @@ const calcularCotizacion = async () => {
         totalMaterial: item.totalMaterial ?? 0,
         totalServicio: item.totalServicio ?? 0,
         totalViaticos: item.totalViaticos ?? 0,
+        costoUnitario: item.costoUnitario ?? 0,
       });
     });
     await addDoc(bitacora, {
@@ -814,6 +815,7 @@ const calcularCotizacion = async () => {
               )}
             </div>
           </div>
+
           {/*Fin Mostrar Factoraje*/}
 
           <table className="table table-hover">

@@ -257,7 +257,8 @@ const VisualizarCotizacion = () => {
                 {
                   text:
                     "Importe: " +
-                    item.totalPartida.toLocaleString("en-US", {
+                    item.costoUnitario.toLocaleString("en-US", {
+                    //item.totalPartida.toLocaleString("en-US", {
                       style: "currency",
                       currency: "USD",
                     }),
@@ -318,6 +319,7 @@ const VisualizarCotizacion = () => {
               fontSize: 12,
               bold: true,
             },
+            //Modificar Para traer la condicion Comercial
             {
               margin: [0, 5, 0, 0],
               text: "Prueba",

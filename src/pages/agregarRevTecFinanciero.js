@@ -831,7 +831,11 @@ const AgregarRevTecFinanciero = () => {
     );
 
     if (moSnapshot.empty) {
-      console.warn("⚠️ No se encontraron servicios para:", cve_tecFin, noPartida);
+      console.warn(
+        "⚠️ No se encontraron servicios para:",
+        cve_tecFin,
+        noPartida
+      );
       return 0;
     }
 
@@ -864,7 +868,11 @@ const AgregarRevTecFinanciero = () => {
     );
 
     if (moSnapshot.empty) {
-      console.warn("⚠️ No se encontraron materiales para:", cve_tecFin, noPartida);
+      console.warn(
+        "⚠️ No se encontraron materiales para:",
+        cve_tecFin,
+        noPartida
+      );
       return 0;
     }
 
@@ -898,7 +906,11 @@ const AgregarRevTecFinanciero = () => {
     );
 
     if (moSnapshot.empty) {
-      console.warn("⚠️ No se encontraron viaticos para:", cve_tecFin, noPartida);
+      console.warn(
+        "⚠️ No se encontraron viaticos para:",
+        cve_tecFin,
+        noPartida
+      );
       return 0;
     }
 
@@ -1142,27 +1154,43 @@ const AgregarRevTecFinanciero = () => {
 
       /**************************************************AGREGAR TOTALES ******************************** */
 
-      const { costoFijo, factoraje, utilidad, fianzas } = await obtenerPorcentajes();
+      const { costoFijo, factoraje, utilidad, fianzas } =
+        await obtenerPorcentajes();
 
       if (
-          costoFijo !== undefined &&
-          factoraje !== undefined &&
-          utilidad !== undefined &&
-          fianzas !== undefined
+        costoFijo !== undefined &&
+        factoraje !== undefined &&
+        utilidad !== undefined &&
+        fianzas !== undefined
       ) {
         const cotTotal = collection(db, "ANALISIS_TOTALES");
 
         for (const itemTotales of par_levDigital) {
           const cantidad = parseInt(itemTotales.cantidad);
-          const sumaValorLider = await sumarValorLider(cve_precot, itemTotales.noPartida);
-          const sumarCalculoInsumoV = await sumarCalculoInsumo(cve_precot, itemTotales.noPartida);
-          const sumarCalculoServicioV = await sumarCalculoServicio(cve_precot, itemTotales.noPartida);
-          const sumarCalculoMaterialV = await sumarCalculoMaterial(cve_precot, itemTotales.noPartida);
-          const sumarCalculoViaticosV = await sumarCalculoViaticos(cve_precot, itemTotales.noPartida);
+          const sumaValorLider = await sumarValorLider(
+            cve_precot,
+            itemTotales.noPartida
+          );
+          const sumarCalculoInsumoV = await sumarCalculoInsumo(
+            cve_precot,
+            itemTotales.noPartida
+          );
+          const sumarCalculoServicioV = await sumarCalculoServicio(
+            cve_precot,
+            itemTotales.noPartida
+          );
+          const sumarCalculoMaterialV = await sumarCalculoMaterial(
+            cve_precot,
+            itemTotales.noPartida
+          );
+          const sumarCalculoViaticosV = await sumarCalculoViaticos(
+            cve_precot,
+            itemTotales.noPartida
+          );
 
           //const costoBase = sumaValorLider + sumarCalculoInsumoV;
           const costoBase = sumarCalculoInsumoV * cantidad;
-          const factorIndirecto = (costoFijo) / 100;  
+          const factorIndirecto = costoFijo / 100;
           const costoIntegrado = costoBase * (1 + factorIndirecto);
           const precioXpartida = costoIntegrado / (1 - utilidad / 100);
           const precioUnitario = precioXpartida / cantidad;
@@ -1200,7 +1228,7 @@ const AgregarRevTecFinanciero = () => {
             costoFactorizado: costoIntegrado, // si quieres un nombre más explícito usa otro campo
             precioXpartida: precioXpartida,
             precioUnitario: precioUnitario,
-            utilidaEsperada: utilidadEsperada
+            utilidaEsperada: utilidadEsperada,
           });
         }
       }
@@ -1997,7 +2025,6 @@ const AgregarRevTecFinanciero = () => {
                 ],
               },
               layout: customLayout,
-
             },
           ],
           styles: {

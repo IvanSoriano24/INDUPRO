@@ -125,7 +125,7 @@ const AgregarCliente = () => {
             return;
         }
         await actualizarFolioSiguiente();
-        await addDoc( clienteCollecion, { cve_clie: cve_clie, cve_int: cve_int, razonSocial: razonSocial,  rfc: rfc, calle: calle, numExt: numExt, numInt: numInt, entreCalle: entreCalle,  colonia: colonia, referencia: referencia, poblacion: poblacion, codigoPostal: codigoPostal, estado: estado, pais: pais, municipio: municipio, nacionalidad: nacionalidad, nombreComercial: nombreComercial, condicionComercial: condicionComercial, diasCredito: diasCredito, estatus: estatus })
+        await addDoc( clienteCollecion, { cve_clie: cve_clie, cve_int: cve_int ?? 0, razonSocial: razonSocial,  rfc: rfc, calle: calle, numExt: numExt, numInt: numInt, entreCalle: entreCalle,  colonia: colonia, referencia: referencia, poblacion: poblacion, codigoPostal: codigoPostal, estado: estado, pais: pais, municipio: municipio, nacionalidad: nacionalidad, nombreComercial: nombreComercial, condicionComercial: condicionComercial, diasCredito: diasCredito, estatus: estatus })
         navigate("/clientes/")
     }
 
