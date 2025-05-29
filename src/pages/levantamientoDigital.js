@@ -54,7 +54,12 @@ const LevantamientoDigital = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalList.push({ ...combinedData, id: levDigitalDoc.id });
-        levDigitalList.sort((a, b) => a.cve_levDig - b.cve_levDig);
+        levDigitalList.sort((a, b) => {
+          const numA = parseInt(a.cve_levDig.replace(/\D/g, ""));
+          const numB = parseInt(b.cve_levDig.replace(/\D/g, ""));
+          return numB - numA; // Para orden descendente (más reciente primero)
+        });
+
       }
     }
 
@@ -93,7 +98,12 @@ const LevantamientoDigital = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalListB.push({ ...combinedData, id: levDigitalDoc.id });
-        levDigitalListB.sort((a, b) => a.cve_levDig - b.cve_levDig);
+        levDigitalListB.sort((a, b) => {
+          const numA = parseInt(a.cve_levDig.replace(/\D/g, ""));
+          const numB = parseInt(b.cve_levDig.replace(/\D/g, ""));
+          return numB - numA; // Para orden descendente (más reciente primero)
+        });
+
       }
     }
 
@@ -132,7 +142,12 @@ const LevantamientoDigital = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalListC.push({ ...combinedData, id: levDigitalDoc.id });
-        levDigitalListC.sort((a, b) => a.cve_levDig - b.cve_levDig);
+        levDigitalListC.sort((a, b) => {
+          const numA = parseInt(a.cve_levDig.replace(/\D/g, ""));
+          const numB = parseInt(b.cve_levDig.replace(/\D/g, ""));
+          return numB - numA; // Para orden descendente (más reciente primero)
+        });
+
       }
     }
     setLevDigitalC(levDigitalListC);
@@ -172,9 +187,9 @@ const LevantamientoDigital = () => {
         </div>
         <div className="col-md-4 ">
           <div className="mb-3">
-            <div class="input-group-append">
+            <div className="input-group-append">
               <Link to="/agregarLevDigital">
-                <button class="btn btn-success" type="button">
+                <button className="btn btn-success" type="button">
                   <CiCirclePlus /> Agregar{" "}
                 </button>
               </Link>

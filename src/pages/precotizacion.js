@@ -54,7 +54,12 @@ const Precotizacion = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalList.push({ ...combinedData, id: levDigitalDoc.id });
-        levDigitalList.sort((a, b) => a.cve_precot - b.cve_precot);
+        levDigitalList.sort((a, b) => {
+          const numA = parseInt(a.cve_precot.replace(/\D/g, ""));
+          const numB = parseInt(b.cve_precot.replace(/\D/g, ""));
+          return numB - numA;
+        });
+
       }
     }
 
@@ -93,7 +98,12 @@ const Precotizacion = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalListB.push({ ...combinedData, id: levDigitalDoc.id });
-        levDigitalListB.sort((a, b) => a.cve_precot - b.cve_precot);
+        levDigitalListB.sort((a, b) => {
+          const numA = parseInt(a.cve_precot.replace(/\D/g, ""));
+          const numB = parseInt(b.cve_precot.replace(/\D/g, ""));
+          return numB - numA;
+        });
+
       }
     }
 
@@ -131,7 +141,12 @@ const Precotizacion = () => {
         // Combinar información de LEVDIGITAL y CLIENTES
         const combinedData = { ...levDigitalData, cliente: clienteData };
         levDigitalListC.push({ ...combinedData, id: levDigitalDoc.id });
-        levDigitalListC.sort((a, b) => a.cve_precot - b.cve_precot);
+        levDigitalListC.sort((a, b) => {
+          const numA = parseInt(a.cve_precot.replace(/\D/g, ""));
+          const numB = parseInt(b.cve_precot.replace(/\D/g, ""));
+          return numB - numA;
+        });
+
       }
     }
 
