@@ -1161,8 +1161,8 @@ const AgregarRevTecFinanciero = () => {
           const sumarCalculoViaticosV = await sumarCalculoViaticos(cve_precot, itemTotales.noPartida);
 
           //const costoBase = sumaValorLider + sumarCalculoInsumoV;
-          const costoBase = sumarCalculoInsumoV;
-          const factorIndirecto = (costoFijo + factoraje) / 100;  
+          const costoBase = sumarCalculoInsumoV * cantidad;
+          const factorIndirecto = (costoFijo) / 100;  
           const costoIntegrado = costoBase * (1 + factorIndirecto);
           const precioXpartida = costoIntegrado / (1 - utilidad / 100);
           const precioUnitario = precioXpartida / cantidad;

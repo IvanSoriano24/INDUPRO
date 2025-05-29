@@ -46,23 +46,8 @@ const EditarRecTecFinanciero = () => {
   /* ----------------------------------------------------- */
   const [show, setShow] = useState(false);
   const [tot, setTot] = useState(false);
-  const handleClose = () => {
-    setShow(false);
-    setSelectedPartida(null);
-    setCantidad("");
-    setDescripcion("");
-    setObservacion("");
-  };
 
-  const closeTot = () => {
-    setTot(false);
-    setSelectedPartida(null);
-    setCantidadTotalesEdit("");
-    setCostoFijoEdit("");
-    setUtilidadEdit("");
-  };
-
-  const [selectedPartida, setSelectedPartida] = useState(null);
+  const [selectedPartida, setSelectedPartida] = useState("");
 
   const guardarEdicion = async () => {
     if (idPartida) {
@@ -96,6 +81,7 @@ const EditarRecTecFinanciero = () => {
   const [manoObraEdit, setManoObraEdit] = useState("");
   const [factorajeEdit, setFactorajeEdit] = useState("");
   const [costoFijoEdit, setCostoFijoEdit] = useState("");
+  const [noPartidaFactores, setNoPartidaFactores] = useState("");
   const [totalesDoc, setTotalesDoc] = useState([]);
   const [totalInsumosEdit, setTotalInsumosEdit] = useState("");
   const [valorInsumosEdit, setValorInsumosEdit] = useState("");
@@ -127,7 +113,24 @@ const EditarRecTecFinanciero = () => {
     getFactoresById(id);
   }, [id]);
   /*AQUI*/
+const handleClose = () => {
+    setShow(false);
+    setSelectedPartida("");
+    
+    setCantidad("");
+    setDescripcion("");
+    setObservacion("");
+  };
 
+  const closeTot = () => {
+    setTot(false);
+    setSelectedPartida("");
+    setCantidadTotalesEdit("");
+    setNoPartidaFactores("");
+    setCostoFijoEdit("");
+    setUtilidadEdit("");
+    limpiarCampos();
+  };
   /* --------------------- JALAR INFORMACIÓN DE PARTIDAS ANTERIORES ------------------------------------- */
   const getParPreCot = async () => {
     try {
@@ -362,6 +365,7 @@ const EditarRecTecFinanciero = () => {
       setFactorajeEdit(parInsumoDOC.data().factorajePorcentaje);
       setCostoFijoEdit(parInsumoDOC.data().costoFijoPorcentaje);
       setUtilidadEdit(parInsumoDOC.data().utilidadPorcentaje);
+      setNoPartidaFactores(parInsumoDOC.data().id);
     } else {
       console.log("El cliente no existe");
     }
@@ -372,13 +376,15 @@ const EditarRecTecFinanciero = () => {
   };
   const limpiarCampos = () => {
     setTot(false);
-    setSelectedPartida(null);
+    setSelectedPartida("");
     setCantidadTotalesEdit("");
-    setCostoFijoEdit("");
-    setUtilidadEdit("");
+    setCostoFijoEdit(0);
+    setUtilidadEdit(0);
+    setNoPartidaFactores("");
   };
   const openModal = async (noPartida, item) => {
-    console.log(item);
+    //console.log(item);
+    console.log("noPartida: ", noPartida);
     limpiarCampos();
     try {
       setCostoFijoEdit(item.costoFijoPorcentaje);
@@ -387,10 +393,11 @@ const EditarRecTecFinanciero = () => {
       setTotalInsumosEdit(item.totalInsumo);
       setCantidadEdit(item.cantidad);
       setValorInsumosEdit(item.valorInsumos);
-      
+       // 🟢 Establecer el id de partida correctamente
+      setNoPartidaFactores(noPartida);
+      console.log("setNoPartidaFactores: ", noPartidaFactores);
 
-      // 🟢 Establecer el número de partida correctamente
-      //setSelectedPartida({ noPartida });
+     
 
       setTot(true);
     } catch (error) {
@@ -398,39 +405,39 @@ const EditarRecTecFinanciero = () => {
     }
   };
   const editarPartidaTotales = async () => {
-    const preCotizacionRef = doc(db, "ANALISIS_TOTALES", idPartidaEdit);
-
+    
+    console.log("Edicion: ", noPartidaFactores);
+    const idPartidaFactores = parseFloat(noPartidaFactores || 0);
     const cantidad = parseFloat(cantidadEdit || 0);
     const totalInsumos = parseFloat(totalInsumosEdit || 0);
     const costoFijo = parseFloat(costoFijoEdit || 0);
     const utilidad = parseFloat(utilidadEdit || 0);
     const valorInsumos = parseFloat(valorInsumosEdit || 0);
-    
-
+    console.log("idPartidaFactores: ", idPartidaFactores);
     // Paso 1: Costo directo
     const costoDirecto = totalInsumos * cantidad;
 
     // Paso 2: Costo integrado con costo fijo
-    const costoIntegrado = costoDirecto * (1 + costoFijo / 100);
+    const costoIntegradoE = valorInsumos * (1 + costoFijo / 100);
 
     // Paso 3: Aplicar utilidad sobre el costo integrado
-    const precioPorPartida = valorInsumos * (1 + utilidad / 100);
+    const precioPorPartida = costoIntegradoE / (1 - utilidad / 100);
 
     // Paso 4: Precio unitario
-    const precioUnitario = precioPorPartida / cantidad;
+    const precioUnitarioE = precioPorPartida / cantidad;
 
     // Utilidad monetaria (solo si necesitas almacenarla aparte)
-    const utilidadMonetaria = precioPorPartida - costoIntegrado;
+    const utilidadMonetaria = precioPorPartida - costoIntegradoE;
 
     const datos = {
       costoFijoPorcentaje: costoFijo,
       utilidadPorcentaje: utilidad,
-      costoIntegrado: costoIntegrado,
+      costoIntegrado: costoIntegradoE,
       precioXpartida: precioPorPartida,
-      precioUnitario: precioUnitario,
+      precioUnitario: precioUnitarioE,
       utilidadEsperada: utilidadMonetaria,
     };
-
+    const preCotizacionRef = doc(db, "ANALISIS_TOTALES", noPartidaFactores);
     await updateDoc(preCotizacionRef, datos);
     await obtenerPartidasTotales(); // Recarga datos
     closeTot(); // Cierra modal
@@ -840,7 +847,7 @@ const calcularTotales = (item) => {
                         {itemTotal.utilidadPorcentaje ?? 0}%
                       </td>
                       <td style={{ textAlign: "right" }}>
-                        {(itemTotal.valorInsumos ?? 0).toLocaleString(
+                        {(itemTotal.precioXpartida ?? 0).toLocaleString(
                           "en-US",
                           {
                             style: "currency",

@@ -335,7 +335,7 @@ Falta multiplicar por cantidad de partida
           const indirectoPartida = valorInsumo * porcCostoFijo;
           const totalPartidaIns = (valorInsumo + indirectoPartida) / (1 - porcUtilidad);
           console.log("totalPartidaIns _------- ", totalPartidaIns);
-        console.log("porcCostoFijo: ", porcCostoFijo);
+          console.log("porcCostoFijo: ", porcCostoFijo);
           // Suma totales 
           sumaValorInsumos += totalInsumoPorCantidad;
           valorIndirecto += indirectoPartida;
