@@ -98,6 +98,7 @@ const EditarRecTecFinanciero = () => {
   const [costoFijoEdit, setCostoFijoEdit] = useState("");
   const [totalesDoc, setTotalesDoc] = useState([]);
   const [totalInsumosEdit, setTotalInsumosEdit] = useState("");
+  const [valorInsumosEdit, setValorInsumosEdit] = useState("");
   const [cantidadEdit, setCantidadEdit] = useState("");
   /* --------------------------------PARTIDAS PARA MANO DE OBRA -----------------*/
   const [manoObra, setManoObra] = useState([]);
@@ -227,9 +228,9 @@ const EditarRecTecFinanciero = () => {
           // Solo si hay una diferencia significativa
           const partidaRef = doc(db, "ANALISIS_TOTALES", item.id);
           await updateDoc(partidaRef, {
-            costoIntegrado,
+            costoIntegrado: costoIntegrado,
             precioXpartida: precioPorPartida,
-            precioUnitario,
+            precioUnitario: precioUnitario,
             utilidadEsperada: utilidadMonetaria,
           });
         }
@@ -385,6 +386,8 @@ const EditarRecTecFinanciero = () => {
       setIdPartidaEdit(item.id);
       setTotalInsumosEdit(item.totalInsumo);
       setCantidadEdit(item.cantidad);
+      setValorInsumosEdit(item.valorInsumos);
+      
 
       // 🟢 Establecer el número de partida correctamente
       //setSelectedPartida({ noPartida });
@@ -401,6 +404,8 @@ const EditarRecTecFinanciero = () => {
     const totalInsumos = parseFloat(totalInsumosEdit || 0);
     const costoFijo = parseFloat(costoFijoEdit || 0);
     const utilidad = parseFloat(utilidadEdit || 0);
+    const valorInsumos = parseFloat(valorInsumosEdit || 0);
+    
 
     // Paso 1: Costo directo
     const costoDirecto = totalInsumos * cantidad;
@@ -409,7 +414,7 @@ const EditarRecTecFinanciero = () => {
     const costoIntegrado = costoDirecto * (1 + costoFijo / 100);
 
     // Paso 3: Aplicar utilidad sobre el costo integrado
-    const precioPorPartida = costoIntegrado * (1 + utilidad / 100);
+    const precioPorPartida = valorInsumos * (1 + utilidad / 100);
 
     // Paso 4: Precio unitario
     const precioUnitario = precioPorPartida / cantidad;
@@ -430,6 +435,88 @@ const EditarRecTecFinanciero = () => {
     await obtenerPartidasTotales(); // Recarga datos
     closeTot(); // Cierra modal
   };
+const calcularTotales = (item) => {
+  const insumo = Number(item.totalInsumo ?? 0);
+  const cantidad = Number(item.cantidad ?? 0);
+  const costoFijo = Number(item.costoFijoPorcentaje ?? 0);
+  const utilidad = Number(item.utilidadPorcentaje ?? 0);
+
+  const valorInsumos = insumo * cantidad;
+  const costoIntegrado = valorInsumos * (1 + costoFijo / 100);
+  const precioXpartida = costoIntegrado / (1 - utilidad / 100 || 1);
+  const precioUnitario = precioXpartida / (cantidad || 1);
+
+  return {
+    valorInsumos,
+    costoIntegrado,
+    precioXpartida,
+    precioUnitario
+  };
+};
+
+/* 
+<tbody>
+  {totalesDoc.map((itemTotal, indexPC) => {
+    const {
+      valorInsumos,
+      costoIntegrado,
+      precioXpartida,
+      precioUnitario
+    } = calcularTotales(itemTotal);
+
+    return (
+      <tr key={indexPC}>
+        <td>{itemTotal.noPartidaATF ?? "-"}</td>
+        <td>{itemTotal.cantidad ?? 0}</td>
+        <td style={{ textAlign: "right" }}>
+          {(itemTotal.totalInsumo ?? 0).toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+          })}
+        </td>
+        <td style={{ textAlign: "right" }}>
+          {valorInsumos.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+          })}
+        </td>
+        <td style={{ textAlign: "center" }}>
+          {itemTotal.costoFijoPorcentaje ?? 0}%
+        </td>
+        <td style={{ textAlign: "right" }}>
+          {costoIntegrado.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+          })}
+        </td>
+        <td style={{ textAlign: "center" }}>
+          {itemTotal.utilidadPorcentaje ?? 0}%
+        </td>
+        <td style={{ textAlign: "right" }}>
+          {precioXpartida.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+          })}
+        </td>
+        <td style={{ textAlign: "right" }}>
+          {precioUnitario.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+          })}
+        </td>
+        <td style={{ textAlign: "center" }}>
+          <button
+            className="btn btn-primary"
+            onClick={() => openModal(itemTotal.id, itemTotal)}
+          >
+            <FaPencilAlt />
+          </button>
+        </td>
+      </tr>
+    );
+  })}
+</tbody>
+*/
 
   return (
     <div className="container">
@@ -699,6 +786,7 @@ const EditarRecTecFinanciero = () => {
                 overflowY: "auto",
               }}
             >
+              {/*CALCULOS - VISTA*/}
               <br></br>
               <table class="table">
                 <thead>
@@ -747,11 +835,12 @@ const EditarRecTecFinanciero = () => {
                           }
                         )}
                       </td>
+                      
                       <td style={{ textAlign: "center" }}>
                         {itemTotal.utilidadPorcentaje ?? 0}%
                       </td>
                       <td style={{ textAlign: "right" }}>
-                        {(itemTotal.precioXpartida ?? 0).toLocaleString(
+                        {(itemTotal.valorInsumos ?? 0).toLocaleString(
                           "en-US",
                           {
                             style: "currency",
