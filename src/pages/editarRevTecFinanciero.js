@@ -82,6 +82,7 @@ const EditarRecTecFinanciero = () => {
   const [factorajeEdit, setFactorajeEdit] = useState("");
   const [costoFijoEdit, setCostoFijoEdit] = useState("");
   const [noPartidaFactores, setNoPartidaFactores] = useState("");
+  const [idPartidaFactores, setIdPartidaFactores] = useState("");
   const [totalesDoc, setTotalesDoc] = useState([]);
   const [totalInsumosEdit, setTotalInsumosEdit] = useState("");
   const [valorInsumosEdit, setValorInsumosEdit] = useState("");
@@ -230,12 +231,12 @@ const handleClose = () => {
         if (diferencia > 1) {
           // Solo si hay una diferencia significativa
           const partidaRef = doc(db, "ANALISIS_TOTALES", item.id);
-          await updateDoc(partidaRef, {
+          /*await updateDoc(partidaRef, {
             costoIntegrado: costoIntegrado,
             precioXpartida: precioPorPartida,
             precioUnitario: precioUnitario,
             utilidadEsperada: utilidadMonetaria,
-          });
+          });*/
         }
       }
 
@@ -365,7 +366,6 @@ const handleClose = () => {
       setFactorajeEdit(parInsumoDOC.data().factorajePorcentaje);
       setCostoFijoEdit(parInsumoDOC.data().costoFijoPorcentaje);
       setUtilidadEdit(parInsumoDOC.data().utilidadPorcentaje);
-      setNoPartidaFactores(parInsumoDOC.data().id);
     } else {
       console.log("El cliente no existe");
     }
@@ -383,9 +383,10 @@ const handleClose = () => {
     setNoPartidaFactores("");
   };
   const openModal = async (noPartida, item) => {
-    //console.log(item);
-    console.log("noPartida: ", noPartida);
     limpiarCampos();
+    const idFactores = noPartida;
+    //console.log(item);
+    console.log("id: ", idFactores);
     try {
       setCostoFijoEdit(item.costoFijoPorcentaje);
       setUtilidadEdit(item.utilidadPorcentaje);
@@ -393,12 +394,10 @@ const handleClose = () => {
       setTotalInsumosEdit(item.totalInsumo);
       setCantidadEdit(item.cantidad);
       setValorInsumosEdit(item.valorInsumos);
+      setIdPartidaFactores(idFactores);
        // 🟢 Establecer el id de partida correctamente
-      setNoPartidaFactores(noPartida);
-      console.log("setNoPartidaFactores: ", noPartidaFactores);
-
-     
-
+      
+      console.log("idPartida: ", idPartidaFactores);
       setTot(true);
     } catch (error) {
       console.error("⚠️ Error al obtener los datos necesarios:", error);
@@ -407,7 +406,7 @@ const handleClose = () => {
   const editarPartidaTotales = async () => {
     
     console.log("Edicion: ", noPartidaFactores);
-    const idPartidaFactores = parseFloat(noPartidaFactores || 0);
+    //const idPartidaFactores = parseFloat(noPartidaFactores || 0);
     const cantidad = parseFloat(cantidadEdit || 0);
     const totalInsumos = parseFloat(totalInsumosEdit || 0);
     const costoFijo = parseFloat(costoFijoEdit || 0);
@@ -437,7 +436,7 @@ const handleClose = () => {
       precioUnitario: precioUnitarioE,
       utilidadEsperada: utilidadMonetaria,
     };
-    const preCotizacionRef = doc(db, "ANALISIS_TOTALES", noPartidaFactores);
+    const preCotizacionRef = doc(db, "ANALISIS_TOTALES", idPartidaFactores);
     await updateDoc(preCotizacionRef, datos);
     await obtenerPartidasTotales(); // Recarga datos
     closeTot(); // Cierra modal
