@@ -18,6 +18,46 @@ const AgregarCliente = () => {
     const foliosCollection = collection(db, "FOLIOS"); // Referencia a la colección
     const [cve_clie, setCve_clie] = React.useState(""); // Inicializar el estado vacío
     // Función para obtener el folio siguiente al cargar la página
+
+
+    const obtenerFolio = async () => {
+        try {
+            // Buscar el documento con el campo "documento" igual a "CLIENTES" en la colección FOLIOS
+            const q = query(collection(db, "FOLIOS"), where("documento", "==", "CLIENTES"));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                const folioDoc = querySnapshot.docs[0];
+                const folioData = folioDoc.data();
+
+                const folio = folioData.folio; // Ejemplo: "GS-Cli"
+                const folioSiguiente = parseInt(folioData.folioSiguiente, 10);
+                const folioFinal = parseInt(folioData.folioFinal, 10);
+
+                // Verificar la cantidad de documentos actuales en CLIENTES
+                const clientesSnapshot = await getDocs(collection(db, "CLIENTES"));
+                const cantidadClientes = clientesSnapshot.size;
+
+                if (cantidadClientes === folioSiguiente - 1) {
+                    // Validación correcta: se puede generar el nuevo folio
+                    const nuevoFolio = `${folio}-${folioSiguiente}`;
+                    setCve_clie(nuevoFolio);
+                } else {
+                    console.warn("Inconsistencia: cantidad de clientes no coincide con el folioSiguiente.");
+                    // O puedes generar el folio basándote en la cantidad real + 1:
+                    const nuevoFolio = `${folio}-${cantidadClientes + 1}`;
+                    setCve_clie(nuevoFolio);
+                    console.warn("El folio se actualizo a la cantidad correcta")
+                }
+            } else {
+                console.log("No se encontró un documento con el campo documento: CLIENTES.");
+            }
+        } catch (error) {
+            console.error("Error al obtener el folio:", error);
+        }
+    };
+
+    /* CODIGO ANTERIOR
     const obtenerFolio = async () => {
         try {
             // Crear la consulta para buscar el documento que tenga el campo "documento" con el valor "CLIENTES"
@@ -42,7 +82,7 @@ const AgregarCliente = () => {
         } catch (error) {
             console.error("Error al obtener el folio:", error);
         }
-    };
+    };*/
 
     // Función para actualizar el folio siguiente en el documento de Firebase
     const actualizarFolioSiguiente = async () => {
@@ -56,20 +96,42 @@ const AgregarCliente = () => {
                 // Si encontramos un documento que cumpla la condición, accedemos a él
                 const folioDoc = querySnapshot.docs[0]; // El primer documento que cumpla la condición
                 const folioData = folioDoc.data();
-    
+
                 const folioSiguiente = parseInt(folioData.folioSiguiente, 10);
                 const folioFinal = parseInt(folioData.folioFinal, 10);
-    
+
+                // Verificar la cantidad actual de documentos en CLIENTES (David)
+                const clientesQuery = query(collection(db, "CLIENTES"));
+                const clientesSnapshot = await getDocs(clientesQuery);
+                const cantidadClientes = clientesSnapshot.size;
+
+                // Validar si el número de clientes coincide con el folioSiguiente - 1
+                if (cantidadClientes === folioSiguiente - 1) {
+                    // Aumentar el folio si está dentro del rango permitido
+                    if (folioSiguiente < folioFinal) {
+                        await updateDoc(folioDoc.ref, {
+                            folioSiguiente: (folioSiguiente + 1).toString()
+                        });
+                        console.log("Folio actualizado exitosamente");
+                    } else {
+                        console.log("El folio siguiente ha alcanzado el folio final.");
+                    }
+                } else {
+                    console.warn("Inconsistencia: la cantidad de documentos en CLIENTES no coincide con el folio actual.");
+                    await updateDoc(folioDoc.ref, { folioSiguiente: (cantidadClientes + 1).toString() })
+                }
+
+                /*CODIGO ANTERIOR
                 // Verificar que el folioSiguiente no haya alcanzado el folioFinal
                 if (folioSiguiente < folioFinal) {
                     // Actualizar el documento en Firestore incrementando el folioSiguiente
                     await updateDoc(folioDoc.ref, { // Usamos `folioDoc.ref` para apuntar al documento directamente
-                        folioSiguiente: (folioSiguiente + 1).toString(),
+                        folioSiguiente: (folioSiguiente + 1).toString();
                     });
                     console.log("Folio actualizado exitosamente");
                 } else {
                     console.log("El folio siguiente ha alcanzado el folio final.");
-                }
+                }*/
             } else {
                 console.log("No se encontró un documento con el campo documento: CLIENTES.");
             }

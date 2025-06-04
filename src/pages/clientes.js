@@ -23,10 +23,27 @@ const Clientes = () => {
   const navigate = useNavigate();
 
   const getClientes = async () => {
-    const data = await getDocs(collection(db, "CLIENTES")); // Cambiado a "CLIENTES"
-    const clienteList = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-    setClientes(clienteList);
+    try {
+      const data = await getDocs(collection(db, "CLIENTES"));
+
+      const clienteList = data.docs.map((doc) => {
+        const clienteData = doc.data();
+        return { ...clienteData, id: doc.id };
+      });
+
+      // Ordenar por número extraído de cve_clie (ej. GS-Cli-10 → 10)
+      clienteList.sort((a, b) => {
+        const numA = parseInt(a.cve_clie.replace(/\D/g, ""), 10);
+        const numB = parseInt(b.cve_clie.replace(/\D/g, ""), 10);
+        return numB - numA; // Orden descendente
+      });
+
+      setClientes(clienteList);
+    } catch (error) {
+      console.error("Error al obtener y ordenar los clientes:", error);
+    }
   };
+
 
   /*const deleteCliente = async (id) => {
        const ClienteDoc =  doc(db, "CLIENTES", id)
