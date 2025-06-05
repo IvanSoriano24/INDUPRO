@@ -43,17 +43,16 @@ const AgregarCliente = () => {
                     const nuevoFolio = `${folio}-${folioSiguiente}`;
                     setCve_clie(nuevoFolio);
                 } else {
-                    console.warn("Inconsistencia: cantidad de clientes no coincide con el folioSiguiente.");
-                    // O puedes generar el folio basándote en la cantidad real + 1:
+                    //console.warn("Inconsistencia: cantidad de clientes no coincide con el folioSiguiente.");
                     const nuevoFolio = `${folio}-${cantidadClientes + 1}`;
                     setCve_clie(nuevoFolio);
-                    console.warn("El folio se actualizo a la cantidad correcta")
+                    //console.warn("El folio se actualizo a la cantidad correcta")
                 }
             } else {
-                console.log("No se encontró un documento con el campo documento: CLIENTES.");
+                //console.log("No se encontró un documento con el campo documento: CLIENTES.");
             }
         } catch (error) {
-            console.error("Error al obtener el folio:", error);
+            //console.error("Error al obtener el folio:", error);
         }
     };
 
@@ -112,12 +111,12 @@ const AgregarCliente = () => {
                         await updateDoc(folioDoc.ref, {
                             folioSiguiente: (folioSiguiente + 1).toString()
                         });
-                        console.log("Folio actualizado exitosamente");
+                        //console.log("Folio actualizado exitosamente");
                     } else {
-                        console.log("El folio siguiente ha alcanzado el folio final.");
+                        //console.log("El folio siguiente ha alcanzado el folio final.");
                     }
                 } else {
-                    console.warn("Inconsistencia: la cantidad de documentos en CLIENTES no coincide con el folio actual.");
+                    //console.warn("Inconsistencia: la cantidad de documentos en CLIENTES no coincide con el folio actual.");
                     await updateDoc(folioDoc.ref, { folioSiguiente: (cantidadClientes + 1).toString() })
                 }
 

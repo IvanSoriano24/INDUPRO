@@ -18,7 +18,7 @@ import { HiDocumentPlus } from "react-icons/hi2";
 import { IoArrowBackCircleOutline } from "react-icons/io5";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
-import encabezadoPDF from "../imagenes/GS-ENCABEZADO-2.PNG";
+import encabezadoPDF from "../imagenes/nuevoEncabezado.png";
 import { VscFilePdf } from "react-icons/vsc";
 import { FaFileDownload } from "react-icons/fa";
 import swal from "sweetalert2";
@@ -30,6 +30,8 @@ import { NumerosALetras } from "numero-a-letras";
 import { FaCheckCircle } from "react-icons/fa";
 
 const VisualizarCotizacion = () => {
+  const  [acuerdoComercial, setAcuerdoComercial] = useState("");
+  const [nombreProyecto, setNombreProyecto] = useState("");
   const [cve_tecFin, setCve_tecFin] = useState("");
   const [folioSae, setFolioSae] = useState("");
   const [cve_clie, setCve_clie] = useState("");
@@ -56,6 +58,7 @@ const VisualizarCotizacion = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [idMonday, setIdMonday] = useState("");
+
   /* ---------------------JALAR INFORMACIÓN DE DOCUMENTO ANTERIOR ------------------------------------- */
   const getFactoresById = async (id) => {
     const factoresDOC = await getDoc(doc(db, "COTIZACION", id));
@@ -70,6 +73,9 @@ const VisualizarCotizacion = () => {
       setIva(factoresDOC.data().IVA);
       setTotal(factoresDOC.data().total);
       setIdMonday(factoresDOC.data().idMonday);
+
+      setAcuerdoComercial(factoresDOC.data().acuerdoComercial);
+
     } else {
       console.log("El personals no existe");
     }
@@ -126,53 +132,48 @@ const VisualizarCotizacion = () => {
     getCliente();
   }, [cve_clie]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
 
-  const handleOpenPDF = () => {
-    try {
-      // Crear un elemento de imagen
-      const img = new Image();
 
-      // Establecer la URL de la imagen
+  const generarPDF = async (accion = "open") => {
+    try {
+      const getAcuerdoComercialSnapshot = await getDocs(
+          query(
+              collection(db, "COTIZACION"),
+              where("cve_clie", "==", cve_clie),
+              where("cve_tecFin", "==", cve_tecFin),
+              where("estatus", "==", "Activo")
+          )
+      );
+
+      let acuerdoTexto = "Sin acuerdo";
+      if (!getAcuerdoComercialSnapshot.empty) {
+        const docData = getAcuerdoComercialSnapshot.docs[0].data();
+        acuerdoTexto = docData.acuedoComercial ?? "Sin acuerdo";
+      } else {
+        //console.log("No hay documento con cve_clie y cve_tecFin activos");
+      }
+
+
+      const img = new Image();
       img.src = encabezadoPDF;
 
-      // Manejar la carga de la imagen
       img.onload = () => {
-        // Crear un lienzo HTML5
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
-        const enLetras = NumerosALetras(total);
-        // Establecer las dimensiones del lienzo para que coincidan con las de la imagen
+
         canvas.width = img.width;
         canvas.height = img.height;
-
-        // Dibujar la imagen en el lienzo
         ctx.drawImage(img, 0, 0);
 
-        // Obtener la representación base64 de la imagen desde el lienzo
         const base64Image = canvas.toDataURL("image/png");
-        const fechaElaboracionFormateada = new Date(
-          fechaElaboracion
-        ).toLocaleDateString("es-ES");
-        // Construir datos para la tabla dinámica
+        const fechaFormateada = new Date(fechaElaboracion).toLocaleDateString("es-ES");
+        let enLetras = NumerosALetras(total).toUpperCase();
+        enLetras = enLetras.replace(/\bDE\b/g, "").replace(/\s{2,}/g, " ");
+        console.log(enLetras);
 
-        const tableBody20 = parCotizacionLista.map((itemTotales) => [
-          //itemTotales.cve_tecFin,
-          itemTotales.noPartidaATF,
-          itemTotales.descripcion,
-          //itemTotales.observacion,
-          itemTotales.totalPartida.toLocaleString("en-US", {
-            style: "currency",
-            currency: "USD",
-          }), // Formatea costoCotizado,,
-        ]);
-
-        const numPartida = parCotizacionLista.map((itemTotales) => [
-          itemTotales.noPartidaATF,
-        ]);
-
-        // Define el contenido del documento PDF
         const documentDefinition = {
+          pageMargins: [40, 160, 40, 40],
           header: {
-            margin: [0, 0, 0, 0], // Margen superior, derecho, inferior e izquierdo del encabezado de la página
+            margin: [0, 0, 0, 0],
             image: base64Image,
             width: 600,
             height: 150,
@@ -184,374 +185,164 @@ const VisualizarCotizacion = () => {
                   width: "50%",
                   stack: [
                     {
-                      text: "Información del cliente: ",
+                      text: "Información del cliente:",
                       fontSize: 12,
                       bold: true,
                     },
                     {
                       text: `${clienteLista[0].razonSocial} (${clienteLista[0].cve_clie})\nCalle: ${clienteLista[0].calle} Int: ${clienteLista[0].numInt}, Col: ${clienteLista[0].colonia}\n${clienteLista[0].municipio}, cp: ${clienteLista[0].codigoPostal}, estado: ${clienteLista[0].estado}, RFC: ${clienteLista[0].rfc}`,
                       fontSize: 8,
-                      bold: false,
                     },
                   ],
                 },
-
                 {
                   width: "50%",
                   stack: [
-                    /* {
-                      text: "No. Cotización: " + cve_tecFin,
-                      fontSize: 12,
-                      bold: true,
-                      alignment: "right",
-                    },*/
                     {
-                      text:
-                        "\n" +
-                        "Fecha de elaboración: " +
-                        fechaElaboracionFormateada,
+                      text: "\nFecha de elaboración: " + fechaFormateada,
                       fontSize: 10,
-                      bold: false,
                       alignment: "right",
                     },
                   ],
                 },
               ],
-              margin: [0, 110, 0, 0],
+              margin: [0, 20, 0, 0],
             },
             {
               margin: [0, 10, 0, 0],
-              text: "Estimado usuario, no es grato presentar la propuesta de servicios de Correccion de prensas y levantamiento agradecemos de manera anticipada sus atenciones esperando poder contar con su Vbo",
+              text: `Estimado cliente, nos es grato presentar la propuesta de servicios de ${nombreProyecto}, agradecemos de manera anticipada sus atenciones esperando poder contar con su Vo.Bo.`,
               fontSize: 9,
               bold: true,
             },
             ...parCotizacionLista
-              .map((item) => [
-                {
-                  text: "Partida: " + item.noPartidaATF,
-                  fontSize: 12,
-                  bold: true,
-                  alignment: "left",
-                  margin: [0, 10, 0, 0],
-                },
-                {
-                  margin: [0, 5, 0, 0],
-                  table: {
-                    headerRows: 1,
-                    widths: ["*"],
-                    body: [
-                      [
-                        {
-                          text: "Descripción",
-                          bold: true,
-                          fontSize: 12,
-                          alignment: "center",
-                          fillColor: "#eeeeee", // Opcional: fondo gris claro
-                        },
-                      ],
-                      [item.descripcion],
-                    ],
-                  },
-                  layout: "noBorders",
-                },
-                {
-                  text:
-                    "Importe: " +
-                    item.costoUnitario.toLocaleString("en-US", {
-                    //item.totalPartida.toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }),
-                  fontSize: 14,
-                  bold: true,
-                  alignment: "right",
-                  margin: [0, 10, 0, 0],
-                },
-              ])
-              .flat(),
+                .map((item) => ({
+                  unbreakable: true,
+                  stack: [
+                    {
+                      text: "Partida: " + item.noPartidaATF,
+                      fontSize: 12,
+                      bold: true,
+                      alignment: "left",
+                      margin: [0, 10, 0, 0],
+                    },
+                    {
+                      margin: [0, 5, 0, 0],
+                      table: {
+                        headerRows: 1,
+                        widths: ["*"],
+                        body: [
+                          [
+                            {
+                              text: "Descripción",
+                              bold: true,
+                              fontSize: 12,
+                              alignment: "center",
+                              fillColor: "#eeeeee",
+                            },
+                          ],
+                          [item.descripcion],
+                          [
+                            {
+                              text: "Observaciones",
+                              bold: true,
+                              fontSize: 12,
+                              alignment: "center",
+                              fillColor: "#eeeeee",
+                            },
+                          ],
+                          [item.observacion],
+                        ],
+                      },
+                      layout: "noBorders",
+                    },
+                    {
+                      text: "Importe: " + item.totalPartida.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      }),
+                      fontSize: 14,
+                      bold: true,
+                      alignment: "right",
+                      margin: [0, 10, 0, 0],
+                    },
+                  ],
+                })),
             {
-              text:
-                "\n" +
-                "\n" +
-                "Importe: " +
-                subtotal.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }),
+              text: "\n\nImporte: " + subtotal.toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+              }),
               fontSize: 12,
               bold: true,
               alignment: "right",
             },
             {
               margin: [0, 3, 0, 0],
-              text:
-                "IVA: " +
-                iva.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }),
+              text: "IVA: " + iva.toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+              }),
               fontSize: 12,
               bold: true,
               alignment: "right",
             },
             {
               margin: [0, 3, 0, 0],
-              text:
-                "Total: " +
-                total.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }),
+              text: "Total: " + total.toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+              }),
               fontSize: 12,
               bold: true,
               alignment: "right",
             },
             {
               margin: [0, 3, 0, 0],
-              text: enLetras.toUpperCase(),
+              text: enLetras,
               fontSize: 10,
               bold: true,
               alignment: "right",
             },
             {
-              margin: [0, 7, 0, 0],
-              text: "Condición comercial ",
-              fontSize: 12,
-              bold: true,
-            },
-            //Modificar Para traer la condicion Comercial
-            {
-              margin: [0, 5, 0, 0],
-              text: "Prueba",
-              fontSize: 7,
-              bold: false,
-            },
-            // Agrega más contenido según sea necesario
-          ],
-        };
-
-        // Genera el PDF y muestra una vista preliminar
-        pdfMake.createPdf(documentDefinition).open();
-      };
-
-      // Manejar errores durante la carga de la imagen
-      img.onerror = (error) => {
-        console.error("Error al cargar la imagen:", error);
-      };
-    } catch (error) {
-      console.error("Error al abrir el PDF:", error);
-    }
-  };
-
-  const descargarOpenPDF = () => {
-    try {
-      // Crear un elemento de imagen
-      const img = new Image();
-
-      // Establecer la URL de la imagen
-      img.src = encabezadoPDF;
-
-      // Manejar la carga de la imagen
-      img.onload = () => {
-        // Crear un lienzo HTML5
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-
-        // Establecer las dimensiones del lienzo para que coincidan con las de la imagen
-        canvas.width = img.width;
-        canvas.height = img.height;
-
-        // Dibujar la imagen en el lienzo
-        ctx.drawImage(img, 0, 0);
-
-        // Obtener la representación base64 de la imagen desde el lienzo
-        const base64Image = canvas.toDataURL("image/png");
-        const fechaElaboracionFormateada = new Date(
-          fechaElaboracion
-        ).toLocaleDateString("es-ES");
-        // Construir datos para la tabla dinámica
-        const tableBody20 = parCotizacionLista.map((itemTotales) => [
-          itemTotales.cve_tecFin,
-          //itemTotales.noPartidaATF,
-          itemTotales.descripcion,
-          //itemTotales.observacion,
-          itemTotales.totalPartida.toLocaleString("en-US", {
-            style: "currency",
-            currency: "USD",
-          }), // Formatea costoCotizado,,
-        ]);
-        const enLetras = NumerosALetras(total);
-        // Define el contenido del documento PDF
-        const documentDefinition = {
-          header: {
-            margin: [0, 0, 0, 0], // Margen superior, derecho, inferior e izquierdo del encabezado de la página
-            image: base64Image,
-            width: 600,
-            height: 150,
-          },
-          content: [
-            {
-              columns: [
-                {
-                  width: "50%",
-                  stack: [
-                    {
-                      text: "Información del cliente: ",
-                      fontSize: 12,
-                      bold: true,
-                    },
-                    {
-                      text: `${clienteLista[0].razonSocial} (${clienteLista[0].cve_clie})\nCalle: ${clienteLista[0].calle} Int: ${clienteLista[0].numInt}, Col: ${clienteLista[0].colonia}\n${clienteLista[0].municipio}, cp: ${clienteLista[0].codigoPostal}, estado: ${clienteLista[0].estado}, RFC: ${clienteLista[0].rfc}`,
-                      fontSize: 8,
-                      bold: false,
-                    },
-                  ],
-                },
-
-                {
-                  width: "50%",
-                  stack: [
-                    /*{
-                      text: "No. Cotización: " + cve_tecFin,
-                      fontSize: 12,
-                      bold: true,
-                      alignment: "right",
-                    },*/
-                    {
-                      text:
-                        "\n" +
-                        "Fecha de elaboración: " +
-                        fechaElaboracionFormateada,
-                      fontSize: 10,
-                      bold: false,
-                      alignment: "right",
-                    },
-                  ],
-                },
-              ],
-              margin: [0, 110, 0, 0],
-            },
-            {
-              margin: [0, 10, 0, 0],
-              text: "Estimado usuario, no es grato presentar la propuesta de servicios de Correccion de prensas y levantamiento agradecemos de manera anticipada sus atenciones esperando poder contar con su Vbo",
-              fontSize: 9,
-              bold: true,
-            },
-            ...parCotizacionLista
-              .map((item) => [
-                {
-                  text: "Partida: " + item.noPartidaATF,
-                  fontSize: 12,
-                  bold: true,
-                  alignment: "left",
-                  margin: [0, 10, 0, 0],
-                },
-                {
-                  margin: [0, 5, 0, 0],
-                  table: {
-                    headerRows: 1,
-                    widths: ["*"],
-                    body: [
-                      [
-                        {
-                          text: "Descripción",
-                          bold: true,
-                          fontSize: 11,
-                          alignment: "center",
-                          fillColor: "#eeeeee", // Opcional: fondo gris claro
-                        },
-                      ],
-                      [item.descripcion],
-                    ],
-                  },
-                  layout: "noBorders",
-                },
-                {
-                  text:
-                    "Importe: " +
-                    item.totalPartida.toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }),
-                  fontSize: 14,
-                  bold: true,
-                  alignment: "right",
-                  margin: [0, 10, 0, 0],
-                },
-              ])
-              .flat(),
-            {
-              text:
-                "\n" +
-                "\n" +
-                "Importe: " +
-                subtotal.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }),
-              fontSize: 12,
-              bold: true,
-              alignment: "right",
-            },
-            {
-              margin: [0, 3, 0, 0],
-              text:
-                "IVA: " +
-                iva.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }),
-              fontSize: 12,
-              bold: true,
-              alignment: "right",
-            },
-            {
-              margin: [0, 3, 0, 0],
-              text:
-                "Total: " +
-                total.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }),
-              fontSize: 12,
-              bold: true,
-              alignment: "right",
-            },
-            {
-              margin: [0, 3, 0, 0],
-              text: enLetras.toUpperCase(),
-              fontSize: 10,
-              bold: true,
-              alignment: "right",
-            },
-            {
-              margin: [0, 7, 0, 0],
-              text: "Condición comercial ",
-              fontSize: 12,
+              margin: [0, 20, 0, 0],
+              text: "Condición comercial",
+              fontSize: 14,
               bold: true,
             },
             {
               margin: [0, 5, 0, 0],
-              text: "Prueba",
-              fontSize: 7,
-              bold: false,
+              text: acuerdoTexto,
+              fontSize: 12,
             },
-            // Agrega más contenido según sea necesario
           ],
         };
-
-        // Genera el PDF y descarga el archivo
-        pdfMake.createPdf(documentDefinition).download(cve_tecFin + ".pdf");
+        // Acción: abrir o descargar
+        const pdf = pdfMake.createPdf(documentDefinition);
+        accion === "download" ? pdf.download(cve_tecFin + ".pdf") : pdf.open();
       };
 
-      // Manejar errores durante la carga de la imagen
       img.onerror = (error) => {
         console.error("Error al cargar la imagen:", error);
       };
     } catch (error) {
-      console.error("Error al abrir el PDF:", error);
+      console.error("Error al generar el PDF:", error);
     }
   };
+
+  const validarYGenerarPDF = (accion) => {
+    if (!nombreProyecto.trim()) {
+      swal.fire({
+        icon: "error",
+        title: "Campo requerido",
+        text: "Debes ingresar el nombre del proyecto para continuar.",
+        confirmButtonColor: "#d33",
+      });
+      return;
+    }
+
+    generarPDF(accion);
+  };
+
   const mostrarAlerta = (cve_tecFin) => {
     swal
       .fire({
@@ -923,27 +714,27 @@ swal.fire({
               <div className="mb-3">
                 <label className="form-label">Folio</label>
                 <input
-                  className="form-control"
-                  id="inputFolioSecuencial"
-                  type="text"
-                  value={cve_tecFin}
-                  onChange={(e) => setCve_tecFin(e.target.value)}
-                  readOnly
+                    className="form-control"
+                    id="inputFolioSecuencial"
+                    type="text"
+                    value={cve_tecFin}
+                    onChange={(e) => setCve_tecFin(e.target.value)}
+                    readOnly
                 />
               </div>
             </div>
             <div className="col-md-4 ">
               <label className="form-label">Cliente</label>
-              <div class="input-group mb-3">
+              <div className="input-group mb-3">
                 <input
-                  placeholder=""
-                  aria-label=""
-                  aria-describedby="basic-addon1"
-                  type="text"
-                  className="form-control"
-                  value={cve_clie}
-                  onChange={(e) => setCve_clie(e.target.value)}
-                  readOnly
+                    placeholder=""
+                    aria-label=""
+                    aria-describedby="basic-addon1"
+                    type="text"
+                    className="form-control"
+                    value={cve_clie}
+                    onChange={(e) => setCve_clie(e.target.value)}
+                    readOnly
                 />
               </div>
             </div>
@@ -952,80 +743,96 @@ swal.fire({
               <label className="form-label">ID GS: </label>
               <div className="input-group mb-3">
                 <input
-                  placeholder=""
-                  aria-label=""
-                  aria-describedby="basic-addon1"
-                  type="text"
-                  value={idMonday}
-                  onChange={(e) => setIdMonday(e.target.value)}
-                  className="form-control"
-                  readOnly
+                    placeholder=""
+                    aria-label=""
+                    aria-describedby="basic-addon1"
+                    type="text"
+                    value={idMonday}
+                    onChange={(e) => setIdMonday(e.target.value)}
+                    className="form-control"
+                    readOnly
                 />
               </div>
             </div>
 
             <div className="col-md-4 ">
               <label className="form-label">Fecha de Elaboración</label>
-              <div class="input-group mb-3">
+              <div className="input-group mb-3">
                 <input
-                  placeholder=""
-                  aria-label=""
-                  aria-describedby="basic-addon1"
-                  type="date"
-                  value={fechaElaboracion}
-                  onChange={(e) => setFechaElaboracion(e.target.value)}
-                  className="form-control"
+                    placeholder=""
+                    aria-label=""
+                    aria-describedby="basic-addon1"
+                    type="date"
+                    value={fechaElaboracion}
+                    onChange={(e) => setFechaElaboracion(e.target.value)}
+                    className="form-control"
                 />
               </div>
             </div>
 
             <div className="col-md-4 ">
               <label className="form-label">Fecha de Inicio</label>
-              <div class="input-group mb-3">
+              <div className="input-group mb-3">
                 <input
-                  placeholder=""
-                  aria-label=""
-                  aria-describedby="basic-addon1"
-                  type="date"
-                  value={fechaInicio}
-                  onChange={(e) => setFechaInicio(e.target.value)}
-                  className="form-control"
+                    placeholder=""
+                    aria-label=""
+                    aria-describedby="basic-addon1"
+                    type="date"
+                    value={fechaInicio}
+                    onChange={(e) => setFechaInicio(e.target.value)}
+                    className="form-control"
                 />
               </div>
             </div>
 
             <div className="col-md-4 ">
               <label className="form-label">Fecha Fin</label>
-              <div class="input-group mb-3">
+              <div className="input-group mb-3">
                 <input
-                  placeholder=""
-                  aria-label=""
-                  aria-describedby="basic-addon1"
-                  type="date"
-                  value={fechaFin}
-                  onChange={(e) => setFechaFin(e.target.value)}
-                  className="form-control"
+                    placeholder=""
+                    aria-label=""
+                    aria-describedby="basic-addon1"
+                    type="date"
+                    value={fechaFin}
+                    onChange={(e) => setFechaFin(e.target.value)}
+                    className="form-control"
+                />
+              </div>
+            </div>
+
+
+            <div className="col-md-4 ">
+              <label className="form-label">Nombre del Proyecto</label>
+              <div className="input-group mb-3">
+                <input
+                    placeholder="Ingresa un nombre del proyecto"
+                    aria-label=""
+                    aria-describedby="basic-addon1"
+                    type="text"
+                    value={nombreProyecto}
+                    onChange={(e) => setNombreProyecto(e.target.value)}
+                    className="form-control"
                 />
               </div>
             </div>
           </div>
           <div
-            className="row"
-            style={{ border: "1px solid #000", borderColor: "gray" }}
+              className="row"
+              style={{border: "1px solid #000", borderColor: "gray"}}
           >
             <div
-              style={{
-                border: "1px solid #000",
-                maxHeight: "550px",
-                overflowY: "auto",
-              }}
+                style={{
+                  border: "1px solid #000",
+                  maxHeight: "550px",
+                  overflowY: "auto",
+                }}
             >
               <br></br>
               <table class="table">
                 <thead>
-                  <tr>
-                    <th scope="col">No. Partida</th>
-                    <th scope="col">Descripción</th>
+                <tr>
+                  <th scope="col">No. Partida</th>
+                  <th scope="col">Descripción</th>
                     <th scope="col">Observaciones</th>
                     <th scope="col">Sub Total</th>
                   </tr>
@@ -1050,11 +857,11 @@ swal.fire({
           </div>
           <br></br>
           <br></br>
-          <button className="btn btn-success" onClick={descargarOpenPDF}>
+          <button className="btn btn-success" onClick={() => validarYGenerarPDF("download")}>
             <FaFileDownload /> Descargar PDF
           </button>
           &nbsp; &nbsp;
-          <button className="btn btn-success" onClick={handleOpenPDF}>
+          <button className="btn btn-success" onClick={() => validarYGenerarPDF("open")}>
             <VscFilePdf /> Ver PDF
           </button>
           &nbsp; &nbsp;

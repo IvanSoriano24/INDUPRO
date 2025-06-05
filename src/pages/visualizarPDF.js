@@ -626,7 +626,7 @@ const calcularCotizacion = async () => {
         subtotal: sumaValorProyecto,
         IVA: sumaValorProyecto * 0.16,
         total: sumaValorProyecto * 0.16 + sumaValorProyecto,
-        acuedoComercial: nombreComercial,
+        acuedoComercial: acuedoComercial,
         idMonday: idMonday,
         factoraje: factorajeManual,
         utilidadNeta:
@@ -644,7 +644,7 @@ const calcularCotizacion = async () => {
         subtotal: sumaValorProyecto,
         IVA: sumaValorProyecto * 0.16,
         total: sumaValorProyecto * 0.16 + sumaValorProyecto,
-        acuedoComercial: nombreComercial,
+        acuedoComercial: acuedoComercial,
         idMonday: idMonday,
       });
     }
@@ -700,6 +700,11 @@ const calcularCotizacion = async () => {
         .then((result) => {
           if (result.isConfirmed) {
             addCotizacion();
+
+
+            //Agregar Condicion
+
+
             Swal
               .fire("¡Felicidades, ahora puedes decargar tu cotización!", {
                 icon: "success",

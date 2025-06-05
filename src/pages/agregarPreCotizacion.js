@@ -340,6 +340,30 @@ const AgregarPreCotizacion = () => {
     return false;
     //return Number.isInteger(Number(cantidad)) && cantidad !== "";
   };
+
+  // /*
+  const unidadesValidas = new Set([
+    // Piezas
+    "Pza", "pza", "Pieza", "pieza", "Piezas", "piezas", "Pzas", "pzas",
+    // Kits
+    "Kit", "kit", "K", "k", "Kits", "kits",
+    // Litros
+    "Litros", "litros", "Lt", "lt", "Lts", "lts", "L", "l", "Litro", "litro",
+    // Metros
+    "Metros", "metros", "Mt", "Mts", "mt", "mts", "M", "m", "Metro", "metro",
+    // Servicios
+    "Serv", "serv", "Servicio", "servicio", "Servicios", "servicios",
+    // Kilos
+    "Kilo", "kilo", "Kg", "kg", "Kilos", "kilos", "Kilogramos", "kilogramos", "Kilogramo", "kilogramo"
+  ]);
+
+  const validarUnidad = (unidad) => {
+    return unidadesValidas.has(unidad);
+  };
+
+  //*/
+
+  /*
   const validarUnidad = (Unidad) => {
     if (
       Unidad == "Pza" ||
@@ -354,6 +378,8 @@ const AgregarPreCotizacion = () => {
     return false;
     //return Number.isInteger(Number(cantidad)) && cantidad !== "";
   };
+  */
+
   const validarCantidad = (Cantidad) => {
     if (Cantidad <= 0) {
       return false;
