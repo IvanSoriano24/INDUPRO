@@ -30,7 +30,7 @@ import { NumerosALetras } from "numero-a-letras";
 import { FaCheckCircle } from "react-icons/fa";
 
 const VisualizarCotizacion = () => {
-  const  [acuerdoComercial, setAcuerdoComercial] = useState("");
+  const [acuerdoComercial, setAcuerdoComercial] = useState("");
   const [nombreProyecto, setNombreProyecto] = useState("");
   const [cve_tecFin, setCve_tecFin] = useState("");
   const [folioSae, setFolioSae] = useState("");
@@ -75,7 +75,6 @@ const VisualizarCotizacion = () => {
       setIdMonday(factoresDOC.data().idMonday);
 
       setAcuerdoComercial(factoresDOC.data().acuerdoComercial);
-
     } else {
       console.log("El personals no existe");
     }
@@ -132,16 +131,15 @@ const VisualizarCotizacion = () => {
     getCliente();
   }, [cve_clie]); // Asegúrate de incluir cve_levDig en las dependencias del useEffect
 
-
   const generarPDF = async (accion = "open") => {
     try {
       const getAcuerdoComercialSnapshot = await getDocs(
-          query(
-              collection(db, "COTIZACION"),
-              where("cve_clie", "==", cve_clie),
-              where("cve_tecFin", "==", cve_tecFin),
-              where("estatus", "==", "Activo")
-          )
+        query(
+          collection(db, "COTIZACION"),
+          where("cve_clie", "==", cve_clie),
+          where("cve_tecFin", "==", cve_tecFin),
+          where("estatus", "==", "Activo")
+        )
       );
 
       let acuerdoTexto = "Sin acuerdo";
@@ -151,7 +149,6 @@ const VisualizarCotizacion = () => {
       } else {
         //console.log("No hay documento con cve_clie y cve_tecFin activos");
       }
-
 
       const img = new Image();
       img.src = encabezadoPDF;
@@ -165,7 +162,9 @@ const VisualizarCotizacion = () => {
         ctx.drawImage(img, 0, 0);
 
         const base64Image = canvas.toDataURL("image/png");
-        const fechaFormateada = new Date(fechaElaboracion).toLocaleDateString("es-ES");
+        const fechaFormateada = new Date(fechaElaboracion).toLocaleDateString(
+          "es-ES"
+        );
         let enLetras = NumerosALetras(total).toUpperCase();
         enLetras = enLetras.replace(/\bDE\b/g, "").replace(/\s{2,}/g, " ");
         console.log(enLetras);
@@ -214,84 +213,95 @@ const VisualizarCotizacion = () => {
               fontSize: 9,
               bold: true,
             },
-            ...parCotizacionLista
-                .map((item) => ({
-                  unbreakable: true,
-                  stack: [
-                    {
-                      text: "Partida: " + item.noPartidaATF,
-                      fontSize: 12,
-                      bold: true,
-                      alignment: "left",
-                      margin: [0, 10, 0, 0],
-                    },
-                    {
-                      margin: [0, 5, 0, 0],
-                      table: {
-                        headerRows: 1,
-                        widths: ["*"],
-                        body: [
-                          [
-                            {
-                              text: "Descripción",
-                              bold: true,
-                              fontSize: 12,
-                              alignment: "center",
-                              fillColor: "#eeeeee",
-                            },
-                          ],
-                          [item.descripcion],
-                          [
-                            {
-                              text: "Observaciones",
-                              bold: true,
-                              fontSize: 12,
-                              alignment: "center",
-                              fillColor: "#eeeeee",
-                            },
-                          ],
-                          [item.observacion],
-                        ],
-                      },
-                      layout: "noBorders",
-                    },
-                    {
-                      text: "Importe: " + item.totalPartida.toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                      }),
-                      fontSize: 14,
-                      bold: true,
-                      alignment: "right",
-                      margin: [0, 10, 0, 0],
-                    },
-                  ],
-                })),
+            ...parCotizacionLista.map((item) => ({
+              unbreakable: true,
+              stack: [
+                {
+                  text: "Partida: " + item.noPartidaATF,
+                  fontSize: 12,
+                  bold: true,
+                  alignment: "left",
+                  margin: [0, 10, 0, 0],
+                },
+                {
+                  margin: [0, 5, 0, 0],
+                  table: {
+                    headerRows: 1,
+                    widths: ["*"],
+                    body: [
+                      [
+                        {
+                          text: "Descripción",
+                          bold: true,
+                          fontSize: 12,
+                          alignment: "center",
+                          fillColor: "#eeeeee",
+                        },
+                      ],
+                      [item.descripcion],
+                      [
+                        {
+                          text: "Observaciones",
+                          bold: true,
+                          fontSize: 12,
+                          alignment: "center",
+                          fillColor: "#eeeeee",
+                        },
+                      ],
+                      [item.observacion],
+                    ],
+                  },
+                  layout: "noBorders",
+                },
+                {
+                  //text: "Importe: " + item.totalPartida.toLocaleString("en-US", {
+                  text:
+                    item.costoUnitario !== undefined &&
+                    item.costoUnitario !== null
+                      ? "Importe: " +
+                        item.costoUnitario.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })
+                      : 0,
+                  fontSize: 14,
+                  bold: true,
+                  alignment: "right",
+                  margin: [0, 10, 0, 0],
+                },
+              ],
+            })),
             {
-              text: "\n\nImporte: " + subtotal.toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-              }),
+              text:
+                "\n\nImporte: " +
+                subtotal.toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                }),
               fontSize: 12,
               bold: true,
               alignment: "right",
             },
             {
               margin: [0, 3, 0, 0],
-              text: "IVA: " + iva.toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-              }),
+              text:
+                "IVA: " +
+                iva.toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                }),
               fontSize: 12,
               bold: true,
               alignment: "right",
             },
             {
               margin: [0, 3, 0, 0],
-              text: "Total: " + total.toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-              }),
+              text:
+                "Total: " +
+                total.toLocaleString("en-US", {
+                  style: "currency",
+                  currency: "USD",
+                }),
               fontSize: 12,
               bold: true,
               alignment: "right",
@@ -435,15 +445,15 @@ const VisualizarCotizacion = () => {
   /******************************************** SAE  *****************************************************************/
   const addSae = async () => {
     //console.log("Cliente:", cliente);
-swal.fire({
-        title: "Procesando Solicitud...",
-        text: "Por favor espera mientras se valida el contenido.",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: () => {
-          swal.showLoading();
-        },
-      });
+    swal.fire({
+      title: "Procesando Solicitud...",
+      text: "Por favor espera mientras se valida el contenido.",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        swal.showLoading();
+      },
+    });
     const { folioSiguiente } = (
       await axios.get(
         //"http://localhost:5000/api/obtenerFolio"
@@ -537,12 +547,14 @@ swal.fire({
     const dataPartidas = detallesArticulos.map((detalle, index) => {
       const impuestos = results[index] || {};
       //console.log("costos: ", costos);
-       const costoMatch = costos.find(c => Number(c.noPartidaATF) === Number(detalle.noPartidaATF)) || {};
+      const costoMatch =
+        costos.find(
+          (c) => Number(c.noPartidaATF) === Number(detalle.noPartidaATF)
+        ) || {};
       console.log("costoMatch: ", costoMatch);
-  
+
       console.log("cantidad: ", detalle.cantidad);
       return {
-        
         data: detalle,
         CVE_DOC: CVE_DOC ?? "",
         noPartida: detalle.noPartidaATF ?? "",
@@ -577,7 +589,7 @@ swal.fire({
         CAMPLIB24: costoMatch.totalServicio ?? 0,
         CAMPLIB22: costoMatch.totalMaterial ?? 0,
         CAMPLIB23: 0,
-        CAMPLIB25: costoMatch.totalViaticos ?? 0
+        CAMPLIB25: costoMatch.totalViaticos ?? 0,
       };
     });
 
@@ -714,12 +726,12 @@ swal.fire({
               <div className="mb-3">
                 <label className="form-label">Folio</label>
                 <input
-                    className="form-control"
-                    id="inputFolioSecuencial"
-                    type="text"
-                    value={cve_tecFin}
-                    onChange={(e) => setCve_tecFin(e.target.value)}
-                    readOnly
+                  className="form-control"
+                  id="inputFolioSecuencial"
+                  type="text"
+                  value={cve_tecFin}
+                  onChange={(e) => setCve_tecFin(e.target.value)}
+                  readOnly
                 />
               </div>
             </div>
@@ -727,14 +739,14 @@ swal.fire({
               <label className="form-label">Cliente</label>
               <div className="input-group mb-3">
                 <input
-                    placeholder=""
-                    aria-label=""
-                    aria-describedby="basic-addon1"
-                    type="text"
-                    className="form-control"
-                    value={cve_clie}
-                    onChange={(e) => setCve_clie(e.target.value)}
-                    readOnly
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="text"
+                  className="form-control"
+                  value={cve_clie}
+                  onChange={(e) => setCve_clie(e.target.value)}
+                  readOnly
                 />
               </div>
             </div>
@@ -743,14 +755,14 @@ swal.fire({
               <label className="form-label">ID GS: </label>
               <div className="input-group mb-3">
                 <input
-                    placeholder=""
-                    aria-label=""
-                    aria-describedby="basic-addon1"
-                    type="text"
-                    value={idMonday}
-                    onChange={(e) => setIdMonday(e.target.value)}
-                    className="form-control"
-                    readOnly
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="text"
+                  value={idMonday}
+                  onChange={(e) => setIdMonday(e.target.value)}
+                  className="form-control"
+                  readOnly
                 />
               </div>
             </div>
@@ -759,13 +771,13 @@ swal.fire({
               <label className="form-label">Fecha de Elaboración</label>
               <div className="input-group mb-3">
                 <input
-                    placeholder=""
-                    aria-label=""
-                    aria-describedby="basic-addon1"
-                    type="date"
-                    value={fechaElaboracion}
-                    onChange={(e) => setFechaElaboracion(e.target.value)}
-                    className="form-control"
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="date"
+                  value={fechaElaboracion}
+                  onChange={(e) => setFechaElaboracion(e.target.value)}
+                  className="form-control"
                 />
               </div>
             </div>
@@ -774,13 +786,13 @@ swal.fire({
               <label className="form-label">Fecha de Inicio</label>
               <div className="input-group mb-3">
                 <input
-                    placeholder=""
-                    aria-label=""
-                    aria-describedby="basic-addon1"
-                    type="date"
-                    value={fechaInicio}
-                    onChange={(e) => setFechaInicio(e.target.value)}
-                    className="form-control"
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="date"
+                  value={fechaInicio}
+                  onChange={(e) => setFechaInicio(e.target.value)}
+                  className="form-control"
                 />
               </div>
             </div>
@@ -789,50 +801,49 @@ swal.fire({
               <label className="form-label">Fecha Fin</label>
               <div className="input-group mb-3">
                 <input
-                    placeholder=""
-                    aria-label=""
-                    aria-describedby="basic-addon1"
-                    type="date"
-                    value={fechaFin}
-                    onChange={(e) => setFechaFin(e.target.value)}
-                    className="form-control"
+                  placeholder=""
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="date"
+                  value={fechaFin}
+                  onChange={(e) => setFechaFin(e.target.value)}
+                  className="form-control"
                 />
               </div>
             </div>
-
 
             <div className="col-md-4 ">
               <label className="form-label">Nombre del Proyecto</label>
               <div className="input-group mb-3">
                 <input
-                    placeholder="Ingresa un nombre del proyecto"
-                    aria-label=""
-                    aria-describedby="basic-addon1"
-                    type="text"
-                    value={nombreProyecto}
-                    onChange={(e) => setNombreProyecto(e.target.value)}
-                    className="form-control"
+                  placeholder="Ingresa un nombre del proyecto"
+                  aria-label=""
+                  aria-describedby="basic-addon1"
+                  type="text"
+                  value={nombreProyecto}
+                  onChange={(e) => setNombreProyecto(e.target.value)}
+                  className="form-control"
                 />
               </div>
             </div>
           </div>
           <div
-              className="row"
-              style={{border: "1px solid #000", borderColor: "gray"}}
+            className="row"
+            style={{ border: "1px solid #000", borderColor: "gray" }}
           >
             <div
-                style={{
-                  border: "1px solid #000",
-                  maxHeight: "550px",
-                  overflowY: "auto",
-                }}
+              style={{
+                border: "1px solid #000",
+                maxHeight: "550px",
+                overflowY: "auto",
+              }}
             >
               <br></br>
               <table class="table">
                 <thead>
-                <tr>
-                  <th scope="col">No. Partida</th>
-                  <th scope="col">Descripción</th>
+                  <tr>
+                    <th scope="col">No. Partida</th>
+                    <th scope="col">Descripción</th>
                     <th scope="col">Observaciones</th>
                     <th scope="col">Sub Total</th>
                   </tr>
@@ -857,11 +868,17 @@ swal.fire({
           </div>
           <br></br>
           <br></br>
-          <button className="btn btn-success" onClick={() => validarYGenerarPDF("download")}>
+          <button
+            className="btn btn-success"
+            onClick={() => validarYGenerarPDF("download")}
+          >
             <FaFileDownload /> Descargar PDF
           </button>
           &nbsp; &nbsp;
-          <button className="btn btn-success" onClick={() => validarYGenerarPDF("open")}>
+          <button
+            className="btn btn-success"
+            onClick={() => validarYGenerarPDF("open")}
+          >
             <VscFilePdf /> Ver PDF
           </button>
           &nbsp; &nbsp;
@@ -937,11 +954,11 @@ swal.fire({
                     value={
                       cliente
                         ? {
-                          value: cliente,
-                          label:
-                            clientes.find((prov) => prov.CLAVE === cliente)
-                              ?.NOMBRE || "",
-                        }
+                            value: cliente,
+                            label:
+                              clientes.find((prov) => prov.CLAVE === cliente)
+                                ?.NOMBRE || "",
+                          }
                         : null
                     }
                     onChange={(selectedOption) => {
