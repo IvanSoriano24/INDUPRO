@@ -841,8 +841,8 @@ swal.fire({
                   {parCotizacionLista.map((item, index) => (
                     <tr key={index}>
                       <td>{item.noPartidaATF}</td>
-                      <td>{item.descripcion}</td>
-                      <td>{item.observacion}</td>
+                      <td style={{ whiteSpace: "pre-wrap" }}>{item.descripcion}</td>
+                      <td style={{ whiteSpace: "pre-wrap" }}>{item.observacion}</td>
                       <td style={{ textAlign: "right" }}>
                         {item.totalPartida.toLocaleString("en-US", {
                           style: "currency",

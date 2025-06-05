@@ -2299,8 +2299,8 @@ const AgregarRevTecFinanciero = () => {
                     {par_levDigital.map((item, index) => (
                       <tr key={index}>
                         <td>{item.noPartida}</td>
-                        <td>{item.descripcion}</td>
-                        <td>{item.observacion}</td>
+                        <td style={{ whiteSpace: "pre-wrap" }}>{item.descripcion}</td>
+                        <td style={{ whiteSpace: "pre-wrap" }}>{item.observacion}</td>
                         <td>
                           <button
                             className="btn btn-primary"

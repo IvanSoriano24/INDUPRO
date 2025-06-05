@@ -43,7 +43,7 @@ const AgregarPreCotizacion = () => {
   const [docAnt, setDocAnt] = useState("N/A");
   const [docSig, setDocSig] = useState("");
   const [estatus, setEstatus] = useState("Activo");
-  const [cantidadPartida, setCantidadPartida] = useState("");
+  const [cantidadPartida, setCantidadPartida] = useState(0);
 
   const [cve_levDig_par, setLevDigital_par] =
     useState(""); /* Este es el campo que agregue */
@@ -89,7 +89,7 @@ const AgregarPreCotizacion = () => {
   const [descripcionInsumo, setDescripcionInsumo] = useState("");
   const [comentariosAdi, setComentariosAdi] = useState("");
   const [costoCotizado, setCostoCotizado] = useState();
-  const [cantidad, setCantidad] = useState();
+  const [cantidad, setCantidad] = useState("");
   const total = costoCotizado * cantidad;
   const [listInsumos, setListInsumos] = useState([]);
   const [insumos, setInsumos] = useState([]); // Estado para los insumos
@@ -132,14 +132,14 @@ const AgregarPreCotizacion = () => {
   //const handleClose = () => setShow(false);
   const handleClose = () => {
     limpiarPartida();
-    setCantidad(0);
+    setCantidad("");
     setDescripcion("");
     setObservacion("");
     setShowPartida(false);
   };
   const handleCloseShow = () => {
     limpiarPartida();
-    setCantidad(0);
+    setCantidad("");
     setDescripcion("");
     setObservacion("");
     setShow(false);
@@ -806,7 +806,7 @@ const AgregarPreCotizacion = () => {
         ]);
 
         // 🟢 Resetear los valores del formulario
-        setCantidadPartida("");
+        setCantidadPartida(0);
         setDescripcion("");
         setObservacion("");
       } catch (error) {
@@ -911,7 +911,7 @@ const AgregarPreCotizacion = () => {
   };
   const limpiarCampos = () => {
     setInsumo("");
-    setCantidad(0);
+    setCantidad("");
     setUnidad("");
     setCategoria("");
     setFamilia("");
@@ -1011,7 +1011,7 @@ const AgregarPreCotizacion = () => {
       );
       setSelectedPartida(partidaSeleccionada);
 
-      setCantidad(0);
+      setCantidad("");
       setCostoCotizado(0);
       // Llamar a la API para obtener las unidades
       let listaInsumos = [...clavesSAE];
@@ -1294,6 +1294,7 @@ const AgregarPreCotizacion = () => {
   };
   /* Modales */
   const handleDelete = async (noPartida, cve_levDig) => {
+
     try {
       // Realiza una consulta para encontrar el documento que coincida con los identificadores proporcionados
       const q = query(
@@ -1892,8 +1893,8 @@ const AgregarPreCotizacion = () => {
                     <tr key={index}>
                       <td>{item.noPartida}</td>
                       <td>{item.cantidad}</td>
-                      <td>{item.descripcion}</td>
-                      <td>{item.observacion}</td>
+                      <td style={{ whiteSpace: "pre-wrap" }}>{item.descripcion}</td>
+                      <td style={{ whiteSpace: "pre-wrap" }}>{item.observacion}</td>
                       <td>
                         <button
                           className="btn btn-primary"

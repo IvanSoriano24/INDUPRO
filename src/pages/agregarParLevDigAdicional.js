@@ -48,7 +48,7 @@ const AgregarParLevDiGAdicional = () => {
   const handleShowAgregar = () => setShowAgregar(true);
   const handleCloseAgregar = () => {
     limpiarPartida();
-    setCantidad(0);
+    setCantidad("");
     setDescripcion("");
     setObservacion("");
     setShowAgregar(false);
@@ -297,8 +297,10 @@ const AgregarParLevDiGAdicional = () => {
     });
     // Si se encuentra un documento que coincide con los identificadores proporcionados, actualiza su estatus
     if (!querySnapshot.empty) {
+      console.log(noPartida+" "+cve_levDig);
       const docSnap = querySnapshot.docs[0]; // Suponiendo que solo hay un documento que coincide con los criterios de consulta
       const factoresRef = doc(db, "PAR_LEVDIGITAL", docSnap.id);
+      console.log(docSnap.id);
 
       // Actualiza el estatus del documento
       const datos = {
@@ -307,7 +309,7 @@ const AgregarParLevDiGAdicional = () => {
       await updateDoc(factoresRef, datos);
 
       // No se recomienda recargar la página; en su lugar, puedes manejar la actualización del estado localmente
-      window.location.reload();
+      //window.location.reload();
     } else {
       console.log(
         "No se encontró ningún documento que coincida con los identificadores proporcionados."
@@ -498,8 +500,8 @@ const AgregarParLevDiGAdicional = () => {
                   <tr key={index}>
                     <td>{item.noPartida}</td>
                     <td>{item.cantidad}</td>
-                    <td>{item.descripcion}</td>
-                    <td>{item.observacion}</td>
+                    <td style={{ whiteSpace: "pre-wrap" }}>{item.descripcion}</td>
+                    <td style={{ whiteSpace: "pre-wrap" }}>{item.observacion}</td>
                     <td>
                       <button
                         className="btn btn-primary"

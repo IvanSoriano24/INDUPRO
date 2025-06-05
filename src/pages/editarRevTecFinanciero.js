@@ -696,8 +696,8 @@ const calcularTotales = (item) => {
                   {totalesDoc.map((item, index) => (
                     <tr key={index}>
                       <td>{item.noPartidaATF}</td>
-                      <td>{item.descripcion}</td>
-                      <td>{item.observacion}</td>
+                      <td style={{ whiteSpace: "pre-wrap" }}>{item.descripcion}</td>
+                      <td style={{ whiteSpace: "pre-wrap" }}>{item.observacion}</td>
                       <td>
                         <button
                           className="btn btn-primary"

@@ -177,7 +177,7 @@ const EditarPreCotizacion = () => {
     setCantidad(0);
     setObservacion("");
     setIdPartida("");
-    setNoPartidaP(0);
+    setNoPartidaP("");
   };
   const recolectarDatos = (
     id,
@@ -1245,11 +1245,11 @@ const EditarPreCotizacion = () => {
         tiempo: horaFormateada,
         fechaRegistro: formattedDate,
         tipoDocumento: "Registro de partidas",
-        noPartida: noPartida,
+        noPartida: noPartidaPC,
       });
       await addDoc(parPrecotizacion, {
         cve_precot: cve_precot,
-        noPartida: noPartida,
+        noPartida: noPartidaPC,
         descripcion: descripcion,
         observacion: observacion,
         estatus: "Activa",
@@ -1759,8 +1759,8 @@ const EditarPreCotizacion = () => {
                   {par_preCot.map((item, index) => (
                     <tr key={index}>
                       <td>{item.noPartida}</td>
-                      <td>{item.descripcion}</td>
-                      <td>{item.observacion}</td>
+                      <td style={{ whiteSpace: "pre-wrap" }}>{item.descripcion}</td>
+                      <td style={{ whiteSpace: "pre-wrap" }}>{item.observacion}</td>
                       <td>
                         <button
                           className="btn btn-primary"
