@@ -256,10 +256,10 @@ const VisualizarCotizacion = () => {
                 {
                   //text: "Importe: " + item.totalPartida.toLocaleString("en-US", {
                   text:
-                    item.costoUnitario !== undefined &&
-                    item.costoUnitario !== null
+                    item.precioUnitario !== undefined &&
+                    item.precioUnitario !== null
                       ? "Importe: " +
-                        item.costoUnitario.toLocaleString("en-US", {
+                        item.precioUnitario.toLocaleString("en-US", {
                           style: "currency",
                           currency: "USD",
                         })

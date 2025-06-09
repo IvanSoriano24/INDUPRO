@@ -668,6 +668,7 @@ const calcularCotizacion = async () => {
         totalServicio: item.totalServicio ?? 0,
         totalViaticos: item.totalViaticos ?? 0,
         costoUnitario: item.costoUnitario ?? 0,
+        precioUnitario: item.precioUnitario ?? 0,
       });
     });
     await addDoc(bitacora, {
